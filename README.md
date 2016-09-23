@@ -1,4 +1,4 @@
-# CPSC 310 Project Repository
+# CPSC 310 Project that Ana Cris will do on her own
 
 This is the base project for CPSC310. You will extend this codebase for all of the deliverables in the project. Please keep your repository private.
 
