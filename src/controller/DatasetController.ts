@@ -1,10 +1,13 @@
 /**
  * Created by rtholmes on 2016-09-03.
  */
+"use strict"
 
 import Log from "../Util";
 import JSZip = require('jszip');
+var fs = require('fs');                       //to use file system in node.js
 
+// PUT
 /**
  * In memory representation of all datasets.
  */
@@ -52,7 +55,9 @@ export default class DatasetController {
         let that = this;
         return new Promise(function (fulfill, reject) {
             try {
+                // creating an instance of JSZip (given)
                 let myZip = new JSZip();
+                // load a zip file
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
@@ -62,6 +67,28 @@ export default class DatasetController {
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
+
+                    //create array of promises
+                    var promises: string[] = [];
+                    // read the contents of a zip file
+                    Log.info('DatasetController::process(..) - will start iterating over files');
+                    //myZip.folder("courses").forEach(function()){
+                    //    myZip.file.async();
+                    for(myZip.file in myZip.files){
+                        //read a zip file
+                        Log.info('DatasetController::process(..) - reading file: ' + myZip.file(name));
+                       // myZip.file.async("string").
+                    }
+
+                    fs.readFile("310courses.1.0", function(err, data){
+                        if (err) {
+                            return console.error(err,"Error reading zip file");
+                        }
+                        console.log("Asynchronous reading of files has occurred");
+                       // JSZip.loadAsync(data).then(function(zip)){
+                        //}
+                        })
+
 
                     that.save(id, processedDataset);
 
