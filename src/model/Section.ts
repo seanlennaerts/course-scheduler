@@ -1,3 +1,68 @@
 /**
  * Created by Sean on 10/1/16.
  */
+
+export default class Section {
+
+    private _uniqueId: string;
+    private _sectionNumber: string; //we made this up
+
+    private _instructor: string;
+    private _pass: number;
+    private _fail: number;
+    private _audit: number;
+
+
+    constructor(uniqueId: string) {
+        this._uniqueId = uniqueId;
+    }
+
+
+    get uniqueId(): string {
+        return this._uniqueId;
+    }
+
+    // set uniqueId(value: string) {
+    //     this._uniqueId = value;
+    // }
+
+    get sectionNumber(): string {
+        return this._sectionNumber;
+    }
+
+    set sectionNumber(value: string) {
+        this._sectionNumber = value;
+    }
+
+    get instructor(): string {
+        return this._instructor;
+    }
+
+    set instructor(value: string) {
+        this._instructor = value;
+    }
+
+    get pass(): number {
+        return this._pass;
+    }
+
+    set pass(value: number) {
+        this._pass = value;
+    }
+
+    get fail(): number {
+        return this._fail;
+    }
+
+    set fail(value: number) {
+        this._fail = value;
+    }
+
+    get audit(): number {
+        return this._audit;
+    }
+
+    set audit(value: number) {
+        this._audit = value;
+    }
+}

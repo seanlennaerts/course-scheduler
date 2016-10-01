@@ -73,11 +73,10 @@ export default class DatasetController {
                     // read the contents of a zip file
                     Log.info('DatasetController::process(..) - will start iterating over files');
                     //myZip.folder("courses").forEach(function()){
-                    //    myZip.file.async();
                     for(myZip.file in myZip.files){
                         //read a zip file
                         Log.info('DatasetController::process(..) - reading file: ' + myZip.file(name));
-                       // myZip.file.async("string").
+                        //myZip.file.async("string"). //TODO: fix this
                     }
 
                     fs.readFile("310courses.1.0", function(err, data){
