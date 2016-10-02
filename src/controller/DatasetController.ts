@@ -1,11 +1,12 @@
 /**
  * Created by rtholmes on 2016-09-03.
  */
-"use strict"
+"use strict"; //nice find :) -S
 
 import Log from "../Util";
 import JSZip = require('jszip');
-var fs = require('fs');                       //to use file system in node.js
+import {xtends} from "tslint/lib/configs/latest";
+var fs = require('fs');   //var is good -S                    //to use file system in node.js
 
 // PUT
 /**
@@ -31,14 +32,21 @@ export default class DatasetController {
      * @returns {{}}
      */
     public getDataset(id: string): any {
-        // TODO: this should check if the dataset is on disk in ./data if it is not already in memory.
-
-        return this.datasets[id];
+        // this should check if the dataset is on disk in ./data if it is not already in memory.
+        if (this.datasets.hasOwnProperty("id")) {
+            return this.datasets[id];
+        }
+        fs.readFile("./data/"+id+".json", "utf8", function (err, file) {
+            if (err) {
+                Log.error("getDataset(): reading file from disk " + err);
+                return null;
+            }
+            return JSON.parse(file);
+        });
     }
 
     public getDatasets(): Datasets {
-        // TODO: if datasets is empty, load all dataset files in ./data from disk
-
+        // if datasets is empty, load all dataset files in ./data from disk
         return this.datasets;
     }
 
