@@ -122,6 +122,12 @@ export default class DatasetController {
         // add it to the memory model
         this.datasets[id] = processedDataset;
 
-        // TODO: actually write to disk in the ./data directory
+        // actually write to disk in the ./data directory
+        fs.writeFile("./data/"+id+".json", processedDataset, function (err) {
+            if (err) {
+                Log.error("save(): Error saving file after process " + err);
+            }
+            Log.info("save(): " + id + ".json was saved succesfully!");
+        });
     }
 }
