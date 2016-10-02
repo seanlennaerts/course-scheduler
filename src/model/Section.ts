@@ -4,21 +4,26 @@
 
 export default class Section {
 
-    private _uniqueId: string;
+    private _uniqueId: number;
     private _sectionNumber: string; //we made this up
 
+    private _average: number;
     private _instructor: string;
     private _pass: number;
     private _fail: number;
     private _audit: number;
 
 
-    constructor(uniqueId: string) {
+    constructor(uniqueId: number) {
         this._uniqueId = uniqueId;
     }
 
 
-    get uniqueId(): string {
+    set average(value: number) {
+        this._average = value;
+    }
+
+    get uniqueId(): number {
         return this._uniqueId;
     }
 

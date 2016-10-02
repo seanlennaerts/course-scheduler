@@ -6,6 +6,9 @@
 import Log from "../Util";
 import JSZip = require('jszip');
 import {xtends} from "tslint/lib/configs/latest";
+import Course from "../model/Course";
+import {error} from "util";
+import Section from "../model/Section";
 var fs = require('fs');   //var is good -S                    //to use file system in node.js
 
 // PUT
@@ -17,6 +20,8 @@ export interface Datasets {
 }
 
 export default class DatasetController {
+
+    private processedData: Datasets = {}; //trying to keep everything in one object mapped key:course
 
     private datasets: Datasets = {};
 
@@ -33,10 +38,12 @@ export default class DatasetController {
      */
     public getDataset(id: string): any {
         // this should check if the dataset is on disk in ./data if it is not already in memory.
-        if (this.datasets.hasOwnProperty("id")) {
+
+        // if the "id in this.datasets" doesn't work try a try/catch block -S
+        if (id in this.datasets) {
             return this.datasets[id];
         }
-        fs.readFile("./data/"+id+".json", "utf8", function (err, file) {
+        fs.readFile("./data/"+id+".json", "utf8", function (err: Error, file) {
             if (err) {
                 Log.error("getDataset(): reading file from disk " + err);
                 return null;
@@ -47,8 +54,66 @@ export default class DatasetController {
 
     public getDatasets(): Datasets {
         // if datasets is empty, load all dataset files in ./data from disk
+        fs.readdir("./data", function(err: Error, files: string[]) {
+            if (err) {
+                Log.error("getDatasets(): trouble reading files in directory " + err);
+            }
+            for (var fileName: string of files) {
+                fs.readFile("./data/" + fileName, "utf8", function (err: Error, file) {
+                    if (err) {
+                        Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
+                    }
+                    var split: string[] = fileName.split(".");
+                    this.datasets[split[0]] = JSON.parse(file);
+                })
+            }
+        });
         return this.datasets;
     }
+
+
+    public readFile(fileName): any {
+        fs.readFile("./data/" + fileName, "utf8", function (err: Error, file) {
+            if (err) {
+                Log.error("readFile() called by process() couldn't read file, probably wrong file name " + err)
+            }
+            var root = JSON.parse(file);
+            var result = root.result;
+            for (var i = 0; i < result.length; i++) {
+
+                //check for missing fields
+                if (!dept in result && !id in result) {
+                    Log.error("readFile(): can't proceed missing fields");
+                }
+
+                var dept: string = result.Subject;
+                var id: string = result.Course;
+                var avg: number = result.Avg;
+                var instructor: string = result.Professor; //lower case lastname, firstname
+                var title: string = result.Title;
+                var pass: number = result.Pass;
+                var fail: number = result.Fail;
+                var audit: number = result.Audit;
+                var uniqueId: number = result.id;
+
+                var newCourse: Course = new Course(dept, id);
+                newCourse.title = title;
+
+                var newSection: Section = new Section(uniqueId);
+                newSection.average = avg;
+                newSection.instructor = instructor;
+                newSection.pass = pass;
+                newSection.fail = fail;
+                newSection.audit = audit;
+
+                newCourse.addSection(newSection);
+
+                this.processedData[dept + id] = newCourse;
+            }
+        });
+
+    }
+
 
     /**
      * Process the dataset; save it to disk when complete.
@@ -62,42 +127,33 @@ export default class DatasetController {
 
         let that = this;
         return new Promise(function (fulfill, reject) {
+            Log.info("process(): start");
             try {
-                // creating an instance of JSZip (given)
                 let myZip = new JSZip();
-                // load a zip file
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    let processedDataset = {};
+                    //let processedDataset = {};
                     // TODO: iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
-
-                    //create array of promises
-                    var promises: string[] = [];
-                    // read the contents of a zip file
-                    Log.info('DatasetController::process(..) - will start iterating over files');
-                    //myZip.folder("courses").forEach(function()){
-                    for(myZip.file in myZip.files){
-                        //read a zip file
-                        Log.info('DatasetController::process(..) - reading file: ' + myZip.file(name));
-                        //myZip.file.async("string"). //TODO: fix this
-                    }
-
-                    fs.readFile("310courses.1.0", function(err, data){
-                        if (err) {
-                            return console.error(err,"Error reading zip file");
+                    var promises:string[] = [];
+                    for (var file of zip.files) {
+                        Log.info("process(): reading file");
+                        if (id == "courses") {
+                            promises.push(that.readFile(file));
+                        } else {
+                            Log.error("process(): id is not courses");
                         }
-                        console.log("Asynchronous reading of files has occurred");
-                       // JSZip.loadAsync(data).then(function(zip)){
-                        //}
-                        })
+                        Log.info("process(): file read succesfully");
+                    }
+                    Log.info("process(): all files read succesfully!!!");
+                    return Promise.all(promises);
 
 
-                    that.save(id, processedDataset);
+                    that.save(id, that.processedData);
 
                     fulfill(true);
                 }).catch(function (err) {
@@ -123,7 +179,7 @@ export default class DatasetController {
         this.datasets[id] = processedDataset;
 
         // actually write to disk in the ./data directory
-        fs.writeFile("./data/"+id+".json", processedDataset, function (err) {
+        fs.writeFile("./data/"+id+".json", processedDataset, function (err: Error) {
             if (err) {
                 Log.error("save(): Error saving file after process " + err);
             }
