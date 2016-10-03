@@ -103,8 +103,12 @@ export default class DatasetController {
                     var uniqueId: number = root.result[i].id;
                     Log.info("uniqueId: " + uniqueId);
 
-                    var newCourse: Course = new Course(dept, id);
-                    newCourse.title = title;
+                    var key: string = dept + id;
+                    if (!(key in that.processedData)) {
+                        var newCourse: Course = new Course(dept, id);
+                        newCourse.title = title;
+                        // make course once per file
+                    }
 
                     var newSection: Section = new Section(uniqueId);
                     newSection.average = avg;
@@ -115,7 +119,7 @@ export default class DatasetController {
 
                     newCourse.addSection(newSection);
 
-                    that.processedData[dept + id] = newCourse;
+                    that.processedData[key] = newCourse;
                 } //end for loop
             }).then(function() {
                 fulfill(true);
@@ -152,29 +156,15 @@ export default class DatasetController {
                     // although you should still be tolerant to errors.
                     var promises: string[] = [];
 
-                    // for (var i = 0; i < Object.keys(zip.files).length; i++) {
-                    //     Log.info("process(): reading file");
-                    //     Log.info("zip length is: " + Object.keys(zip.files).length);
-                    //     switch (id) { //handle different dataset types
-                    //         case "courses": //so far only need to handle id "courses"
-                    //             Log.info("process(): id is courses, calling readFile() on: ");
-                    //             promises.push(<any>that.readFile(zip.files[i]));
-                    //             break;
-                    //         default:
-                    //             Log.error("process(): id is not courses");
-                    //     }
-                    //     Log.info("process(): file read succesfully");
-                    // }
-
-                    zip.folder(id).forEach(function (relativePath, file) {
-                        //Log.info("file full path: " + file.name + ", relativePath: " + relativePath);
-                        //Log.info("process(): is calling readFile() on: " + file.name);
+                    //switch statment
+                    zip.folder("courses").forEach(function (relativePath, file) { //TODO find name of the zipfile and replace "courses"
+                        Log.info("relativePath: " + relativePath + ", file: " + file);
                         promises.push(<any>that.readFile(zip, file.name));
                     });
                     Log.info("process(): all readFile promises are ready!");
                     return Promise.all(promises);
 
-                }).then(function(result: string[]) {
+                }).then(function(result: string[]) { //array of promises
                     that.save(id, that.processedData);
                     fulfill(true);
                 }).catch(function (err: Error) {
