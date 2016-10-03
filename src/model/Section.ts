@@ -8,7 +8,7 @@ export default class Section {
     private _sectionNumber: string; //we made this up
 
     private _average: number;
-    private _instructor: string;
+    private _instructor: string[];
     private _pass: number;
     private _fail: number;
     private _audit: number;
@@ -39,11 +39,11 @@ export default class Section {
         this._sectionNumber = value;
     }
 
-    get instructor(): string {
+    get instructor(): string[] {
         return this._instructor;
     }
 
-    set instructor(value: string) {
+    set instructor(value: string[]) {
         this._instructor = value;
     }
 
