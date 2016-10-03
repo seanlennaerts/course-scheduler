@@ -7,6 +7,7 @@ import Log from "../src/Util";
 
 import JSZip = require('jszip');
 import {expect} from 'chai';
+var fs = require("fs");
 
 describe("DatasetController", function () {
 
