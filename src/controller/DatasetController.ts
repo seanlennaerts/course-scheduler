@@ -10,7 +10,7 @@ import Section from "../model/Section";
 var fs = require('fs');   //var is good -S                    //to use file system in node.js
 
 //temp -S
-var countMissingSections = 0;
+//var countMissingSections = 0;
 
 
 // PUT
@@ -80,10 +80,10 @@ export default class DatasetController {
                 //Log.info(contents);
                 var root = JSON.parse(contents);
                 //Log.info("readFile(): there are " + root.result.length + " sections in " + path);
-                if (root.result.length == 0) {
-                    Log.info("readFile(): " + path + " has no sections!")
-                    countMissingSections++;
-                }
+                // if (root.result.length == 0) {
+                //     Log.info("readFile(): " + path + " has no sections!")
+                //     countMissingSections++;
+                // }
                 for (var i = 0; i < root.result.length; i++) {
 
                     //check for missing fields
@@ -170,14 +170,18 @@ export default class DatasetController {
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
                     var promises: string[] = [];
-
-                    //switch statment
-                    zip.folder("courses").forEach(function (relativePath, file) { //TODO find name of the zipfile and replace "courses"
-                        Log.info("relativePath: " + relativePath + ", file: " + file);
-                        promises.push(<any>that.readFile(zip, file.name));
-                    });
+                    switch (id) {
+                        case "courses":
+                            zip.folder(id).forEach(function (relativePath, file) { //TODO find name of the zipfile and replace "courses"
+                                //Log.info("relativePath: " + relativePath + ", file: " + file);
+                                promises.push(<any>that.readFile(zip, file.name));
+                            });
+                            break;
+                        default:
+                            Log.error("process(): id " + id + " is not recognized yet");
+                    }
                     Log.info("process(): all readFile promises are ready!");
-                    Log.info("process(): there are " + promises.length + " files (should be 5944)");
+                    Log.info("process(): there are " + promises.length + " files");
                     return Promise.all(promises);
 
                 }).then(function(result: string[]) { //array of promises
