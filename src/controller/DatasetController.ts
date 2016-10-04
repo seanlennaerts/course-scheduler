@@ -9,6 +9,8 @@ import Course from "../model/Course";
 import Section from "../model/Section";
 var fs = require('fs');   //var is good -S                    //to use file system in node.js
 
+//temp -S
+var countMissingSections = 0;
 
 
 // PUT
@@ -77,6 +79,11 @@ export default class DatasetController {
             zip.file(path).async("string").then(function (contents: string) {
                 //Log.info(contents);
                 var root = JSON.parse(contents);
+                //Log.info("readFile(): there are " + root.result.length + " sections in " + path);
+                if (root.result.length == 0) {
+                    Log.info("readFile(): " + path + " has no sections!")
+                    countMissingSections++;
+                }
                 for (var i = 0; i < root.result.length; i++) {
 
                     //check for missing fields
@@ -85,23 +92,27 @@ export default class DatasetController {
                     // }
 
                     var dept: string = root.result[i].Subject;
-                    Log.info("dept: " + dept);
+                    // Log.info("dept: " + dept);
                     var id: string = root.result[i].Course;
-                    Log.info("id: " + id);
+                    // Log.info("id: " + id);
                     var avg: number = root.result[i].Avg;
-                    Log.info("avg: " + avg);
+                    // Log.info("avg: " + avg);
                     var instructor: string = root.result[i].Professor; //lower case lastname, firstname
-                    Log.info("instructor: " + instructor);
+                    var instructorArray: string[] = instructor.split(";");
+                    // if (instructorArray.length > 1) {
+                    //     Log.info("instructorArray: " + instructorArray.toString());
+                    // }
+                    // Log.info("instructor: " + instructor);
                     var title: string = root.result[i].Title;
-                    Log.info("title: " + title);
+                    // Log.info("title: " + title);
                     var pass: number = root.result[i].Pass;
-                    Log.info("pass: " + pass);
+                    // Log.info("pass: " + pass);
                     var fail: number = root.result[i].Fail;
-                    Log.info("fail: " + fail);
+                    // Log.info("fail: " + fail);
                     var audit: number = root.result[i].Audit;
-                    Log.info("audit: " + audit);
+                    // Log.info("audit: " + audit);
                     var uniqueId: number = root.result[i].id;
-                    Log.info("uniqueId: " + uniqueId);
+                    // Log.info("uniqueId: " + uniqueId);
 
                     var key: string = dept + id;
                     if (!(key in that.processedData)) {
@@ -110,9 +121,13 @@ export default class DatasetController {
                         // make course once per file
                     }
 
+                    //can't store bidirectional relationship in JSON :( unless serialize objects before stringify..
+                    //in the interest of time not going to use instructor class -S
+
+
                     var newSection: Section = new Section(uniqueId);
                     newSection.average = avg;
-                    newSection.instructor = instructor;
+                    newSection.instructor = instructorArray;
                     newSection.pass = pass;
                     newSection.fail = fail;
                     newSection.audit = audit;
@@ -162,6 +177,7 @@ export default class DatasetController {
                         promises.push(<any>that.readFile(zip, file.name));
                     });
                     Log.info("process(): all readFile promises are ready!");
+                    Log.info("process(): there are " + promises.length + " files (should be 5944)");
                     return Promise.all(promises);
 
                 }).then(function(result: string[]) { //array of promises

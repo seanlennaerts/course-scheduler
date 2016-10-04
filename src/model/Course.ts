@@ -22,17 +22,9 @@ export default class Course {
         return this._dept;
     }
 
-    // set dept(value: string) {
-    //     this._dept = value;
-    // }
-
     get id(): string {
         return this._id;
     }
-
-    // set id(value: string) {
-    //     this._id = value;
-    // }
 
     get title(): string {
         return this._title;
@@ -45,10 +37,6 @@ export default class Course {
     get sections(): Section[] {
         return this._sections;
     }
-
-    // set sections(value: Array) {
-    //     this._sections = value;
-    // }
 
     public addSection(sectionToAdd: Section) {
         this._sections.push(sectionToAdd);

@@ -1,3 +1,4 @@
+
 /**
  * Created by Sean on 10/1/16.
  */
@@ -16,6 +17,7 @@ export default class Section {
 
     constructor(uniqueId: number) {
         this._uniqueId = uniqueId;
+        this._instructor = [];
     }
 
 
@@ -26,10 +28,6 @@ export default class Section {
     get uniqueId(): number {
         return this._uniqueId;
     }
-
-    // set uniqueId(value: string) {
-    //     this._uniqueId = value;
-    // }
 
     get sectionNumber(): string {
         return this._sectionNumber;
