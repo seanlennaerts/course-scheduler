@@ -78,6 +78,7 @@ export default class DatasetController {
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
                 //Log.info(contents);
+                // JSON.parse converts JSON text into JS oject
                 var root = JSON.parse(contents);
                 //Log.info("readFile(): there are " + root.result.length + " sections in " + path);
                 // if (root.result.length == 0) {
@@ -188,11 +189,11 @@ export default class DatasetController {
                     that.save(id, that.processedData);
                     fulfill(true);
                 }).catch(function (err: Error) {
-                    Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
+                    Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);  // error saving data?
                     reject(err);
                 });
             } catch (err) {
-                Log.trace('DatasetController::process(..) - ERROR: ' + err);
+                Log.trace('DatasetController::process(..) - end of processing ERROR: ' + err);
                 reject(err);
             }
         });
@@ -200,6 +201,7 @@ export default class DatasetController {
 
     /**
      * Writes the processed dataset to disk as 'id.json'. The function should overwrite
+     * any existing dataset with the same name.
      * any existing dataset with the same name.
      *
      * @param id
@@ -220,7 +222,7 @@ export default class DatasetController {
         var toWrite: string = JSON.stringify(processedData);
         fs.writeFile("./data/"+id+".json", toWrite, function (err: Error) {
             if (err) {
-                Log.error("save(): Error saving file after process " + err);
+                Log.error("save(): Error saving file  to disk after process " + err);
             }
             Log.info("save(): " + id + ".json was saved succesfully!");
         });
