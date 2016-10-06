@@ -44,7 +44,7 @@ export default class DatasetController {
         if (id in this.datasets) {
             return this.datasets[id];
         }
-        fs.readFile("./data/"+id+".json", "utf8", function (err: Error, file: string) {
+        fs.readFile("./data/" + id + ".json", "utf8", function (err: Error, file: string) {
             if (err) {
                 Log.error("getDataset(): reading file from disk " + err);
                 return null;
@@ -72,8 +72,16 @@ export default class DatasetController {
         return this.datasets;
     }
 
+    public deleteDataset(id: string): any {
+        if (id in this.datasets) {
+            this.datasets[id] = {}; //better way to delete??
+        }
+        fs.unlinkSync("./data/" + id + ".json");
+        Log.info("deleteDataset(): deleted " + id + " succesfully!");
+    }
 
-    public readFile(zip: JSZip, path: string): Promise<boolean> {
+
+    public readFile(zip: JSZip, path: string): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
@@ -139,7 +147,7 @@ export default class DatasetController {
             }).then(function() {
                 fulfill(true);
             }).catch(function (reason: any) {
-                Log.error("readFile(): ERROR " + reason);
+                reject(reason);
             });
         });
     }
@@ -152,8 +160,15 @@ export default class DatasetController {
      * @param data base64 representation of a zip file
      * @returns {Promise<boolean>} returns true if successful; false if the dataset was invalid (for whatever reason)
      */
-    public process(id: string, data: any): Promise<boolean> {
+    public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
+
+        var code: number = 0;
+        if (id in this.datasets) {
+            code = 201;
+        } else {
+            code = 204
+        }
 
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -163,7 +178,6 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    //let processedDataset = {};
                     // TODO: iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
@@ -178,15 +192,15 @@ export default class DatasetController {
                             });
                             break;
                         default:
-                            Log.error("process(): id " + id + " is not recognized yet");
+                            throw Error("I'm not programmed to recognize this ID yet :(");
                     }
                     Log.info("process(): all readFile promises are ready!");
                     Log.info("process(): there are " + promises.length + " files");
                     return Promise.all(promises);
 
                 }).then(function(result: string[]) { //array of promises
-                    that.save(id, that.processedData);
-                    fulfill(true);
+                    that.save(id);
+                    fulfill(code);
                 }).catch(function (err: Error) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(err);
@@ -205,9 +219,9 @@ export default class DatasetController {
      * @param id
      * @param processedDataset
      */
-    private save(id: string, processedData: Datasets) {
+    private save(id: string) {
         // add it to the memory model
-        this.datasets[id] = processedData;
+        this.datasets[id] = this.processedData;
 
         // actually write to disk in the ./data directory
 
@@ -217,12 +231,15 @@ export default class DatasetController {
             fs.mkdirSync("./data");
         }
 
-        var toWrite: string = JSON.stringify(processedData);
+        var toWrite: string = JSON.stringify(this.processedData);
         fs.writeFile("./data/"+id+".json", toWrite, function (err: Error) {
             if (err) {
                 Log.error("save(): Error saving file after process " + err);
+                throw err;
             }
             Log.info("save(): " + id + ".json was saved succesfully!");
         });
+
+        this.processedData = {};
     }
 }
