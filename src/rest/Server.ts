@@ -53,14 +53,14 @@ export default class Server {
                     name: 'insightUBC'
                 });
 
-		// Serves static files for the UI.
-		that.rest.get("/public/.*", restify.serveStatic({
-		    directory: __dirname
-		}));
+                // Serves static files for the UI.
+                that.rest.get("/public/.*", restify.serveStatic({
+                    directory: __dirname
+                }));
 
                 // Loads the homepage.
                 // curl -is  http://localhost:4321/
-		that.rest.get('/', RouteHandler.getHomepage);
+                that.rest.get('/', RouteHandler.getHomepage);
 
                 // Sends a dataset. Is idempotent and can create or update a dataset id.
                 // curl localhost:4321/dataset/test --upload-file FNAME.zip
@@ -70,6 +70,9 @@ export default class Server {
                 // they are formed by sending JSON bodies, which is not standard for normal GET requests.
                 // curl -is -X POST -d '{ "key": "value" }' http://localhost:4321/query
                 that.rest.post('/query', restify.bodyParser(), RouteHandler.postQuery);
+
+                //Deletes a dataset based in id -S
+                that.rest.del('/dataset/:id', RouteHandler.deleteDataset);
 
                 that.rest.listen(that.port, function () {
                     Log.info('Server::start() - restify listening: ' + that.rest.url);

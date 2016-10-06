@@ -10,6 +10,7 @@ import QueryController from '../controller/QueryController';
 
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
+import {Route} from "restify";
 
 export default class RouteHandler {
 
@@ -50,6 +51,11 @@ export default class RouteHandler {
                 let controller = RouteHandler.datasetController;
                 controller.process(id, req.body).then(function (result) {
                     Log.trace('RouteHandler::postDataset(..) - processed');
+                    if (result === 204) {
+                        res.json(result, {success: "ID is new and was added to dataset succesfully!"});
+                    } else if (result === 201) {
+                        res.json(result, {success: "ID is not new and was added to dataset succesfully!"});
+                    }
                     res.json(200, {success: result});
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
@@ -81,6 +87,18 @@ export default class RouteHandler {
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
             res.send(403);
+        }
+        return next();
+    }
+
+    public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
+        try {
+            RouteHandler.datasetController.deleteDataset(req.params.id);
+            res.send(204);
+
+        } catch (err) {
+            Log.error("deleteDataset(): ERROR " + err);
+            res.send(404);
         }
         return next();
     }

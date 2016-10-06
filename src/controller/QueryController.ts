@@ -19,6 +19,8 @@ export interface QueryRequest {
 }
 
 export interface QueryResponse {
+    result: number;
+    error: String;
 }
 
 export default class QueryController {
@@ -49,22 +51,25 @@ export default class QueryController {
             for(var i = 0; i <searchQueries.length; i++){
                 let indivSearchQuery: string[] = searchQueries[i].split("_");
                 let datasetID = indivSearchQuery[0];
-                let datasetField = indivSearchQuery[1];
+                let datasetField = "_" +indivSearchQuery[1];
 
 
-                let dataset:{} = this.datasets[datasetID];
-                for(dataset.keys in dataset ){
+                let dataset: {} = this.datasets[datasetID];
+                //First element in JSON object is "result" folder, why can't I say dataset.result.
+                //check to see if dataset is not empty!
+                if (dataset[0].length > 0){
+                    //check if key is in object
+                    if (datasetField in dataset[0]){
+                        if (datasetField == "_dept" || datasetField == "_id" || datasetField == "_title"){
+                            //calls getter functions
+                            var tempField = dataset[0].datasetField;
+                        } else {
+                            var tempField = dataset[0].sections.datasetField;
+                        }
 
+                    }
+                    resp.result[0] = tempField;
                 }
-                dataset.Subject
-            }
-
-
-            for (dataset in ){
-                this.datasets[]
-               ;
-
-
             }
 
 
@@ -72,6 +77,6 @@ export default class QueryController {
 
 
 
-        return {status: 'received', ts: new Date().getTime()};
+      //  return {status: 'received', ts: new Date().getTime()};
     }
 }
