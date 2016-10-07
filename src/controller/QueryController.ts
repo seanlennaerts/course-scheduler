@@ -56,7 +56,7 @@ export default class QueryController {
                 let datasetField = "_" + indivSearchQuery[1];
 
 
-                let wantedDataset: [] = this.datasets[datasetID];
+                let wantedDataset: {} = this.datasets[datasetID];
                 //First element in JSON object is "result" folder, why can't I say dataset.result.
                 //check to see if dataset is not empty!
                 if (wantedDataset.length > 0) {

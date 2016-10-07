@@ -3,7 +3,7 @@
  */
 
 import Log from "../Util";
-import Course from
+import Course from "../model/Course";
 
 
 export default class MathController{
@@ -13,10 +13,21 @@ export default class MathController{
         Log.trace('MathController:: init()');
     }
 
-    public greaterThan(input: Course, query :string){
+    public greaterThan(courses: Course[], queryKey :string, target :number){
+        var filteredCourses = new Array <Course>();
 
-        switch(query){
+        for(var course: Course in courses){
+            if (queryKey == "_dept" || queryKey == "_id" || queryKey == "_title"){
+                course.
+
+            }
+
+        }
+
+        switch(queryKey){
             case "avg":
+
+
                 return;
             case "pass":
                 return;
@@ -28,6 +39,9 @@ export default class MathController{
 
 
     }
+
+    smallerThan
+    equalTo
 
 
 
