@@ -55,8 +55,9 @@ export default class RouteHandler {
                         res.json(result, {success: "ID is new and was added to dataset succesfully!"});
                     } else if (result === 201) {
                         res.json(result, {success: "ID is not new and was added to dataset succesfully!"});
+                    } else {
+                        res.json(200, {success: result});
                     }
-                    res.json(200, {success: result});
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
                     res.json(400, {err: err.message});
