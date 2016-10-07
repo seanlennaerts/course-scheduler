@@ -13,7 +13,7 @@ export default class MathController{
         Log.trace('MathController:: init()');
     }
 
-    public greaterThan(inputArray: Course[], query :string){
+    public greaterThan(input: Course, query :string){
 
         switch(query){
             case "avg":
