@@ -8,7 +8,7 @@ export default class Section {
     private _uniqueId: number;
     private _sectionNumber: string; //we made this up
 
-    private _average: number;
+    private _avg: number;
     private _instructor: string[];
     private _pass: number;
     private _fail: number;
@@ -22,7 +22,7 @@ export default class Section {
 
 
     set average(value: number) {
-        this._average = value;
+        this._avg = value;
     }
 
     get uniqueId(): number {

@@ -4,6 +4,10 @@
 
 import {Datasets} from "./DatasetController";
 import Log from "../Util";
+import Course from "../model/Course";
+import Section from "../model/Section";
+import RouteHandler from "../rest/RouteHandler"
+
 
 export interface QueryRequest {
     GET: string|string[];
@@ -13,6 +17,8 @@ export interface QueryRequest {
 }
 
 export interface QueryResponse {
+    result: number;
+    error: String;
 }
 
 export default class QueryController {
@@ -30,9 +36,47 @@ export default class QueryController {
     }
 
     public query(query: QueryRequest): QueryResponse {
+        //stringify turns JS object into JSON string
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         // TODO: implement this
-        return {status: 'received', ts: new Date().getTime()};
+        var resp: QueryResponse = {result: 0, error: ''};
+
+        // get appropriate dataset we want to query from datasets
+
+        if (query.WHERE){
+
+        }
+
+        if (query.GET) {
+            var searchQueries = query.GET;
+            for (var i = 0; i < searchQueries.length; i++) {
+                let indivSearchQuery: string[] = searchQueries[i].split("_");
+                let datasetID = indivSearchQuery[0];
+                let datasetField = "_" + indivSearchQuery[1];
+
+
+                let wantedDataset: [] = this.datasets[datasetID];
+                //First element in JSON object is "result" folder, why can't I say dataset.result.
+                //check to see if dataset is not empty!
+                if (wantedDataset.length > 0) {
+                    //check if key is in object
+                    if (datasetField in wantedDataset) {
+                        if (datasetField == "_dept" || datasetField == "_id" || datasetField == "_title") {
+                            //calls getter functions
+                            var tempField: {} = dataset.courses.datasetField;
+                        } else {
+                            var tempField: {} = dataset.courses sections.datasetField;
+                        }
+
+                    }
+                    resp.result[0] = tempField;
+                }
+            }
+
+
+            //return {status: 'received', ts: new Date().getTime()};
+        }
+        return resp;
     }
 }
