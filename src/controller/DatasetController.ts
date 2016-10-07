@@ -23,7 +23,8 @@ export interface Datasets {
 
 export default class DatasetController {
 
-    private processedData: Datasets = {}; //trying to keep everything in one object mapped key:course
+    private processedData: Course[] = []; //-S
+
     private datasets: Datasets = {};
 
     constructor() {
@@ -80,6 +81,19 @@ export default class DatasetController {
         Log.info("deleteDataset(): deleted " + id + " succesfully!");
     }
 
+    private checkIfCourseExists(dept: string, id: string): Course {
+        for (var i = 0; i < this.processedData.length; i++) {
+            let course = this.processedData[i];
+            if (course.dept === dept && course.id === id) {
+                Log.info("COURSE EXISTED");
+                return course;
+            }
+        }
+        //else
+        return new Course(dept, id);
+    }
+
+
 
     public readFile(zip: JSZip, path: string): Promise<any> {
         let that = this;
@@ -92,6 +106,7 @@ export default class DatasetController {
                 //     Log.info("readFile(): " + path + " has no sections!")
                 //     countMissingSections++;
                 // }
+
                 for (var i = 0; i < root.result.length; i++) {
 
                     //check for missing fields
@@ -122,11 +137,24 @@ export default class DatasetController {
                     var uniqueId: number = root.result[i].id;
                     // Log.info("uniqueId: " + uniqueId);
 
-                    var key: string = dept + id;
-                    if (!(key in that.processedData)) {
-                        var newCourse: Course = new Course(dept, id);
-                        newCourse.title = title;
-                        // make course once per file
+                    // var key: string = dept + id;
+                    // if (!(key in that.processedData)) {
+                    //     var newCourse: Course = new Course(dept, id);
+                    //     newCourse.title = title;
+                    //     // make course once per file
+                    // }
+
+                    var courseToPush: Course;
+                    var exists: boolean = false;
+                    for (var course of that.processedData) {
+                        if (course.dept === dept && course.id === id) {
+                            courseToPush = course;
+                            exists = true;
+                        }
+                    }
+                    if (!exists) {
+                        courseToPush = new Course(dept, id);
+                        courseToPush.title = title;
                     }
 
                     //can't store bidirectional relationship in JSON :( unless serialize objects before stringify..
@@ -140,9 +168,11 @@ export default class DatasetController {
                     newSection.fail = fail;
                     newSection.audit = audit;
 
-                    newCourse.addSection(newSection);
+                    courseToPush.addSection(newSection);
 
-                    that.processedData[key] = newCourse;
+                    if (!exists) {
+                        that.processedData.push(courseToPush);
+                    }
                 } //end for loop
             }).then(function() {
                 fulfill(true);
@@ -241,6 +271,6 @@ export default class DatasetController {
             Log.info("save(): " + id + ".json was saved succesfully!");
         });
 
-        this.processedData = {};
+        this.processedData = [];
     }
 }
