@@ -6,39 +6,39 @@ import Section from "./Section";
 
 export default class Course {
 
-    private _dept: string;
-    private _id: string;
-    private _title: string;
-    private _sections: Section[];
+    private dept: string;
+    private id: string;
+    private title: string;
+    private sections: Section[];
 
     constructor(dept: string, id: string) {
-        this._dept = dept;
-        this._id = id;
-        this._sections = [];
+        this.dept = dept;
+        this.id = id;
+        this.sections = [];
     }
 
 
     get dept(): string {
-        return this._dept;
+        return this.dept;
     }
 
     get id(): string {
-        return this._id;
+        return this.id;
     }
 
     get title(): string {
-        return this._title;
+        return this.title;
     }
 
     set title(value: string) {
-        this._title = value;
+        this.title = value;
     }
 
     get sections(): Section[] {
-        return this._sections;
+        return this.sections;
     }
 
     public addSection(sectionToAdd: Section) {
-        this._sections.push(sectionToAdd);
+        this.sections.push(sectionToAdd);
     }
 }

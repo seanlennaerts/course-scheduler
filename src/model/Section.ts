@@ -5,67 +5,67 @@
 
 export default class Section {
 
-    private _uniqueId: number;
-    private _sectionNumber: string; //we made this up
+    private uniqueId: number;
+    private sectionNumber: string; //we made this up
 
-    private _average: number;
-    private _instructor: string[];
-    private _pass: number;
-    private _fail: number;
-    private _audit: number;
+    private average: number;
+    private instructor: string[];
+    private pass: number;
+    private fail: number;
+    private audit: number;
 
 
     constructor(uniqueId: number) {
-        this._uniqueId = uniqueId;
-        this._instructor = [];
+        this.uniqueId = uniqueId;
+        this.instructor = [];
     }
 
 
     set average(value: number) {
-        this._average = value;
+        this.average = value;
     }
 
     get uniqueId(): number {
-        return this._uniqueId;
+        return this.uniqueId;
     }
 
     get sectionNumber(): string {
-        return this._sectionNumber;
+        return this.sectionNumber;
     }
 
     set sectionNumber(value: string) {
-        this._sectionNumber = value;
+        this.sectionNumber = value;
     }
 
     get instructor(): string[] {
-        return this._instructor;
+        return this.instructor;
     }
 
     set instructor(value: string[]) {
-        this._instructor = value;
+        this.instructor = value;
     }
 
     get pass(): number {
-        return this._pass;
+        return this.pass;
     }
 
     set pass(value: number) {
-        this._pass = value;
+        this.pass = value;
     }
 
     get fail(): number {
-        return this._fail;
+        return this.fail;
     }
 
     set fail(value: number) {
-        this._fail = value;
+        this.fail = value;
     }
 
     get audit(): number {
-        return this._audit;
+        return this.audit;
     }
 
     set audit(value: number) {
-        this._audit = value;
+        this.audit = value;
     }
 }
