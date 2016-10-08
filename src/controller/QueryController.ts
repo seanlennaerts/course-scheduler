@@ -5,7 +5,7 @@
 import {Datasets} from "./DatasetController";
 import Log from "../Util";
 import Course from "../model/Course";
-import Section from "../model/Section";
+//import Section from "../model/Section";
 import RouteHandler from "../rest/RouteHandler"
 
 
@@ -24,18 +24,74 @@ export default class QueryController {
     private datasets: Datasets = null;
     private stack: string[] = []; //might need other type, object?
     private tempResults: Course[][] = [];
+    private dataset: Course[] = [];
+    private queryKeys: string[] = [];
+    //private datasetID: string;
 
-    constructor(datasets: Datasets) {
+    constructor(datasets: Datasets, id: string) {
         this.datasets = datasets;
+     //   this.datasetID = id;
+        this.dataset = this.getDataset(id);
+
+    }
+
+    public WHEREhelper(query: QueryRequest):boolean {
+        for (var filter: string in Object.keys(query)){
+           // if ()
+        }
+
+
+
+        return true;
     }
 
     public isValid(query: QueryRequest): boolean {
-        //TODO (1): WORK ON VALIDATING QUERY
-
-        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 0) {
-            return true;
+        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 3) {
+            if ('key' in query == query.GET && 'key' in query == query.WHERE && 'key' in query == query.AS){
+                // GET part of query
+                var GETelements = query.GET;
+                for (var i = 0; i < GETelements.length; i++) {
+                    var GETelement: string[] = GETelements[i].split("_");
+                    var id = GETelement[0];
+                    if (!(id in this.datasets)){
+                        return false;
+                    } else {
+                        var datasetField = GETelement[1];
+                        if (!(datasetField == "dept" || datasetField == "id" || datasetField == "avg" ||
+                            datasetField == "instructor" || datasetField == "title" ||
+                            datasetField == "pass" || datasetField == "fail" || datasetField == "audit")){
+                            return false;
+                        } else{
+                            this.queryKeys.push(datasetField);
+                        }
+                    }
+                }
+                // AS part of query
+                var as = query.AS;
+                if (!(as == "TABLE")){
+                    return false;
+                }
+                // ORDER part of query -> OPTIONAL
+                if (query.ORDER){
+                    for (let key:string in this.queryKeys){
+                        if (query.ORDER == key){
+                            this.WHEREhelper(query);
+                        } else {
+                            return false;
+                        }
+                    }
+                }
+                return this.WHEREhelper(query);
+            }
+            return false;
         }
         return false;
+    }
+
+    public getDataset(id: string): Course[]{
+        this.dataset = this.datasets[id];
+        return this.dataset;
+
     }
 
     private traverseKeys (obj: QueryRequest) {
