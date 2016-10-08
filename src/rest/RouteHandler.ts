@@ -79,7 +79,7 @@ export default class RouteHandler {
             let query: QueryRequest = req.params;
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
-            let dataset: Course[] = controller.getDataset(id);
+           // let dataset: Course[] = controller.getDataset(id);
             let isValid = controller.isValid(query);
 
             if (isValid === true) {
