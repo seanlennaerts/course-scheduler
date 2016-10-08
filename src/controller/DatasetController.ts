@@ -18,7 +18,7 @@ var fs = require('fs');   //var is good -S                    //to use file syst
  * In memory representation of all datasets.
  */
 export interface Datasets {
-    [id: string]: {};
+    [id: string]: Course[];
 }
 
 export default class DatasetController {
@@ -75,7 +75,7 @@ export default class DatasetController {
 
     public deleteDataset(id: string): any {
         if (id in this.datasets) {
-            this.datasets[id] = {}; //better way to delete??
+            this.datasets[id] = []; //better way to delete??
         }
         fs.unlinkSync("./data/" + id + ".json");
         Log.info("deleteDataset(): deleted " + id + " succesfully!");
@@ -209,7 +209,7 @@ export default class DatasetController {
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
 
-                    // TODO: iterate through files in zip (zip.files)
+                    // iterate through files in zip (zip.files)
                     // The contents of the file will depend on the id provided. e.g.,
                     // some zips will contain .html files, some will contain .json files.
                     // You can depend on 'id' to differentiate how the zip should be handled,
@@ -217,7 +217,7 @@ export default class DatasetController {
                     var promises: string[] = [];
                     switch (id) {
                         case "courses":
-                            zip.folder(id).forEach(function (relativePath, file) { //TODO find name of the zipfile and replace "courses"
+                            zip.folder(id).forEach(function (relativePath, file) { // find name of the zipfile and replace "courses"
                                 //Log.info("relativePath: " + relativePath + ", file: " + file);
                                 promises.push(<any>that.readFile(zip, file.name));
                             });
