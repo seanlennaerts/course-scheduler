@@ -23,6 +23,8 @@ export interface QueryResponse {
 
 export default class QueryController {
     private datasets: Datasets = null;
+    private dataset: Course[] = [];
+    private queryKeys: string[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -30,9 +32,21 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): boolean {
         if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 0) {
+
+            var searchQueries = query.GET;
+            for (var i = 0; i < searchQueries.length; i++) {
+                let searchQuery: string[] = searchQueries[i].split("_");
+                let datasetField = "_" + searchQuery[1];
+
             return true;
         }
         return false;
+    }
+
+    public getDataset(id: string): Course[]{
+        this.dataset = this.datasets[id];
+        return this.dataset;
+
     }
 
     public query(query: QueryRequest): QueryResponse {

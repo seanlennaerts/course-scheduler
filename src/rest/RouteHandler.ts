@@ -11,6 +11,7 @@ import QueryController from '../controller/QueryController';
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
 import {Route} from "restify";
+import Course from "../model/Course";
 
 export default class RouteHandler {
 
@@ -74,9 +75,11 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
+            var id: string = req.params.id;
             let query: QueryRequest = req.params;
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
+            let dataset: Course[] = controller.getDataset(id);
             let isValid = controller.isValid(query);
 
             if (isValid === true) {
