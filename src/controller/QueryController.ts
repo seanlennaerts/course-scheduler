@@ -35,24 +35,49 @@ export default class QueryController {
 
     }
 
-    public WHEREhelper(whereObject: {}):boolean {
+    private WHEREhelperArray(array:{}[]):boolean {
+        for(var i = 0; i < array.length; i++){
+            this.WHEREhelperObject(array[i]);
+        }
+        return true;
+    }
+
+    private objectOrArrayValid (checkObj: any) {
+        if (typeof(checkObj) === {}) {
+            this.WHEREhelperObject(checkObj);
+        } else {
+            this.WHEREhelperArray(checkObj);
+        }
+    }
+
+    private WHEREhelperObject(whereObject: {}):boolean {
+        // section 1
         if (Object.keys(whereObject).length > 1){
+            Log.info("QueryController :: WHEREhelperObject(..) - about to return false: sect 1");
             return false;
         }
-        if (!(Object.keys(whereObject)[0] == "LT" || Object.keys(whereObject)[0] == "GT" ||
-            Object.keys(whereObject)[0] == "EQ" || Object.keys(whereObject)[0] == "AND" ||
-            Object.keys(whereObject)[0] == "OR" || Object.keys(whereObject)[0] == "IS" ||
-            Object.keys(whereObject)[0] == "NOT")) {
-                return false;
-            } else {
-
-
-            }
-
-
-
-
-
+        // section 2
+        // check if the object key is one of the permitted course keys
+        if (Object.keys(whereObject)[0] === "dept" || Object.keys(whereObject)[0] === "id" ||
+                Object.keys(whereObject)[0] === "avg" || Object.keys(whereObject)[0] === "instructor" ||
+                Object.keys(whereObject)[0] === "title" || Object.keys(whereObject)[0] === "pass" ||
+                Object.keys(whereObject)[0] === "fail"){
+            Log.info("QueryController :: WHEREhelperObject(..) - about to return true: sect 2 ");
+            return true;
+        }
+        // section 3
+        // check if the keys in first level are the LOGIC operators allowed
+        if (!(Object.keys(whereObject)[0] === "LT" || Object.keys(whereObject)[0] === "GT" ||
+            Object.keys(whereObject)[0] === "EQ" || Object.keys(whereObject)[0] === "AND" ||
+            Object.keys(whereObject)[0] === "OR" || Object.keys(whereObject)[0] === "IS" ||
+            Object.keys(whereObject)[0] === "NOT")){
+            Log.info("QueryController :: WHEREhelperObject(..) - about to return false: sect 3 ");
+            return false;
+        } else {
+            var secondLevel: {}|{}[] = Object.values(whereObject)[0];
+            this.objectOrArrayValid(secondLevel);
+        }
+        Log.info("QueryController :: WHEREhelperObject(..) - about to return true in the end ");
         return true;
     }
 
@@ -60,18 +85,20 @@ export default class QueryController {
         if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 3) {
             if (query.GET && query.WHERE && query.AS){
                 // GET part of query
-                var GETelements = query.GET;
+                var GETelements: string[] = query.GET;
                 if (GETelements.length > 0) {
                     for (var i = 0; i < GETelements.length; i++) {
                         var GETelement: string[] = GETelements[i].split("_");
                         var id = GETelement[0];
                         if (!(id in this.datasets)) {
+                            Log.info("QueryController :: isValid(..) - about to return false in GET in for loop ");
                             return false;
                         } else {
                             var datasetField = GETelement[1];
-                            if (!(datasetField == "dept" || datasetField == "id" || datasetField == "avg" ||
-                                datasetField == "instructor" || datasetField == "title" ||
-                                datasetField == "pass" || datasetField == "fail" || datasetField == "audit")) {
+                            if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
+                                datasetField === "instructor" || datasetField === "title" ||
+                                datasetField === "pass" || datasetField === "fail" || datasetField === "audit")) {
+                                Log.info("QueryController :: isValid(..) - about to return false in GET in else ");
                                 return false;
                             } else {
                                 this.queryKeys.push(datasetField);
@@ -82,22 +109,26 @@ export default class QueryController {
                 // AS part of query
                 var as = query.AS;
                 if (!(as == "TABLE")){
+                    Log.info("QueryController :: isValid(..) - about to return false in AS");
                     return false;
                 }
                 // ORDER part of query -> OPTIONAL
                 if (query.ORDER){
                     for (var key in this.queryKeys){
                         if (query.ORDER == key){
-                            this.WHEREhelper(query.WHERE);
+                            this.WHEREhelperObject(query.WHERE);
                         } else {
+                            Log.info("QueryController :: isValid(..) - about to return false in ORDER");
                             return false;
                         }
                     }
                 }
-                return this.WHEREhelper(query.WHERE);
+                return this.WHEREhelperObject(query.WHERE);
             }
+            Log.info("QueryController :: isValid(..) - about to return false close to the end");
             return false;
         }
+        Log.info("QueryController :: isValid(..) - about to return false at the very end ");
         return false;
     }
 
