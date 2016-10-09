@@ -1,44 +1,63 @@
+
 /**
  * Created by Sean on 10/1/16.
  */
 
-import Section from "./Section";
-
 export default class Course {
 
+    //identified by:
+    private _sectionId: number;
+
+    //course info:
     private _dept: string;
     private _id: string;
     private _title: string;
-    private _sections: Section[];
 
-    constructor(dept: string, id: string) {
+    //section info:
+    private _avg: number;
+    private _instructor: string[];
+    private _pass: number;
+    private _fail: number;
+    private _audit: number;
+
+
+    constructor(uniqueId: number, dept: string, id: string, title: string, avg: number, instructor: string[],
+                pass: number, fail: number, audit: number) {
+        this._sectionId = uniqueId;
         this._dept = dept;
         this._id = id;
-        this._sections = [];
+        this._title = title;
+        this._avg = avg;
+        this._instructor = instructor;
+        this._pass = pass;
+        this._fail = fail;
+        this._audit = audit;
     }
 
-
-    get dept(): string {
-        return this._dept;
+    get uniqueId(): number {
+        return this._sectionId;
     }
 
-    get id(): string {
-        return this._id;
-    }
-
-    get title(): string {
-        return this._title;
-    }
-
-    set title(value: string) {
-        this._title = value;
-    }
-
-    get sections(): Section[] {
-        return this._sections;
-    }
-
-    public addSection(sectionToAdd: Section) {
-        this._sections.push(sectionToAdd);
+    public getField (field: string): number|string|string[] {
+        switch (field) {
+            case "dept":
+                return this._dept;
+            case "id":
+                return this._id;
+            case "title":
+                return this._title;
+            case "avg":
+                return this._avg;
+            case "instructor":
+                return this._instructor;
+            case "pass":
+                return this._pass;
+            case "fail":
+                return this._fail;
+            case "audit":
+                return this._audit;
+            default:
+            //
+        }
     }
 }

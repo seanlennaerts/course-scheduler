@@ -6,7 +6,6 @@
 import Log from "../Util";
 import JSZip = require('jszip');
 import Course from "../model/Course";
-import Section from "../model/Section";
 var fs = require('fs');   //var is good -S                    //to use file system in node.js
 
 //temp -S
@@ -81,20 +80,6 @@ export default class DatasetController {
         Log.info("deleteDataset(): deleted " + id + " succesfully!");
     }
 
-    private checkIfCourseExists(dept: string, id: string): Course {
-        for (var i = 0; i < this.processedData.length; i++) {
-            let course = this.processedData[i];
-            if (course.dept === dept && course.id === id) {
-                Log.info("COURSE EXISTED");
-                return course;
-            }
-        }
-        //else
-        return new Course(dept, id);
-    }
-
-
-
     public readFile(zip: JSZip, path: string): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
@@ -137,6 +122,10 @@ export default class DatasetController {
                     var uniqueId: number = root.result[i].id;
                     // Log.info("uniqueId: " + uniqueId);
 
+                    var newSection = new Course (uniqueId, dept, id, title, avg, instructorArray, pass, fail, audit);
+                    that.processedData.push(newSection);
+
+                    // DEAD CODE =======================================
                     // var key: string = dept + id;
                     // if (!(key in that.processedData)) {
                     //     var newCourse: Course = new Course(dept, id);
@@ -144,35 +133,34 @@ export default class DatasetController {
                     //     // make course once per file
                     // }
 
-                    var courseToPush: Course;
-                    var exists: boolean = false;
-                    for (var course of that.processedData) {
-                        if (course.dept === dept && course.id === id) {
-                            courseToPush = course;
-                            exists = true;
-                        }
-                    }
-                    if (!exists) {
-                        courseToPush = new Course(dept, id);
-                        courseToPush.title = title;
-                    }
+                    // var courseToPush: Course;
+                    // var exists: boolean = false;
+                    // for (var course of that.processedData) {
+                    //     if (course.dept === dept && course.id === id) {
+                    //         courseToPush = course;
+                    //         exists = true;
+                    //     }
+                    // }
+                    // if (!exists) {
+                    //     courseToPush = new Course(dept, id, title);
+                    // }
 
                     //can't store bidirectional relationship in JSON :( unless serialize objects before stringify..
                     //in the interest of time not going to use instructor class -S
 
 
-                    var newSection: Section = new Section(uniqueId);
-                    newSection.average = avg;
-                    newSection.instructor = instructorArray;
-                    newSection.pass = pass;
-                    newSection.fail = fail;
-                    newSection.audit = audit;
+                    // var newSection: Section = new Section(uniqueId);
+                    // newSection.average = avg;
+                    // newSection.instructor = instructorArray;
+                    // newSection.pass = pass;
+                    // newSection.fail = fail;
+                    // newSection.audit = audit;
 
-                    courseToPush.addSection(newSection);
-
-                    if (!exists) {
-                        that.processedData.push(courseToPush);
-                    }
+                    // courseToPush.addSection(newSection);
+                    //
+                    // if (!exists) {
+                    //     that.processedData.push(courseToPush);
+                    // }
                 } //end for loop
             }).then(function() {
                 fulfill(true);
