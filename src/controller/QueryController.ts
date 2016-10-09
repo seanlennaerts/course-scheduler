@@ -28,17 +28,28 @@ export default class QueryController {
     private queryKeys: string[] = [];
     //private datasetID: string;
 
-    constructor(datasets: Datasets, id: string) {
+    constructor(datasets: Datasets) {
         this.datasets = datasets;
      //   this.datasetID = id;
-        this.dataset = this.getDataset(id);
+     //   this.dataset = this.getDataset(id);
 
     }
 
-    public WHEREhelper(query: QueryRequest):boolean {
-        for (var filter: string in Object.keys(query)){
-           // if ()
+    public WHEREhelper(whereObject: {}):boolean {
+        if (Object.keys(whereObject).length > 1){
+            return false;
         }
+        if (!(Object.keys(whereObject)[0] == "LT" || Object.keys(whereObject)[0] == "GT" ||
+            Object.keys(whereObject)[0] == "EQ" || Object.keys(whereObject)[0] == "AND" ||
+            Object.keys(whereObject)[0] == "OR" || Object.keys(whereObject)[0] == "IS" ||
+            Object.keys(whereObject)[0] == "NOT")) {
+                return false;
+            } else {
+
+
+            }
+
+
 
 
 
@@ -47,22 +58,24 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): boolean {
         if (typeof query !== 'undefined' && query !== null && Object.keys(query).length > 3) {
-            if ('key' in query == query.GET && 'key' in query == query.WHERE && 'key' in query == query.AS){
+            if (query.GET && query.WHERE && query.AS){
                 // GET part of query
                 var GETelements = query.GET;
-                for (var i = 0; i < GETelements.length; i++) {
-                    var GETelement: string[] = GETelements[i].split("_");
-                    var id = GETelement[0];
-                    if (!(id in this.datasets)){
-                        return false;
-                    } else {
-                        var datasetField = GETelement[1];
-                        if (!(datasetField == "dept" || datasetField == "id" || datasetField == "avg" ||
-                            datasetField == "instructor" || datasetField == "title" ||
-                            datasetField == "pass" || datasetField == "fail" || datasetField == "audit")){
+                if (GETelements.length > 0) {
+                    for (var i = 0; i < GETelements.length; i++) {
+                        var GETelement: string[] = GETelements[i].split("_");
+                        var id = GETelement[0];
+                        if (!(id in this.datasets)) {
                             return false;
-                        } else{
-                            this.queryKeys.push(datasetField);
+                        } else {
+                            var datasetField = GETelement[1];
+                            if (!(datasetField == "dept" || datasetField == "id" || datasetField == "avg" ||
+                                datasetField == "instructor" || datasetField == "title" ||
+                                datasetField == "pass" || datasetField == "fail" || datasetField == "audit")) {
+                                return false;
+                            } else {
+                                this.queryKeys.push(datasetField);
+                            }
                         }
                     }
                 }
@@ -73,15 +86,15 @@ export default class QueryController {
                 }
                 // ORDER part of query -> OPTIONAL
                 if (query.ORDER){
-                    for (let key:string in this.queryKeys){
+                    for (var key in this.queryKeys){
                         if (query.ORDER == key){
-                            this.WHEREhelper(query);
+                            this.WHEREhelper(query.WHERE);
                         } else {
                             return false;
                         }
                     }
                 }
-                return this.WHEREhelper(query);
+                return this.WHEREhelper(query.WHERE);
             }
             return false;
         }
@@ -144,11 +157,6 @@ export default class QueryController {
         this.traverseKeys(query);
 
         var resp: QueryResponse = {result: JSON};
-
-        let id = query.GET[0].split("_");
-        var dataset: Course[] = this.datasets[id];
-
-        if (query.GET) {}
 
         return resp;
     }

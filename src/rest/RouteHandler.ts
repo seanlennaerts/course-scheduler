@@ -75,10 +75,10 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
-            var id: string = req.params.id;
+            //var id: string = req.params.id;
             let query: QueryRequest = req.params;
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
-            let controller = new QueryController(datasets, id);
+            let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
 
             if (isValid === true) {
