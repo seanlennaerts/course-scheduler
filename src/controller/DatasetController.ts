@@ -93,15 +93,43 @@ export default class DatasetController {
             Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
         }
-        var file: string = fs.readFileSync("./data/courses.json", "utf8");
-        this.datasets["courses"] = JSON.parse(file);
-        Log.info("getDatasets(): not in memory so reading from data directory");
-        return this.datasets;
+        try {
+            var file: string = fs.readFileSync("./data/courses.json", "utf8");
+            //this.datasets["courses"] = JSON.parse(file);
+            this.datasets["courses"] = [];
+            this.parseAgain(JSON.parse(file));
+            Log.info("getDatasets(): not in memory so reading from data directory");
+            this.datasets["courses"] = this.processedData;
+            return this.datasets;
+        } catch (err) {
+            //
+            return this.datasets;
+        }
+    }
+
+    private parseAgain(json: any) {
+        for (var i = 0; i < json.length; i++) {
+            var dept: string = json[i]._dept;
+            var id: string = json[i]._id;
+            var avg: number = json[i]._avg;
+            var instructor: string[] = json[i]._instructor;
+            var title: string = json[i]._title;
+            var pass: number = json[i]._pass;
+            var fail: number = json[i]._fail;
+            var audit: number = json[i]._audit;
+            var uniqueId: number = json[i]._setionId;
+
+            var newCourse: Course = new Course(uniqueId, dept, id, title, avg,
+                instructor, pass, fail, audit);
+
+            this.processedData.push(newCourse);
+        }
     }
 
     public deleteDataset(id: string): any {
         if (id in this.datasets) {
-            this.datasets[id] = []; //better way to delete??
+            //this.datasets[id] = []; //better way to delete??
+            delete this.datasets[id];
         }
         fs.unlinkSync("./data/" + id + ".json");
         Log.info("deleteDataset(): deleted " + id + " succesfully!");
