@@ -25,7 +25,7 @@ export default class QueryController {
     private tempResults: Course[][] = [];
     private dataset: Course[] = [];
     private queryKeys: string[] = [];
-    private wrongDatasetIDs: string[];
+    private wrongDatasetIDs: string[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -101,6 +101,7 @@ export default class QueryController {
     }
 
     public isValid(query: QueryRequest): number {
+        let that = this;
         if (typeof query !== 'undefined' && query !== null && Object.keys(query).length >= 3) {
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
@@ -111,14 +112,13 @@ export default class QueryController {
                         var GETelement: string[] = GETelements[i].split("_");
                         var id: string = GETelement[0];
                         Log.info("QueryController :: isValid(..) - id is: " + id);
-                        if (!(id in this.datasets)) {
-                            this.wrongDatasetIDs.push(id);
+                        if (!(id in that.datasets)) {
+                            that.wrongDatasetIDs.push(id);
                             Log.info("QueryController :: isValid(..) - about to return 424 error: " + id + "hasn't been put");
                             Log.info("QueryController :: isValid(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
                             return (424);
-                        }
-                        Log.info("QueryController :: isValid(..) - id has been put");
-                        else {
+                        } else {
+                            Log.info("QueryController :: isValid(..) - id has been put in datasets");
                             var datasetField = GETelement[1];
                             Log.info("QueryController :: isValid(..) - datasetField is: " + datasetField);
                             if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
@@ -142,8 +142,9 @@ export default class QueryController {
                 Log.info("QueryController :: isValid(..) - AS is'TABLE' :) ");
                 // ORDER part of query -> OPTIONAL
                 if (query.ORDER) {
-                    if (this.queryKeys.indexOf(query.ORDER, 0) !== -1) {
-                        Log.info("QueryController :: isValid(..) - ORDER key is not included in GET keys");
+                    Log.info("QueryController :: isValid(..) - ORDER key is:" + query.ORDER);
+                    if (this.queryKeys.indexOf(query.ORDER, 0) == -1) {
+                        Log.info("QueryController :: isValid(..) - " + query.ORDER + " key is not included in GET keys");
                         return 400;
                     } else {
                         Log.info("QueryController :: isValid(..) - there is ORDER key included in GET keys, going to WHERE helper ");
