@@ -86,12 +86,11 @@ export default class RouteHandler {
             if (isValid === 200) {
                 let result = controller.query(query);
                 res.json(200, result);
+            } else if (isValid === 424) {
+                res.json(424, "missing " + controller.returnWrongIDs());
             } else {
-                if (isValid === 424){
-                    res.json(424, "missing " + controller.returnWrongIDs());
-                }
-                res.json(400, {error: 'invalid query'});
-            }
+                res.json(400, {error: 'invalid query'})
+            };
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
             res.send(403);

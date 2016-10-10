@@ -163,7 +163,6 @@ export default class QueryController {
     public getDataset(id: string): Course[]{
         this.dataset = this.datasets[id];
         return this.dataset;
-
     }
 
     private handleAND (arr: {}[]) {
@@ -288,7 +287,7 @@ export default class QueryController {
         }
     }
 
-    private handleIS (keyValue: {}) {
+    private handleIS (obj: {}) {
 
     }
 
@@ -315,7 +314,30 @@ export default class QueryController {
         }
     }
 
+    //From stack overflow
+    //http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
+    private dynamicSort(property: string) {
+        Log.info("dynamicSort(): sorting...")
+        var sortOrder = 1;
+        if (property[0] === "-") {
+            sortOrder = -1;
+            property = property.substr(1);
+        }
+        return function (a,b) {
+            var result = (a[property] < b[property]) ? -1: (a[property] > b[property]) ? 1 : 0;
+            return result * sortOrder;
+        }
+    }
+
+    private dynamicSortNumber(property: string) {
+        return function (a,b) {
+            return a[property] - b[property];
+        }
+
+    }
+
     public query(query: QueryRequest): QueryResponse {
+        this.tempResults = [];
         //stringify turns JS object into JSON string
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
@@ -337,9 +359,15 @@ export default class QueryController {
             }
             finalTable.push(obj);
         }
-        // for (var temp of finalTable) {
-        //     Log.info(temp.toString());
-        // }
+
+        if (query.ORDER) { //if is important because optional
+            if (typeof(query.ORDER) === "number") {
+                finalTable.sort(this.dynamicSortNumber(query.ORDER));
+            } else {
+                finalTable.sort(this.dynamicSort(query.ORDER));
+            }
+        }
+
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
         var resp: QueryResponse = {render: query.AS, result: finalTable};
