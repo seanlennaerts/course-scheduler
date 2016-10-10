@@ -141,7 +141,7 @@ export default class QueryController {
                 // ORDER part of query -> OPTIONAL
                 if (query.ORDER) {
                     Log.info("QueryController :: isValid(..) - ORDER key is:" + query.ORDER);
-                    if (this.queryKeys.indexOf(query.ORDER, 0) == -1) {
+                    if (this.queryKeys.indexOf(query.ORDER.split("_")[1], 0) == -1) {
                         Log.info("QueryController :: isValid(..) - " + query.ORDER + " key is not included in GET keys");
                         return 400;
                     } else {
