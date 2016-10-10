@@ -14,7 +14,7 @@ export interface QueryRequest {
 }
 
 export interface QueryResponse {
-    render: string
+    render: string;
     result: {}[];
 }
 
@@ -147,9 +147,9 @@ export default class QueryController {
             return 400;
         }
         Log.info("QueryController :: isValid(..) - query is either undefined, null, or keys are less than 3" );
-        for (var key in Object.keys(query).length){
-            Log.info("the keys are: " + key);
-        }
+        // for (var key in Object.keys(query).length){
+        //     Log.info("the keys are: " + key);
+        // }
         return 400;
     }
 
@@ -484,8 +484,8 @@ export default class QueryController {
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
-        var resp: QueryResponse = {render: query.AS, result: finalTable};
+        //var resp: QueryResponse = {render: query.AS, result: finalTable};
 
-        return resp;
+        return {render: query.AS, result: finalTable};
     }
 }
