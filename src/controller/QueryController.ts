@@ -50,16 +50,6 @@ export default class QueryController {
         }
     }
 
-    private objectOrArrayValid (checkObj: any): number {
-        if (typeof(checkObj) === {}) {
-            Log.info("QueryController :: objectOrArrayValid(..) - it's an object, now going to the helper");
-            return this.WHEREhelperObject(checkObj);
-        } else {
-            Log.info("QueryController :: objectOrArrayValid(..) - it's an array, now going to helper");
-            return this.WHEREhelperArray(checkObj);
-        }
-    }
-
     private WHEREhelperObject(whereObject: {}): number {
         let that = this;
         // section 1
@@ -90,7 +80,7 @@ export default class QueryController {
         else if (Object.keys(whereObject)[0] === "AND" || Object.keys(whereObject)[0] === "OR"){
             var objectKey: string = Object.keys(whereObject)[0];
             var secondLevelArray: {}[] = whereObject[objectKey];
-            Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevel));
+            Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevelArray));
             return that.WHEREhelperArray(secondLevelArray);
         } else{
             Log.info("QueryController :: WHEREhelperObject(..) - about to return errors, these object keys are not proper operators: " + Object.keys(whereObject)[0]);
@@ -112,7 +102,7 @@ export default class QueryController {
                         Log.info("QueryController :: isValid(..) - id is: " + id);
                         if (!(id in that.datasets)) {
                             that.wrongDatasetIDs.push(id);
-                            Log.info("QueryController :: isValid(..) - about to return 424 error: " + id + "hasn't been put");
+                            Log.info("QueryController :: isValid(..) - about to return 424 error: " + id + " hasn't been put");
                             Log.info("QueryController :: isValid(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
                             return (424);
                         } else {
@@ -288,8 +278,30 @@ export default class QueryController {
         }
     }
 
-    private handleIS (keyValue: {}) {
+    private handleIS (obj: {}) {
+        Log.info("QueryController:: handleIS(" + JSON.stringify(obj) + ")");
+        var keyFull: string = Object.keys(obj)[0];
+        var value: string = obj[keyFull];
+        var keyRight: string = keyFull.split("_")[1];
+        var filteredResult: Course[] = [];
+        for (var section of this.datasets["courses"]) {
+            // case1: value = *adhe
+            if (section.getField(keyRight) === value) {
+                filteredResult.push(section);
+                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
+            }
 
+            // case2: value = adhe
+            if (section.getField(keyRight) === value) {
+                filteredResult.push(section);
+                Log.info("handleIS() pushed " + section + " where ");
+                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
+            }
+
+            // case3: value = adhe*
+            // case4: value = *adhe*
+        }
+        this.tempResults.push(filteredResult);
     }
 
 

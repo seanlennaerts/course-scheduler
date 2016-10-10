@@ -54,21 +54,27 @@ export default class DatasetController {
     }
 
     public getDatasets(): Datasets {
-        // if datasets is empty, load all dataset files in ./data from disk
-        fs.readdir("./data", function(err: Error, files: string[]) {
-            if (err) {
-                Log.error("getDatasets(): trouble reading files in directory " + err);
-            }
-            for (var fileName of files) {
-                fs.readFile("./data/" + fileName, "utf8", function (err: Error, file: string) {
-                    if (err) {
-                        Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
-                    }
-                    var split: string[] = fileName.split(".");
-                    this.datasets[split[0]] = JSON.parse(file);
-                })
-            }
-        });
+        // check first if memory has stored datasets
+        if (Object.keys(this.datasets).length > 0) {
+            return this.datasets;
+        } else {
+            //checking disk
+            fs.readdir("./data", function (err: Error, files: string[]) {
+                if (err) {
+                    Log.error("getDatasets(): trouble reading files in directory " + err);
+                }
+                for (var fileName of files) {
+                    fs.readFile("./data/" + fileName, "utf8", function (err: Error, file: string) {
+                        if (err) {
+                            Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
+                        }
+                        var split: string[] = fileName.split(".");
+                        Log.info("DatasetControler:: getDatasets(..): This is file with name: " + split[0]);
+                        this.datasets[split[0]] = JSON.parse(file);
+                    })
+                }
+            })
+        };
         return this.datasets;
     }
 
