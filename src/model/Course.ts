@@ -38,6 +38,10 @@ export default class Course {
         return this._sectionId;
     }
 
+    public getInstructors(){
+        return this._instructor;
+    }
+
     public getField (field: string): number|string|string[] {
         switch (field) {
             case "dept":

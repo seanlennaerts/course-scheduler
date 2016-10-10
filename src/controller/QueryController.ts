@@ -286,14 +286,28 @@ export default class QueryController {
         var value: string = obj[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
+        if (Object.keys(obj)[0] === "instructor"){
+
+        }
+
 
         // case4: value = *adhe*
-        Log.info("it is case4");
         if (value.indexOf("*") == 0 && value.lastIndexOf("*") == (value.length - 1)){
+            Log.info("it is case4");
             var trimmedStr: string = value.substr(1,(value.length-2));
             Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
-                if (typeof section.getField(keyRight) === "string") {
+                if(keyRight === "instructor") {
+                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    var strings: string[] = section.getInstructors();
+                    for(var s in strings){
+                        //Log.info(strings[s]);
+                        if (strings[s].includes(trimmedStr)){
+                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                            filteredResult.push(section);
+                        }
+                    }
+                } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
                     Log.info("str has: " + str);
                     if (str.includes(trimmedStr)){
@@ -304,12 +318,22 @@ export default class QueryController {
             }
         }
         // case1: value = *adhe
-        //Log.info("it is case1");
         else if (value.indexOf("*") == 0){
+            Log.info("it is case1");
             var trimmedStr: string = value.substr(1, (value.length - 1));
             Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
-                if (typeof section.getField(keyRight) === "string") {
+                if(keyRight === "instructor") {
+                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    var strings: string[] = section.getInstructors();
+                    for(var s in strings){
+                        //Log.info(strings[s]);
+                        if (strings[s].endsWith(trimmedStr)){
+                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                            filteredResult.push(section);
+                        }
+                    }
+                } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
                     if (str.endsWith(trimmedStr)){
                         Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
@@ -323,7 +347,17 @@ export default class QueryController {
             var trimmedStr: string = value.split("*")[0];
             Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
-                if (typeof section.getField(keyRight) === "string") {
+                if(keyRight === "instructor") {
+                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    var strings: string[] = section.getInstructors();
+                    for(var s in strings){
+                        //Log.info(strings[s]);
+                        if (strings[s].startsWith(trimmedStr)){
+                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                            filteredResult.push(section);
+                        }
+                    }
+                } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
                     Log.info("str has: " + str);
                     if (str.startsWith(trimmedStr)){
@@ -334,10 +368,20 @@ export default class QueryController {
             }
         } else {
             // case2: value = adhe
-            Log.info("it is case2");
+            Log.info("it is case2: value is: " + value);
             if (!(value.includes("*"))) {
                 for (var section of this.datasets["courses"]) {
-                    if (section.getField(keyRight) === value) {
+                    if(keyRight === "instructor") {
+                        Log.info("It should be an instructor that we are looking for: " + value);
+                        var strings: string[] = section.getInstructors();
+                        for(var s in strings){
+                            //Log.info(strings[s]);
+                            if (strings[s] === value){
+                                Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                                filteredResult.push(section);
+                            }
+                        }
+                    } else if (section.getField(keyRight) === value) {
                         Log.info("handleIS() pushed " + section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
                         filteredResult.push(section);
                     }
