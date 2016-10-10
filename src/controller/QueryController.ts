@@ -186,6 +186,8 @@ export default class QueryController {
                 filteredResult.push(course);
             }
         }
+        this.tempResults = [];
+        this.tempResults.push(filteredResult);
     }
 
     private handleOR (arr: {}[]) {
@@ -249,7 +251,7 @@ export default class QueryController {
         var keyRight = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
-            if (section.getField(keyRight) > value) {
+            if (<Course>section.getField(keyRight) > value) {
                 filteredResult.push(section);
                 //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
             }

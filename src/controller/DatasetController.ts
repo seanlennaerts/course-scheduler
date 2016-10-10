@@ -37,44 +37,65 @@ export default class DatasetController {
      * @param id
      * @returns {{}}
      */
-    public getDataset(id: string): any {
-        // this should check if the dataset is on disk in ./data if it is not already in memory.
-
-        // if the "id in this.datasets" doesn't work try a try/catch block -S
-        if (id in this.datasets) {
-            return this.datasets[id];
-        }
-        fs.readFile("./data/" + id + ".json", "utf8", function (err: Error, file: string) {
-            if (err) {
-                Log.error("getDataset(): reading file from disk " + err);
-                return null;
-            }
-            return JSON.parse(file);
-        });
-    }
+    // public getDataset(id: string): any {
+    //     // this should check if the dataset is on disk in ./data if it is not already in memory.
+    //
+    //     // if the "id in this.datasets" doesn't work try a try/catch block -S
+    //     if (id in this.datasets) {
+    //         return this.datasets[id];
+    //     }
+    //     fs.readFile("./data/" + id + ".json", "utf8", function (err: Error, file: string) {
+    //         if (err) {
+    //             Log.error("getDataset(): reading file from disk " + err);
+    //             return null;
+    //         }
+    //         return JSON.parse(file);
+    //     });
+    // }
 
     public getDatasets(): Datasets {
         // check first if memory has stored datasets
-        if (Object.keys(this.datasets).length > 0) {
+        // if (Object.keys(this.datasets).length > 0) {
+        //     return this.datasets;
+        // }
+        // if ("courses" in this.datasets) {
+        //     Log.info("returning in if");
+        //     return this.datasets;
+        // }
+        // fs.readFile("./data/courses.json", "utf8", function (err: Error, file: string) {
+        //     if (err) {
+        //         Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
+        //     }
+        //     this.datasets["courses"] = JSON.parse(file);
+        //     Log.info("returning");
+        //     return this.datasets;
+        // });
+        //checking disk
+        // fs.readdir("./data", function (err: Error, files: string[]) {
+        //     if (err) {
+        //         Log.error("getDatasets(): trouble reading files in directory " + err);
+        //     }
+        //     //for (var fileName of files) {
+        //     var fileName: string = "courses.json";
+        //     fs.readFile("./data/" +fileName, "utf8", function (err: Error, file: string) {
+        //         if (err) {
+        //             Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
+        //         }
+        //         Log.info("file name before split: " + fileName);
+        //         var name: string = fileName.split(".")[0];
+        //         this.datasets[name] = JSON.parse(file);
+        //         return this.datasets;
+        //     });
+        //     //}
+        // })
+
+        if ("courses" in this.datasets) {
+            Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
-        } else {
-            //checking disk
-            fs.readdir("./data", function (err: Error, files: string[]) {
-                if (err) {
-                    Log.error("getDatasets(): trouble reading files in directory " + err);
-                }
-                for (var fileName of files) {
-                    fs.readFile("./data/" + fileName, "utf8", function (err: Error, file: string) {
-                        if (err) {
-                            Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
-                        }
-                        var split: string[] = fileName.split(".");
-                        Log.info("DatasetControler:: getDatasets(..): This is file with name: " + split[0]);
-                        this.datasets[split[0]] = JSON.parse(file);
-                    })
-                }
-            })
-        };
+        }
+        var file: string = fs.readFileSync("./data/courses.json", "utf8");
+        this.datasets["courses"] = JSON.parse(file);
+        Log.info("getDatasets(): not in memory so reading from data directory");
         return this.datasets;
     }
 
