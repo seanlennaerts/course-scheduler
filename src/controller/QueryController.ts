@@ -187,6 +187,8 @@ export default class QueryController {
                 filteredResult.push(course);
             }
         }
+        this.tempResults = [];
+        this.tempResults.push(filteredResult);
     }
 
     private handleOR (arr: {}[]) {
@@ -284,22 +286,63 @@ export default class QueryController {
         var value: string = obj[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
-        for (var section of this.datasets["courses"]) {
-            // case1: value = *adhe
-            if (section.getField(keyRight) === value) {
-                filteredResult.push(section);
-                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
-            }
 
+        // case4: value = *adhe*
+        Log.info("it is case4");
+        if (value.indexOf("*") == 0 && value.lastIndexOf("*") == (value.length - 1)){
+            var trimmedStr: string = value.substr(1,(value.length-2));
+            Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
+            for (var section of this.datasets["courses"]) {
+                if (typeof section.getField(keyRight) === "string") {
+                    var str: string = <string>section.getField(keyRight);
+                    Log.info("str has: " + str);
+                    if (str.includes(trimmedStr)){
+                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        filteredResult.push(section);
+                    }
+                }
+            }
+        }
+        // case1: value = *adhe
+        //Log.info("it is case1");
+        else if (value.indexOf("*") == 0){
+            var trimmedStr: string = value.substr(1, (value.length - 1));
+            Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
+            for (var section of this.datasets["courses"]) {
+                if (typeof section.getField(keyRight) === "string") {
+                    var str: string = <string>section.getField(keyRight);
+                    if (str.endsWith(trimmedStr)){
+                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        filteredResult.push(section);
+                    }
+                }
+            }
+        }
+        // case3: value = adhe*
+        else if (value.lastIndexOf("*") == value.length - 1){
+            var trimmedStr: string = value.split("*")[0];
+            Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
+            for (var section of this.datasets["courses"]) {
+                if (typeof section.getField(keyRight) === "string") {
+                    var str: string = <string>section.getField(keyRight);
+                    Log.info("str has: " + str);
+                    if (str.startsWith(trimmedStr)){
+                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        filteredResult.push(section);
+                    }
+                }
+            }
+        } else {
             // case2: value = adhe
-            if (section.getField(keyRight) === value) {
-                filteredResult.push(section);
-                Log.info("handleIS() pushed " + section + " where ");
-                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
+            Log.info("it is case2");
+            if (!(value.includes("*"))) {
+                for (var section of this.datasets["courses"]) {
+                    if (section.getField(keyRight) === value) {
+                        Log.info("handleIS() pushed " + section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        filteredResult.push(section);
+                    }
+                }
             }
-
-            // case3: value = adhe*
-            // case4: value = *adhe*
         }
         this.tempResults.push(filteredResult);
     }
