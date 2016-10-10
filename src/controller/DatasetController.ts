@@ -211,7 +211,7 @@ export default class DatasetController {
                             });
                             break;
                         default:
-                            throw Error("I'm not programmed to recognize this ID yet :(");
+                            throw Error("I'm not programmed to recognize this ID yet :( ");
                     }
                     Log.info("process(): all readFile promises are ready!");
                     Log.info("process(): there are " + promises.length + " files");

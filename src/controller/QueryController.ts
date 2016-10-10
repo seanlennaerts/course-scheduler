@@ -17,16 +17,6 @@ export interface QueryRequest {
     AS: string;
 }
 
-export interface Filter {
-    LT: {};
-    GT: {};
-    EQ: {};
-    AND: {}[];
-    OR: {}[];
-    IS: {};
-    NOT: {};
-}
-
 export interface QueryResponse {
     render: string
     result: {}[];
@@ -50,11 +40,13 @@ export default class QueryController {
     }
 
     private handleAND (arr: {}[]) {
+        Log.info("handleAND(" + JSON.stringify(arr) + ")");
+
         //TODO (4):
         // - should check if section id is present in all tempResults arrays
         // - collect the one's that are and set tempResults = [] and store the new result
         for (var obj of arr) {
-            this.nextObjectOrArray(<Filter>obj);
+            this.nextObjectOrArray(obj);
         }
         var filteredResult: Course[] = [];
         for (var course of this.tempResults[0]) {
@@ -70,22 +62,23 @@ export default class QueryController {
                     }
                     //else: not found. continue looking in this array
                 }
-                if (exists == false) {
+                if (!exists) {
                     break; //doesn't exist in one course[] no use checking others
                 }
             }
-            if (exists == true) {
+            if (exists) {
                 filteredResult.push(course);
             }
         }
     }
 
     private handleOR (arr: {}[]) {
+        Log.info("handleOR(" + JSON.stringify(arr) + ")");
         //TODO (5):
         // - should combine all tempResults arrays into one array
         // - set tempResults = [] and store new result
         for (var obj of arr) {
-            this.nextObjectOrArray(<Filter>obj);
+            this.nextObjectOrArray(obj);
         }
         var merged: Course[] = [].concat.apply([], this.tempResults);
         this.tempResults = [];
@@ -93,96 +86,88 @@ export default class QueryController {
 
     }
 
+
+    private handleNOT (obj: {}) {
+        Log.info("handleNOT(" + JSON.stringify(obj) + ")");
+        //var keyFull: string = Object.keys(obj)[0];
+        this.nextObjectOrArray(obj);
+        var resultArray: Course[] = [];
+        var exists: boolean = false;
+        Log.info("entering for loop in handlNOT");
+        for (var section of this.datasets["courses"]) {
+            var id: number = section.uniqueId;
+            Log.info("entering second for loop in handleNOT");
+            Log.info("tempResults length in handleNOT:" + this.tempResults.length);
+            for (var checkCourse of this.tempResults[0]){
+                if (checkCourse.uniqueId === id) {
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                resultArray.push(section);
+            }
+        }
+        this.tempResults = [];
+        this.tempResults.push(resultArray);
+    }
+
     private handleLT (obj: {}) {
-        var key: string = Object.keys(obj)[0].split[1];
-        var value: number = Object.values(obj)[0];
+        Log.info("handleLT(" + JSON.stringify(obj) + ")");
+        var keyFull: string = Object.keys(obj)[0];
+        var value: number = obj[keyFull];
+        var keyRight = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
-            if (section.getField(key) < value) {
+            if (section.getField(keyRight) < value) {
                 filteredResult.push(section);
+                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + ", avg: " + section.getField("avg"));
             }
         }
         this.tempResults.push(filteredResult);
     }
 
     private handleGT (obj: {}) {
-        var key: string = Object.keys(obj)[0].split[1];
-        var value: number = Object.values(obj)[0];
+        Log.info("handleGT(" + JSON.stringify(obj) + ")");
+        var keyFull: string = Object.keys(obj)[0];
+        var value: number = obj[keyFull];
+        var keyRight = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
-            if (section.getField(key) > value) {
+            if (section.getField(keyRight) > value) {
                 filteredResult.push(section);
+                //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
             }
         }
         this.tempResults.push(filteredResult);
+        Log.info("tempResults length after handleGT:" + this.tempResults.length);
     }
 
     private handleEQ (obj: {}) {
-        var key: string = Object.keys(obj)[0].split[1];
-        var value: number = Object.values(obj)[0];
+        Log.info("handleEQ(" + JSON.stringify(obj) + ")");
+        var keyFull: string = Object.keys(obj)[0];
+        var value: number = obj[keyFull];
+        var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
-            if (section.getField(key) === value) {
+            if (section.getField(keyRight) === value) {
                 filteredResult.push(section);
+                Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
             }
         }
         this.tempResults.push(filteredResult);
+        Log.info("tempResults: ");
+        for (var temp of filteredResult) {
+            Log.info(<string>temp.getField("dept"));
+        }
     }
 
     private handleIS (keyValue: {}) {
 
     }
 
-    private handleNOT (keyValue: {}) {
 
-    }
-
-
-    //TODO(6):
-    // - make other handlers, I think we can continue here for now
-
-    // private handleObject (obj: {}) {
-    //     switch (Object.keys(obj)[0]) {
-    //         case "LT":
-    //             this.handleLT(obj);
-    //             break;
-    //         case "GT":
-    //             this.handleGT(obj);
-    //             break;
-    //         case "EQ":
-    //             this.handleEQ(obj);
-    //             break;
-    //         case "IS":
-    //             this.handleIS(obj);
-    //             break;
-    //         case "NOT":
-    //             this.handleNOT(obj);
-    //             break;
-    //         default:
-    //             //
-    //     }
-    // }
-    //
-    // private handleArray (array: Array) {
-    //     switch (Object.keys(array)[0]) {
-    //         case "AND":
-    //             this.handleAND(array);
-    //             break;
-    //         case "OR":
-    //             this.handleOR(array);
-    //             break;
-    //         default:
-    //             //
-    //     }
-    // }
-
-    private nextObjectOrArray (checkObj: Filter) {
-        // checkObj = Object.values(Object.keys(checkObj)[0])[0];
-        // if (typeof(checkObj) === {}) {
-        //     this.handleObject(checkObj);
-        // } else {
-        //     this.handleArray(checkObj);
-        // }
+    private nextObjectOrArray (checkObj: any) {
+        Log.info("nextObjectOrArray(" + JSON.stringify(checkObj) + ")");
 
         if (checkObj.AND) {
             this.handleAND(checkObj.AND);
@@ -208,7 +193,7 @@ export default class QueryController {
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         //TODO (7): call all the handlers above and do "GET" and "ORDER" and return result
-        this.nextObjectOrArray (<Filter>query.WHERE);
+        this.nextObjectOrArray (query.WHERE);
 
         var finalTable: {}[] = [];
         var wantedKeys: string[] = [];
@@ -219,11 +204,16 @@ export default class QueryController {
         for (var course of this.tempResults[0]) {
             var obj: {} = {};
             for (var key of wantedKeys) {
-                var keyRight: string = key.split[1];
+                var keyRight: string = key.split("_")[1];
                 obj[key] = course.getField(keyRight);
+                //Log.info("Check it out!: " + obj[key]);
             }
             finalTable.push(obj);
         }
+        // for (var temp of finalTable) {
+        //     Log.info(temp.toString());
+        // }
+        Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
         var resp: QueryResponse = {render: query.AS, result: finalTable};
 
