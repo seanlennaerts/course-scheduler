@@ -73,13 +73,13 @@ export default class QueryController {
             Object.keys(whereObject)[0] === "EQ" ||  Object.keys(whereObject)[0] === "IS" ||
             Object.keys(whereObject)[0] === "NOT") {
             var objectKey: string = Object.keys(whereObject)[0];
-            var secondLevel: {} = whereObject[objectKey];
+            var secondLevel: {} = (<any>whereObject)[objectKey];
             Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this object: " + JSON.stringify(secondLevel));
             return that.WHEREhelperObject(secondLevel);
         }
         else if (Object.keys(whereObject)[0] === "AND" || Object.keys(whereObject)[0] === "OR"){
             var objectKey: string = Object.keys(whereObject)[0];
-            var secondLevelArray: {}[] = whereObject[objectKey];
+            var secondLevelArray: {}[] = (<any>whereObject)[objectKey];
             Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevelArray));
             return that.WHEREhelperArray(secondLevelArray);
         } else{
@@ -242,7 +242,7 @@ export default class QueryController {
     private handleLT (obj: {}) {
         Log.info("handleLT(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
-        var value: number = obj[keyFull];
+        var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
@@ -257,7 +257,7 @@ export default class QueryController {
     private handleGT (obj: {}) {
         Log.info("handleGT(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
-        var value: number = obj[keyFull];
+        var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
@@ -273,7 +273,7 @@ export default class QueryController {
     private handleEQ (obj: {}) {
         Log.info("handleEQ(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
-        var value: number = obj[keyFull];
+        var value: number = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         for (var section of this.datasets["courses"]) {
@@ -292,7 +292,7 @@ export default class QueryController {
     private handleIS (obj: {}) {
         Log.info("QueryController:: handleIS(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
-        var value: string = obj[keyFull];
+        var value: string = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
         if (Object.keys(obj)[0] === "instructor"){
@@ -432,14 +432,14 @@ export default class QueryController {
             sortOrder = -1;
             property = property.substr(1);
         }
-        return function (a,b) {
+        return function (a: any,b: any) {
             var result = (a[property] < b[property]) ? -1: (a[property] > b[property]) ? 1 : 0;
             return result * sortOrder;
         }
     }
 
     private dynamicSortNumber(property: string) {
-        return function (a,b) {
+        return function (a: any,b: any) {
             return a[property] - b[property];
         }
 
@@ -466,7 +466,7 @@ export default class QueryController {
             var obj: {} = {};
             for (var key of wantedKeys) {
                 var keyRight: string = key.split("_")[1];
-                obj[key] = course.getField(keyRight);
+                (<any>obj)[key] = course.getField(keyRight);
                 //Log.info("Check it out!: " + obj[key]);
             }
             finalTable.push(obj);
