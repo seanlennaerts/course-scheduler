@@ -207,15 +207,22 @@ export default class QueryController {
 
     private handleNOT (obj: {}) {
         Log.info("handleNOT(" + JSON.stringify(obj) + ")");
+        Log.info("handleNOT(): tempArray size before running inner filter: " + this.tempResults.length);
         //var keyFull: string = Object.keys(obj)[0];
         this.nextObjectOrArray(obj);
+        Log.info("handleNOT(): tempArray size after running inner filter: " + this.tempResults.length);
+        Log.info("handleNOT(): tempArray[0] size: " + this.tempResults[0].length);
+        Log.info("handleNOT(): datasets[courses] size: " + this.datasets["courses"].length);
+
+
         var resultArray: Course[] = [];
         var exists: boolean = false;
-        Log.info("entering for loop in handlNOT");
+        //Log.info("entering for loop in handlNOT");
         for (var section of this.datasets["courses"]) {
+            exists = false;
             var id: number = section.uniqueId;
-            Log.info("entering second for loop in handleNOT");
-            Log.info("tempResults length in handleNOT:" + this.tempResults.length);
+            //Log.info("entering second for loop in handleNOT");
+            //Log.info("tempResults length in handleNOT:" + this.tempResults.length);
             for (var checkCourse of this.tempResults[0]){
                 if (checkCourse.uniqueId === id) {
                     exists = true;
@@ -225,8 +232,8 @@ export default class QueryController {
                 resultArray.push(section);
             }
         }
-        this.tempResults = [];
-        this.tempResults.push(resultArray);
+        //this.tempResults = [];
+        this.tempResults[0] =resultArray;
     }
 
     private handleLT (obj: {}) {
@@ -392,6 +399,9 @@ export default class QueryController {
     }
 
     public query(query: QueryRequest): QueryResponse {
+        for (var i = 0; i < this.tempResults.length; i++) {
+            this.tempResults[i] = [];
+        }
         this.tempResults = [];
         //stringify turns JS object into JSON string
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
@@ -416,10 +426,12 @@ export default class QueryController {
         }
 
         if (query.ORDER) { //if is important because optional
-            if (typeof(query.ORDER) === "number") {
-                finalTable.sort(this.dynamicSortNumber(query.ORDER));
-            } else {
+            if (typeof(query.ORDER) === "string") {
                 finalTable.sort(this.dynamicSort(query.ORDER));
+
+            } else {
+                finalTable.sort(this.dynamicSortNumber(query.ORDER));
+
             }
         }
 

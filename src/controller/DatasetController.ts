@@ -136,6 +136,7 @@ export default class DatasetController {
     }
 
     public readFile(zip: JSZip, path: string): Promise<any> {
+        Log.info("readFile() start");
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
@@ -146,13 +147,14 @@ export default class DatasetController {
                 //     Log.info("readFile(): " + path + " has no sections!")
                 //     countMissingSections++;
                 // }
+                if (!root.result) {
+                    Log.info("readFile(): not valid zip");
+                    throw new Error("readFile(): not valid zip");
+                }
 
                 for (var i = 0; i < root.result.length; i++) {
 
                     //check for missing fields
-                    // if (!dept in result && !id in result) {
-                    //     Log.error("readFile(): can't proceed missing fields");
-                    // }
 
                     var dept: string = root.result[i].Subject;
                     // Log.info("dept: " + dept);
@@ -270,6 +272,9 @@ export default class DatasetController {
                     }
                     Log.info("process(): all readFile promises are ready!");
                     Log.info("process(): there are " + promises.length + " files");
+                    if (promises.length < 1) {
+                        throw new Error("process(): Not valid dataset");
+                    }
                     return Promise.all(promises);
 
                 }).then(function(result: string[]) { //array of promises
