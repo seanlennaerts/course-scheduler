@@ -90,7 +90,12 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): number {
         let that = this;
-        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length >= 3) {
+        if (typeof query !== 'undefined' && query !== null) {
+            if (query.GET.length >= 1){
+                Log.info("there are GET elements");
+            }
+            Log.info(JSON.stringify(query.WHERE));
+            Log.info(query.AS);
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
                 var GETelements: string[] = query.GET;
@@ -147,9 +152,6 @@ export default class QueryController {
             return 400;
         }
         Log.info("QueryController :: isValid(..) - query is either undefined, null, or keys are less than 3" );
-        for (var key in Object.keys(query).length){
-            Log.info("the keys are: " + key);
-        }
         return 400;
     }
 
