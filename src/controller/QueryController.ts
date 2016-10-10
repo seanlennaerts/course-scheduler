@@ -57,6 +57,9 @@ export default class QueryController {
             Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key");
             return 400;
         }
+        if (Object.keys(whereObject)[0].split("_")[1] !== "courses"){
+            return 400;
+        }
         // section 2
         // check if the object key is one of the permitted course keys
         if (Object.keys(whereObject)[0].split("_")[1] === "dept" || Object.keys(whereObject)[0].split("_")[1]  === "id" ||
@@ -90,12 +93,13 @@ export default class QueryController {
 
     public isValid(query: QueryRequest): number {
         let that = this;
-        if (typeof query !== 'undefined' && query !== null) {
-            if (query.GET.length >= 1){
+        if (typeof query !== 'undefined' && query !== null && Object.keys(query).length >= 3) {
+            /*if (query.GET.length >= 1){
                 Log.info("there are GET elements");
             }
             Log.info(JSON.stringify(query.WHERE));
             Log.info(query.AS);
+            */
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
                 var GETelements: string[] = query.GET;
