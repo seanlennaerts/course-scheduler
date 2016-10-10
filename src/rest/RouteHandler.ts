@@ -11,6 +11,7 @@ import QueryController from '../controller/QueryController';
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
 import {Route} from "restify";
+import Course from "../model/Course";
 
 export default class RouteHandler {
 
@@ -57,6 +58,7 @@ export default class RouteHandler {
                         res.json(result, {success: "ID is not new and was added to dataset succesfully!"});
                     } else {
                         res.json(200, {success: result});
+                        Log.info("RouteHandler :: VALID QUERY!! :D");
                     }
                 }).catch(function (err: Error) {
                     Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
@@ -74,16 +76,21 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
+            var id: string = req.params.id;
             let query: QueryRequest = req.params;
             let datasets: Datasets = RouteHandler.datasetController.getDatasets();
             let controller = new QueryController(datasets);
             let isValid = controller.isValid(query);
+            Log.info("RouteHandler :: postQuery(..) - isValid is now:" + isValid);
 
-            if (isValid === true) {
+            if (isValid === 200) {
                 let result = controller.query(query);
                 res.json(200, result);
             } else {
-                res.json(400, {status: 'invalid query'});
+                if (isValid === 424){
+                    res.json(424, "missing " + controller.returnWrongIDs());
+                }
+                res.json(400, {error: 'invalid query'});
             }
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
