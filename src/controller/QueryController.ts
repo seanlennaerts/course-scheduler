@@ -14,7 +14,7 @@ export interface QueryRequest {
 }
 
 export interface QueryResponse {
-    render: string
+    render: string;
     result: {}[];
 }
 
@@ -487,8 +487,8 @@ export default class QueryController {
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
-        var resp: QueryResponse = {render: query.AS, result: finalTable};
+        //var resp: QueryResponse = {render: query.AS, result: finalTable};
 
-        return resp;
+        return {render: query.AS, result: finalTable};
     }
 }
