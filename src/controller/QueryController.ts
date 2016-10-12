@@ -211,34 +211,44 @@ export default class QueryController {
 
 
     private handleNOT (obj: {}) {
-        Log.info("handleNOT(" + JSON.stringify(obj) + ")");
-        Log.info("handleNOT(): tempArray size before running inner filter: " + this.tempResults.length);
+        //Log.info("handleNOT(" + JSON.stringify(obj) + ")");
+        //Log.info("handleNOT(): tempArray size before running inner filter: " + this.tempResults.length);
         //var keyFull: string = Object.keys(obj)[0];
         this.nextObjectOrArray(obj);
-        Log.info("handleNOT(): tempArray size after running inner filter: " + this.tempResults.length);
-        Log.info("handleNOT(): tempArray[0] size: " + this.tempResults[0].length);
-        Log.info("handleNOT(): datasets[courses] size: " + this.datasets["courses"].length);
+        //Log.info("handleNOT(): tempArray size after running inner filter: " + this.tempResults.length);
+        //Log.info("handleNOT(): tempArray[0] size: " + this.tempResults[0].length);
+        //Log.info("handleNOT(): datasets[courses] size: " + this.datasets["courses"].length);
 
 
-        var resultArray: Course[] = [];
-        var exists: boolean = false;
+        //var resultArray: Course[] = [];
+        //var exists: boolean = false;
         //Log.info("entering for loop in handlNOT");
-        for (var section of this.datasets["courses"]) {
-            exists = false;
-            var id: number = section.uniqueId;
-            //Log.info("entering second for loop in handleNOT");
-            //Log.info("tempResults length in handleNOT:" + this.tempResults.length);
-            for (var checkCourse of this.tempResults[0]){
-                if (checkCourse.uniqueId === id) {
-                    exists = true;
+        // for (var section of this.datasets["courses"]) {
+        //     exists = false;
+        //     var id: number = section.uniqueId;
+        //     //Log.info("entering second for loop in handleNOT");
+        //     //Log.info("tempResults length in handleNOT:" + this.tempResults.length);
+        //     for (var checkCourse of this.tempResults[0]){
+        //         if (checkCourse.uniqueId === id) {
+        //             exists = true;
+        //         }
+        //     }
+        //     if (!exists) {
+        //         resultArray.push(section);
+        //     }
+        // }
+        var that = this;
+
+        that.tempResults[0].filter(function something(course: Course) {
+            for (var mCourse of that.datasets["courses"]) {
+                if (mCourse.uniqueId === course.uniqueId) {
+                    return true;
                 }
             }
-            if (!exists) {
-                resultArray.push(section);
-            }
-        }
+            return false;
+        });
         //this.tempResults = [];
-        this.tempResults[0] =resultArray;
+        //this.tempResults[0] =resultArray;
     }
 
     private handleLT (obj: {}) {
