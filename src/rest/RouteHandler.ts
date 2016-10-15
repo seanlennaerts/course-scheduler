@@ -4,18 +4,16 @@
 import restify = require('restify');
 import fs = require('fs');
 
-import DatasetController from '../controller/DatasetController';
 import {Datasets} from '../controller/DatasetController';
 import QueryController from '../controller/QueryController';
-
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
-import {Route} from "restify";
-import Course from "../model/Course";
+import InsightFacade from "../controller/InsightFacade";
 
 export default class RouteHandler {
 
-    private static datasetController = new DatasetController();
+    //private static datasetController = new DatasetController();
+    private static insightFacade = new InsightFacade();
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RoutHandler::getHomepage(..)');
@@ -49,23 +47,11 @@ export default class RouteHandler {
                 req.body = concated.toString('base64');
                 Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
 
-                let controller = RouteHandler.datasetController;
-                controller.process(id, req.body).then(function (result) {
-                    Log.trace('RouteHandler::postDataset(..) - processed');
-                    if (result === 204) {
-                        res.json(result, {success: "ID is new and was added to dataset succesfully!"});
-                    } else if (result === 201) {
-                        res.json(result, {success: "ID is not new and was added to dataset succesfully!"});
-                    } else {
-                        res.json(200, {success: result});
-                        Log.info("RouteHandler :: VALID QUERY!! :D");
-                    }
-                }).catch(function (err: Error) {
-                    Log.trace('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-                    res.json(400, {err: err.message});
+                RouteHandler.insightFacade.addDataset(req.params.id, req.body).then(function(result){
+                    res.json(result.code, result.body);
                 });
-            });
 
+            });
         } catch (err) {
             Log.error('RouteHandler::postDataset(..) - ERROR: ' + err.message);
             res.send(400, {err: err.message});
@@ -76,31 +62,22 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         try {
-            var id: string = req.params.id;
             let query: QueryRequest = req.params;
-            let datasets: Datasets = RouteHandler.datasetController.getDatasets();
-            let controller = new QueryController(datasets);
-            let isValid = controller.isValid(query);
-            Log.info("RouteHandler :: postQuery(..) - isValid is now:" + isValid);
-
-            if (isValid === 200) {
-                let result = controller.query(query);
-                res.json(200, result);
-            } else if (isValid === 424) {
-                res.json(424, "missing " + controller.returnWrongIDs());
-            } else {
-                res.json(400, {error: 'invalid query'})
-            };
+            RouteHandler.insightFacade.performQuery(query).then(function(result){
+                res.json(result.code, result.body);
+            });
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
-            res.send(403);
+            res.json(403, err);
         }
         return next();
     }
 
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         try {
-            RouteHandler.datasetController.deleteDataset(req.params.id);
+            RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){
+
+            });
             res.send(204);
 
         } catch (err) {

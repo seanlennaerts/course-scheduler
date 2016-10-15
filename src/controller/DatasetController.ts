@@ -126,13 +126,15 @@ export default class DatasetController {
         }
     }
 
-    public deleteDataset(id: string): any {
+    public deleteDataset(id: string): boolean{
         if (id in this.datasets) {
-            //this.datasets[id] = []; //better way to delete??
             delete this.datasets[id];
+            fs.unlinkSync("./data/" + id + ".json");
+            Log.info("deleteDataset(): deleted " + id + " succesfully!");
+            return true;
+        } else {
+            return false;
         }
-        fs.unlinkSync("./data/" + id + ".json");
-        Log.info("deleteDataset(): deleted " + id + " succesfully!");
     }
 
     public readFile(zip: JSZip, path: string): Promise<any> {
