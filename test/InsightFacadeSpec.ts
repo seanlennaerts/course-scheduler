@@ -18,11 +18,11 @@ describe("InsightFacade", function () {
     before(function () {
         Log.info('InsightController::before() - start');
         // this zip might be in a different spot for you
-        zipFileContents = new Buffer(fs.readFileSync('310courses.1.0.zip')).toString('base64');
+        zipFileContents = new Buffer(fs.readFileSync('courses.zip')).toString('base64');
         try {
             // what you delete here is going to depend on your impl, just make sure
             // all of your temporary files and directories are deleted
-            fs.unlinkSync('./id.json');
+            fs.unlinkSync("./data/courses.json");
         } catch (err) {
             // silently fail, but don't crash; this is fine
             Log.warn('InsightController::before() - id.json not removed (probably not present)');

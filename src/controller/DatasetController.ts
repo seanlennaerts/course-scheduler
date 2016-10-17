@@ -138,7 +138,6 @@ export default class DatasetController {
     }
 
     public readFile(zip: JSZip, path: string): Promise<any> {
-        Log.info("readFile() start");
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
