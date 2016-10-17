@@ -33,7 +33,7 @@ export default class QueryController {
     }
 
     public returnWrongIDs(): string[]{
-        return this.wrongDatasetIDs
+        return this.wrongDatasetIDs;
     }
 
     private WHEREhelperArray(array:{}[]): number {

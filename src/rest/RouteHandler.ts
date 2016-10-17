@@ -4,15 +4,12 @@
 import restify = require('restify');
 import fs = require('fs');
 
-import {Datasets} from '../controller/DatasetController';
-import QueryController from '../controller/QueryController';
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
 import InsightFacade from "../controller/InsightFacade";
 
 export default class RouteHandler {
 
-    //private static datasetController = new DatasetController();
     private static insightFacade = new InsightFacade();
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
@@ -68,7 +65,7 @@ export default class RouteHandler {
             });
         } catch (err) {
             Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
-            res.json(403, err);
+            res.send(403);
         }
         return next();
     }
@@ -76,13 +73,11 @@ export default class RouteHandler {
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         try {
             RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){
-
+                res.send(result.code);
             });
-            res.send(204);
-
         } catch (err) {
-            Log.error("deleteDataset(): ERROR " + err);
-            res.send(404);
+            Log.error("RouteHandler::deleteDataset(..) - ERROR: " + err);
+            res.send(403);
         }
         return next();
     }

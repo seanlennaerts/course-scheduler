@@ -24,42 +24,45 @@ export default class InsightFacade implements IInsightFacade {
         InsightFacade.queryController = new QueryController(datasets);
     }
 
-
     public addDataset(id: string, content: string): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject){
             let controller = InsightFacade.datasetController;
-            controller.process(id, content).then(function (result) {
+            controller.process(id, content).then(function (result: number) {
                 Log.trace('InsightFacade::addDataset(..) - processed');
-                if (result === 204) {
-                    fulfill({code: 204, body:{}});
-                    // res.json(result, {success: "ID is new and was added to dataset succesfully!"});
-                } else if (result === 201) {
-                    fulfill({code: 201, body:{}});
-                    //res.json(result, {success: "ID is not new and was added to dataset succesfully!"});
-                } else {
-                    fulfill({code: 200, body:{}});
-                    //res.json(200, {success: result});
-                    Log.info("InsightFacade::addDataset VALID QUERY!! :D");
+                switch (result) {
+                    case 204:
+                        fulfill({code: 204});
+                        break;
+                    case 201:
+                        fulfill({code: 201});
+                        break;
+                    default:
+                        //
                 }
             }).catch(function (err: Error) {
                 Log.trace('InsightFacade::addDataset(..) - ERROR: ' + err.message);
-                reject({code: 400, err: err.message})
+                reject({code: 400, body: {error: err.message}})
                 //res.json(400, {err: err.message});
             });
         });
-        // TODO#1
     }
+
     public removeDataset(id: string): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject){
-            var successfulDelete: boolean = InsightFacade.datasetController.deleteDataset(id);
-            if (successfulDelete){
-                fulfill({code: 204, body:{}});
-            } else{
-                reject({code: 404, body:{}});
+            let result = InsightFacade.datasetController.deleteDataset(id);
+            switch (result) {
+                case 204:
+                    fulfill({code: 204});
+                    break;
+                case 404:
+                    reject({code: 404});
+                    break;
+                default:
+                   //
             }
         });
-        // TODO#2
     }
+
     public performQuery(query: QueryRequest): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject){
             let datasets: Datasets = InsightFacade.datasetController.getDatasets();
@@ -67,18 +70,17 @@ export default class InsightFacade implements IInsightFacade {
             let isValid = controller.isValid(query);
             Log.info("InsightFacade :: performQuery(..) - isValid is now:" + isValid);
 
-            if (isValid === 200) {
-                let result = controller.query(query);
-                fulfill(200, result);
-            } else if (isValid === 424) {
-                reject(424, "missing " + controller.returnWrongIDs());
-            } else {
-                reject(400, {error: 'invalid query'})
-            };
+            switch (isValid) {
+                case 200:
+                    let result = controller.query(query);
+                    fulfill({code: 200, body: result});
+                    break;
+                case 424:
+                    reject({code: 424, body: {missing: controller.returnWrongIDs()}});
+                    break;
+                default:
+                    reject({code: 400, body: {error: "invalid query"}});
+            }
         });
-        // TODO#3
     }
-
-
-
 }

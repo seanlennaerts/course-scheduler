@@ -126,14 +126,14 @@ export default class DatasetController {
         }
     }
 
-    public deleteDataset(id: string): boolean{
+    public deleteDataset(id: string): number{
         if (id in this.datasets) {
             delete this.datasets[id];
             fs.unlinkSync("./data/" + id + ".json");
             Log.info("deleteDataset(): deleted " + id + " succesfully!");
-            return true;
+            return 204;
         } else {
-            return false;
+            return 404;
         }
     }
 
