@@ -15,13 +15,14 @@ import Log from "../Util";
 
 export default class InsightFacade implements IInsightFacade {
 
-    private static datasetController = new DatasetController;
-    private static queryController: QueryController = null;
+    private static datasetController: DatasetController = new DatasetController;
+    // private static queryController: QueryController = null;
 
     constructor(){
         Log.info("InsightFacade::init() ");
-        let datasets = InsightFacade.datasetController.getDatasets();
-        InsightFacade.queryController = new QueryController(datasets);
+        //InsightFacade.datasetController = new DatasetController;
+        //let datasets = InsightFacade.datasetController.getDatasets(); // removed this line because it makes PUT 204 impossible to test -S
+        //InsightFacade.queryController = new QueryController(datasets);
     }
 
     public addDataset(id: string, content: string): Promise<InsightResponse>{

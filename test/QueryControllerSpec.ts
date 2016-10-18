@@ -2,13 +2,28 @@
  * Created by rtholmes on 2016-10-31.
  */
 
+import fs = require('fs');
 import {Datasets} from "../src/controller/DatasetController";
 import QueryController from "../src/controller/QueryController";
 import {QueryRequest} from "../src/controller/QueryController";
 import Log from "../src/Util";
 
 import {expect} from 'chai';
+import InsightFacade from "../src/controller/InsightFacade";
 describe("QueryController", function () {
+
+    var zipFileContents: string = null;
+    var facade: InsightFacade = new InsightFacade();
+    before(function () {
+        zipFileContents = new Buffer(fs.readFileSync('courses.zip')).toString('base64');
+        try {
+            fs.unlinkSync("./data/courses.json");
+        } catch (err) {
+            Log.warn('InsightController::before() - courses.json not removed (probably not present)');
+        }
+        facade = new InsightFacade();
+        facade.addDataset("courses", zipFileContents);
+    });
 
     beforeEach(function () {
     });
@@ -17,7 +32,7 @@ describe("QueryController", function () {
     });
 
     it("Should be able to validate a valid query", function () {
-        // NOTE: this is not actually a valid query for D1
+        // NOTE: this is not actually a valid qf`uery for D1
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_avg"],
             "WHERE": {"GT": {"courses_avg": 90}},
@@ -28,7 +43,7 @@ describe("QueryController", function () {
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.equal(true);
+        expect(isValid).to.equal(200);
     });
 
     it("Should be able to invalidate an invalid query", function () {
