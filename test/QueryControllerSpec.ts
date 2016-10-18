@@ -265,19 +265,6 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    it("Should be able to invalidate an invalid query - typo in ORDER", function () {
-        let query: QueryRequest = {
-            "GET": ["courses_dept", "courses_avg"],
-            "WHERE" : {"GT" : {"courses_avg" : 90}},
-            "ODER" : "course_avg",
-            "AS" : "TABLE"
-        };
-        let dataset: Datasets = {};
-        let controller = new QueryController(dataset);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(400);
-    });
 
     it("Should be able to invalidate an invalid query - wrong field in WHERE", function () {
         let query: QueryRequest = {
