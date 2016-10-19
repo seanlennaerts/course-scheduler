@@ -283,8 +283,10 @@ describe("QueryController", function () {
         let dataset: Datasets = {something: []}; // should leave datasets empty, or put different dataset -S
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
+        let missingIDs = controller.returnWrongIDs();
 
         expect(isValid).to.equal(424);
+        expect(missingIDs[0]).to.equal("course");
     });
 
     it("Should be able to invalidate an invalid query - key in GET not valid", function () {
@@ -328,6 +330,53 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(400);
     });
+
+    it("Valid query - with NOT", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "OR": [
+                    {"AND": [
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_instructor": "*gregor*"}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid query - BLAH", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "OR": [
+                    {"AND": [
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_instructor": "*gregor*"}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+
+    });
+
+
 
 
 });
