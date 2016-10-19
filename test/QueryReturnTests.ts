@@ -14,15 +14,12 @@ import {InsightResponse} from "../src/controller/IInsightFacade";
 
 describe("QueryReturns", function () {
 
-    //var zipFileContents: string = null;
     var facade: InsightFacade = null;
     before(function () {
-        //zipFileContents = new Buffer(fs.readFileSync('coursesCUSTOM.zip')).toString("base64");
     });
 
     beforeEach(function () {
         facade = new InsightFacade();
-        // return facade.addDataset("courses", zipFileContents);
     });
 
     afterEach(function () {
@@ -36,15 +33,14 @@ describe("QueryReturns", function () {
             "AS": "TABLE"
         };
         return facade.performQuery(query).then(function (response: InsightResponse) {
-            Log.info("GOT HERE!");
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
             Log.info("Size of result array should be 2: " + result.length);
             Log.info("GOT HERE?");
-            expect(result).to.equal([{courses_dept: "cpsc"}, {courses_dept: "cpsc"}])
+            let test: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
+            expect(result).to.deep.equal(test);
         }).catch(function (response: InsightResponse) {
             expect.fail("Something went wrong!");
         });
-
     });
 });
