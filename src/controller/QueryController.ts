@@ -53,8 +53,8 @@ export default class QueryController {
     private WHEREhelperObject(whereObject: {}): number {
         let that = this;
         // section 1
-        if (Object.keys(whereObject).length > 1){
-            Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key");
+        if (Object.keys(whereObject).length > 1 || Object.keys(whereObject).length === 0 ){
+            Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
             return 400;
         }
         // section 2
@@ -88,71 +88,115 @@ export default class QueryController {
         }
     }
 
+    public isValidOrderHandler(orderString: string): number {
+        Log.info("QueryController :: isValidOrderHandler(..) - ORDER key is:" + orderString);
+        if (orderString.length === 0){
+            return 400;
+        } if (!(orderString.includes("_"))){
+            return 400;
+        } else {
+            // it used to be: (this.queryKeys.indexOf(orderString.split("_")[1], 0) == -1)
+            if (!(orderString.split("_")[0] in this.datasets)){
+                this.wrongDatasetIDs[0] = orderString.split("_")[0];
+                Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
+                return 424;
+            }
+            if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
+                Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
+                return 400;
+            } else {
+                Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
+                return 200;
+            }
+        }
+    }
+
+    public isValidAsHandler(asString: string): number{
+        if (asString.length === 0) {
+            return 400;
+        }
+        if (!(asString == "TABLE")) {
+                Log.info("QueryController :: isValidAsHandler(..) - AS is other than 'TABLE'");
+                return 400;
+        } else {
+            Log.info("QueryController :: isValidAsHandler(..) - AS is'TABLE' :) ");
+            return 200;
+        }
+    }
+
+    public isValidGetHandler(getArray:string[]): number{
+        if (getArray.length <= 0) {
+            return 400;
+        } else {
+            for (var i = 0; i < getArray.length; i++) {
+                if (!(getArray[i].includes("_"))){
+                    return 400;
+                }
+                var GETelement: string[] = getArray[i].split("_");
+                var id: string = GETelement[0];
+                Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
+                if (!(id in this.datasets)) {
+                    this.wrongDatasetIDs.push(id);
+                    Log.info("QueryController :: isValidGetHandler(..) - 424 error: " + id + " hasn't been put");
+                    Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
+                    return (424);
+                } else {
+                    Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
+                    var datasetField = GETelement[1];
+                    Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
+                    if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
+                        datasetField === "instructor" || datasetField === "title" ||
+                        datasetField === "pass" || datasetField === "fail" || datasetField === "audit")) {
+                        Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+                        return 400;
+                    } else {
+                        Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                        this.queryKeys.push(datasetField);
+                    }
+                }
+            }
+            return 200;
+        }
+    }
+
     public isValid(query: QueryRequest): number {
         let that = this;
         if (typeof query !== 'undefined' && query !== null ) {
-            /*if (query.GET.length >= 1){
-                Log.info("there are GET elements");
-            }
-            Log.info(JSON.stringify(query.WHERE));
-            Log.info(query.AS);
-            */
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
                 var GETelements: string[] = query.GET;
-                Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements));
-                if (GETelements.length > 0) {
-                    for (var i = 0; i < GETelements.length; i++) {
-                        var GETelement: string[] = GETelements[i].split("_");
-                        var id: string = GETelement[0];
-                        Log.info("QueryController :: isValid(..) - id is: " + id);
-                        if (!(id in that.datasets)) {
-                            that.wrongDatasetIDs.push(id);
-                            Log.info("QueryController :: isValid(..) - about to return 424 error: " + id + " hasn't been put");
-                            Log.info("QueryController :: isValid(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
-                            return (424);
-                        } else {
-                            Log.info("QueryController :: isValid(..) - id has been put in datasets");
-                            var datasetField = GETelement[1];
-                            Log.info("QueryController :: isValid(..) - datasetField is: " + datasetField);
-                            if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
-                                datasetField === "instructor" || datasetField === "title" ||
-                                datasetField === "pass" || datasetField === "fail" || datasetField === "audit")) {
-                                Log.info("QueryController :: isValid(..) - wrong field in query submitted ");
-                                return 400;
-                            } else {
-                                Log.info("QueryController :: isValid(..) - pushing datasetField: " + datasetField);
-                                this.queryKeys.push(datasetField);
-                            }
+                Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
+                var GETresult = this.isValidGetHandler(GETelements);
+                if (GETresult === 200){
+                    var ASresult = this.isValidAsHandler(query.AS);
+                    if (ASresult === 200){
+                        // ORDER is optional
+                        if (query.ORDER === ""){
+                            return 400;
                         }
-                    }
-                }
-                // AS part of query
-                var as = query.AS;
-                if (!(as == "TABLE")) {
-                    Log.info("QueryController :: isValid(..) - AS is other than 'TABLE'");
-                    return 400;
-                }
-                Log.info("QueryController :: isValid(..) - AS is'TABLE' :) ");
-                // ORDER part of query -> OPTIONAL
-                if (query.ORDER) {
-                    Log.info("QueryController :: isValid(..) - ORDER key is:" + query.ORDER);
-                    if (this.queryKeys.indexOf(query.ORDER.split("_")[1], 0) == -1) {
-                        Log.info("QueryController :: isValid(..) - " + query.ORDER + " key is not included in GET keys");
-                        return 400;
+                        if (query.ORDER){
+                            var ORDERresult = this.isValidOrderHandler(query.ORDER);
+                            Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                            if(ORDERresult === 200) {
+                                return this.WHEREhelperObject(query.WHERE);
+                            } else {
+                                return ORDERresult;
+                            }
+                        } else {
+                            Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
+                            return this.WHEREhelperObject(query.WHERE);
+                        }
                     } else {
-                        Log.info("QueryController :: isValid(..) - there is ORDER key included in GET keys, going to WHERE helper ");
-                        return this.WHEREhelperObject(query.WHERE);
+                        return ASresult;
                     }
                 } else {
-                    Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
-                    return this.WHEREhelperObject(query.WHERE);
+                    return GETresult;
                 }
             }
             Log.info("QueryController :: isValid(..) - query doesn't include GET, WHERE, AS");
             return 400;
         }
-        Log.info("QueryController :: isValid(..) - query is either undefined, null, or keys are less than 3" );
+        Log.info("QueryController :: isValid(..) - query is either undefined, null" );
         return 400;
     }
 
