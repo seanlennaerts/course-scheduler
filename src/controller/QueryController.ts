@@ -42,10 +42,10 @@ export default class QueryController {
             resultNumbers.push(this.WHEREhelperObject(i));
         }
         if (resultNumbers.indexOf(400,0) === -1){
-            Log.info("QueryController :: WHEREhelperArray(..) - Array of objects all return 200!");
+            //Log.info("QueryController :: WHEREhelperArray(..) - Array of objects all return 200!");
             return 200;
         }else{
-            Log.info("QueryController :: WHEREhelperArray(..) - At least one object in the array returns 400");
+            //Log.info("QueryController :: WHEREhelperArray(..) - At least one object in the array returns 400");
             return 400;
         }
     }
@@ -54,7 +54,7 @@ export default class QueryController {
         let that = this;
         // section 1
         if (Object.keys(whereObject).length > 1 || Object.keys(whereObject).length === 0 ){
-            Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
+            //Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
             return 400;
         }
         // section 2
@@ -63,7 +63,7 @@ export default class QueryController {
                 Object.keys(whereObject)[0].split("_")[1]  === "avg" || Object.keys(whereObject)[0].split("_")[1]  === "instructor" ||
                 Object.keys(whereObject)[0].split("_")[1]  === "title" || Object.keys(whereObject)[0].split("_")[1]  === "pass" ||
                 Object.keys(whereObject)[0].split("_")[1]  === "fail"){
-            Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
+            //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
             return 200;
         }
         // section 3
@@ -74,22 +74,22 @@ export default class QueryController {
             Object.keys(whereObject)[0] === "NOT") {
             var objectKey: string = Object.keys(whereObject)[0];
             var secondLevel: {} = (<any>whereObject)[objectKey];
-            Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this object: " + JSON.stringify(secondLevel));
+            //Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this object: " + JSON.stringify(secondLevel));
             return that.WHEREhelperObject(secondLevel);
         }
         else if (Object.keys(whereObject)[0] === "AND" || Object.keys(whereObject)[0] === "OR"){
             var objectKey: string = Object.keys(whereObject)[0];
             var secondLevelArray: {}[] = (<any>whereObject)[objectKey];
-            Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevelArray));
+            //Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevelArray));
             return that.WHEREhelperArray(secondLevelArray);
         } else{
-            Log.info("QueryController :: WHEREhelperObject(..) - about to return errors, these object keys are not proper operators: " + Object.keys(whereObject)[0]);
+            //Log.info("QueryController :: WHEREhelperObject(..) - about to return errors, these object keys are not proper operators: " + Object.keys(whereObject)[0]);
             return 400;
         }
     }
 
     public isValidOrderHandler(orderString: string): number {
-        Log.info("QueryController :: isValidOrderHandler(..) - ORDER key is:" + orderString);
+        //Log.info("QueryController :: isValidOrderHandler(..) - ORDER key is:" + orderString);
         if (orderString.length === 0){
             return 400;
         } if (!(orderString.includes("_"))){
@@ -98,14 +98,14 @@ export default class QueryController {
             // it used to be: (this.queryKeys.indexOf(orderString.split("_")[1], 0) == -1)
             if (!(orderString.split("_")[0] in this.datasets)){
                 this.wrongDatasetIDs[0] = orderString.split("_")[0];
-                Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
+                //Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
                 return 424;
             }
             if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
-                Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
+                //Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
                 return 400;
             } else {
-                Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
+                //Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
                 return 200;
             }
         }
@@ -116,10 +116,10 @@ export default class QueryController {
             return 400;
         }
         if (!(asString == "TABLE")) {
-                Log.info("QueryController :: isValidAsHandler(..) - AS is other than 'TABLE'");
-                return 400;
+            //Log.info("QueryController :: isValidAsHandler(..) - AS is other than 'TABLE'");
+            return 400;
         } else {
-            Log.info("QueryController :: isValidAsHandler(..) - AS is'TABLE' :) ");
+            //Log.info("QueryController :: isValidAsHandler(..) - AS is'TABLE' :) ");
             return 200;
         }
     }
@@ -134,23 +134,23 @@ export default class QueryController {
                 }
                 var GETelement: string[] = getArray[i].split("_");
                 var id: string = GETelement[0];
-                Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
+                //Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
                 if (!(id in this.datasets)) {
                     this.wrongDatasetIDs.push(id);
-                    Log.info("QueryController :: isValidGetHandler(..) - 424 error: " + id + " hasn't been put");
-                    Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
+                    //Log.info("QueryController :: isValidGetHandler(..) - 424 error: " + id + " hasn't been put");
+                    //Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
                     return (424);
                 } else {
-                    Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
+                    //Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
                     var datasetField = GETelement[1];
-                    Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
+                    //Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
                     if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
                         datasetField === "instructor" || datasetField === "title" ||
                         datasetField === "pass" || datasetField === "fail" || datasetField === "audit")) {
-                        Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+                        //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
                         return 400;
                     } else {
-                        Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                        //Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
                         this.queryKeys.push(datasetField);
                     }
                 }
@@ -165,7 +165,7 @@ export default class QueryController {
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
                 var GETelements: string[] = query.GET;
-                Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
+               // Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
                 var GETresult = this.isValidGetHandler(GETelements);
                 if (GETresult === 200){
                     var ASresult = this.isValidAsHandler(query.AS);
@@ -176,14 +176,14 @@ export default class QueryController {
                         }
                         if (query.ORDER){
                             var ORDERresult = this.isValidOrderHandler(query.ORDER);
-                            Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                            //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
                             if(ORDERresult === 200) {
                                 return this.WHEREhelperObject(query.WHERE);
                             } else {
                                 return ORDERresult;
                             }
                         } else {
-                            Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
+                            //Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
                             return this.WHEREhelperObject(query.WHERE);
                         }
                     } else {
@@ -193,10 +193,10 @@ export default class QueryController {
                     return GETresult;
                 }
             }
-            Log.info("QueryController :: isValid(..) - query doesn't include GET, WHERE, AS");
+            //Log.info("QueryController :: isValid(..) - query doesn't include GET, WHERE, AS");
             return 400;
         }
-        Log.info("QueryController :: isValid(..) - query is either undefined, null" );
+        //Log.info("QueryController :: isValid(..) - query is either undefined, null" );
         return 400;
     }
 
@@ -359,25 +359,25 @@ export default class QueryController {
 
         // case4: value = *adhe*
         if (value.indexOf("*") == 0 && value.lastIndexOf("*") == (value.length - 1)){
-            Log.info("it is case4");
+           // Log.info("it is case4");
             var trimmedStr: string = value.substr(1,(value.length-2));
-            Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
+            //Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
                 if(keyRight === "instructor") {
-                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s in strings){
                         //Log.info(strings[s]);
                         if (strings[s].includes(trimmedStr)){
-                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                           // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
                     }
                 } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
-                    Log.info("str has: " + str);
+                   // Log.info("str has: " + str);
                     if (str.includes(trimmedStr)){
-                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                       // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
                         filteredResult.push(section);
                     }
                 }
@@ -385,24 +385,24 @@ export default class QueryController {
         }
         // case1: value = *adhe
         else if (value.indexOf("*") == 0){
-            Log.info("it is case1");
+            //Log.info("it is case1");
             var trimmedStr: string = value.substr(1, (value.length - 1));
-            Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
+            //Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
                 if(keyRight === "instructor") {
-                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s in strings){
                         //Log.info(strings[s]);
                         if (strings[s].endsWith(trimmedStr)){
-                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                          //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
                     }
                 } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
                     if (str.endsWith(trimmedStr)){
-                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        //Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
                         filteredResult.push(section);
                     }
                 }
@@ -411,44 +411,44 @@ export default class QueryController {
         // case3: value = adhe*
         else if (value.lastIndexOf("*") == value.length - 1){
             var trimmedStr: string = value.split("*")[0];
-            Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
+            //Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
                 if(keyRight === "instructor") {
-                    Log.info("It should be an instructor that we are looking for: " + trimmedStr);
+                    //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s in strings){
                         //Log.info(strings[s]);
                         if (strings[s].startsWith(trimmedStr)){
-                            Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                          //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
                     }
                 } else if (typeof section.getField(keyRight) === "string") {
                     var str: string = <string>section.getField(keyRight);
-                    Log.info("str has: " + str);
+                    //Log.info("str has: " + str);
                     if (str.startsWith(trimmedStr)){
-                        Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                        //Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
                         filteredResult.push(section);
                     }
                 }
             }
         } else {
             // case2: value = adhe
-            Log.info("it is case2: value is: " + value);
+           // Log.info("it is case2: value is: " + value);
             if (!(value.includes("*"))) {
                 for (var section of this.datasets["courses"]) {
                     if(keyRight === "instructor") {
-                        Log.info("It should be an instructor that we are looking for: " + value);
+                        //Log.info("It should be an instructor that we are looking for: " + value);
                         var strings: string[] = section.getInstructors();
                         for(var s in strings){
                             //Log.info(strings[s]);
                             if (strings[s] === value){
-                                Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                               // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                                 filteredResult.push(section);
                             }
                         }
                     } else if (section.getField(keyRight) === value) {
-                        Log.info("handleIS() pushed " + section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
+                       // Log.info("handleIS() pushed " + section.getField("dept") + section.getField("id") + " since it has a field containing" + trimmedStr);
                         filteredResult.push(section);
                     }
                 }
