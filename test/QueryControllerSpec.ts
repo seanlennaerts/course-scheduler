@@ -30,7 +30,7 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
-    it("Invalid query and dataset exists, should return 400", function () {
+    it("Invalid: null query and dataset exists, should return 400", function () {
         let query: any = null;
         let dataset: Datasets = {courses: []};
         let controller = new QueryController(dataset);
@@ -55,15 +55,6 @@ describe("QueryController", function () {
         expect(missingIDs[0]).to.equal("course");
     });
 
-    it("Invalid query - null query, should return 400", function () {
-        let query: any = null;
-        let dataset: Datasets = {courses: []};
-        let controller = new QueryController(dataset);
-        let isValid = controller.isValid(query);
-
-        expect(isValid).to.equal(400);
-    });
-
     it("Invalid query - wrong mcomparator, should return 400", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_avg"],
@@ -78,7 +69,7 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    it("Should be able to invalidate an invalid query - wrong field (avo instead of avg)", function () {
+    it("Invalid query - wrong field (avo instead of avg)", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_avg"],
             "WHERE" : {"GT" : {"courses_avo" : 90}},
@@ -119,7 +110,7 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    it("Should be able to invalidate an invalid query - ORDER key not in GET key ", function () {
+    it("Should be able to invalidate an invalid query - ORDER key not in GET keys ", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_avg"],
             "WHERE" : {"GT" : {"courses_avg" : 90}},
@@ -237,7 +228,7 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    it("Should be able to validate query - wrong order of query keys", function () {
+    it("Should be able to validate query with wrong order of query keys", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "courses_avg"],
             "AS": "TABLE",
@@ -337,4 +328,6 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(400);
     });
+
+
 });

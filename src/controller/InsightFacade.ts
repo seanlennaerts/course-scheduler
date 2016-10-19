@@ -42,7 +42,7 @@ export default class InsightFacade implements IInsightFacade {
                 }
             }).catch(function (err: Error) {
                 Log.trace('InsightFacade::addDataset(..) - ERROR: ' + err.message);
-                reject({code: 400, body: {error: err.message}})
+                reject({code: 400, error: err.message})
                 //res.json(400, {err: err.message});
             });
         });
@@ -78,10 +78,10 @@ export default class InsightFacade implements IInsightFacade {
                     Log.info("Lenght of result array after performing query: " + result.result.length);
                     break;
                 case 424:
-                    reject({code: 424, body: {missing: controller.returnWrongIDs()}});
+                    reject({code: 424, error: {missing: controller.returnWrongIDs()}});
                     break;
                 default:
-                    reject({code: 400, body: {error: "invalid query"}});
+                    reject({code: 400, error: "invalid query"});
             }
         });
     }
