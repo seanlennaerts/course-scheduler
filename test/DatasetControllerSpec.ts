@@ -28,12 +28,15 @@ describe("DatasetController", function () {
         return zip.generateAsync(opts).then(function (data) {
             Log.test('Dataset created');
             let controller = new DatasetController();
-            return controller.process('setA', data);
+            return controller.process("courses", data);
         }).then(function (result) {
-            Log.test('Dataset processed; result: ' + result);
-            expect(result).to.equal(false); // zip file was invalid, should not have passed
+            expect.fail();
+            // should not be valid
+        }).catch(function (err) {
+            Log.test("Reached catch because process threw error: " + err);
+            expect(err).to.be.an("error");
         });
-
     });
+
 
 });
