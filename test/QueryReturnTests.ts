@@ -25,7 +25,7 @@ describe("QueryReturns", function () {
     afterEach(function () {
     });
 
-    it("Simple query check", function () {
+    it("Check gt", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept"],
             "WHERE": {"GT": {"courses_avg": 75}},
@@ -36,9 +36,26 @@ describe("QueryReturns", function () {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
             Log.info("Size of result array should be 2: " + result.length);
-            Log.info("GOT HERE?");
-            let test: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
-            expect(result).to.deep.equal(test);
+            let expectedResult: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
+            expect(result).to.deep.equal(expectedResult);
+        }).catch(function (response: InsightResponse) {
+            expect.fail("Something went wrong!");
+        });
+    });
+
+    it("Check lt", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"LT": {"courses_avg": 75}},
+            "ORDER": "courses_dept",
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            Log.info("Size of result array should be 2: " + result.length);
+            let expectedResult: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
+            expect(result).to.deep.equal(expectedResult);
         }).catch(function (response: InsightResponse) {
             expect.fail("Something went wrong!");
         });
