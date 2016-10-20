@@ -39,49 +39,56 @@ export default class QueryController {
     private WHEREhelperArray(array:{}[]): number {
         var resultNumbers :number[] = [];
         for(var i of array){
-            resultNumbers.push(this.WHEREhelperObject(i));
+            var tempNumber: number = this.WHEREhelperObject(i);
+            //Log.info("this is tempNumber: " + tempNumber);
+            resultNumbers.push(tempNumber);
+            if (tempNumber === 400){
+                return 400;
+            }
+            if (tempNumber === 424){
+                return 424;
+            }
         }
-        if (resultNumbers.indexOf(400,0) === -1){
-            //Log.info("QueryController :: WHEREhelperArray(..) - Array of objects all return 200!");
-            return 200;
-        }else{
-            //Log.info("QueryController :: WHEREhelperArray(..) - At least one object in the array returns 400");
-            return 400;
-        }
+        return 200;
     }
 
     private WHEREhelperObject(whereObject: {}): number {
-        let that = this;
-        // section 1
         if (Object.keys(whereObject).length > 1 || Object.keys(whereObject).length === 0 ){
             //Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
             return 400;
         }
-        // section 2
-        // check if the object key is one of the permitted course keys
-        if (Object.keys(whereObject)[0].split("_")[1] === "dept" || Object.keys(whereObject)[0].split("_")[1]  === "id" ||
-                Object.keys(whereObject)[0].split("_")[1]  === "avg" || Object.keys(whereObject)[0].split("_")[1]  === "instructor" ||
-                Object.keys(whereObject)[0].split("_")[1]  === "title" || Object.keys(whereObject)[0].split("_")[1]  === "pass" ||
-                Object.keys(whereObject)[0].split("_")[1]  === "fail"){
-            //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
-            return 200;
+        // check if the object of type: id_field is permitted
+        if (Object.keys(whereObject)[0].includes("_")) {
+            var id = Object.keys(whereObject)[0].split("_")[0];
+            //Log.info("this is id right now: " + id);
+            if (!(id in this.datasets)) {
+                this.wrongDatasetIDs.push(id);
+               // Log.info("wrongDataSetIDs[0] is: " + this.wrongDatasetIDs[0]);
+                return 424;
+            } else {
+                if (Object.keys(whereObject)[0].split("_")[1] === "dept" || Object.keys(whereObject)[0].split("_")[1] === "id" ||
+                    Object.keys(whereObject)[0].split("_")[1] === "avg" || Object.keys(whereObject)[0].split("_")[1] === "instructor" ||
+                    Object.keys(whereObject)[0].split("_")[1] === "title" || Object.keys(whereObject)[0].split("_")[1] === "pass" ||
+                    Object.keys(whereObject)[0].split("_")[1] === "fail") {
+                    //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
+                    return 200;
+                }
+            }
         }
-        // section 3
-        // check if the keys in first level are the LOGIC operators allowed
-        // TODO: when object operators are not the given ones
-        if (Object.keys(whereObject)[0] === "LT" || Object.keys(whereObject)[0] === "GT" ||
-            Object.keys(whereObject)[0] === "EQ" ||  Object.keys(whereObject)[0] === "IS" ||
-            Object.keys(whereObject)[0] === "NOT") {
+       // }
+        // check LOGIC operators
+        if (Object.keys(whereObject)[0] === "LT" || Object.keys(whereObject)[0] === "GT" || Object.keys(whereObject)[0] === "EQ" ||
+            Object.keys(whereObject)[0] === "IS" || Object.keys(whereObject)[0] === "NOT") {
             var objectKey: string = Object.keys(whereObject)[0];
             var secondLevel: {} = (<any>whereObject)[objectKey];
             //Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this object: " + JSON.stringify(secondLevel));
-            return that.WHEREhelperObject(secondLevel);
+            return this.WHEREhelperObject(secondLevel);
         }
         else if (Object.keys(whereObject)[0] === "AND" || Object.keys(whereObject)[0] === "OR"){
             var objectKey: string = Object.keys(whereObject)[0];
             var secondLevelArray: {}[] = (<any>whereObject)[objectKey];
             //Log.info("QueryController :: WHEREhelperObject(..) - about to go in a level deeper recursively, with this array: " + JSON.stringify(secondLevelArray));
-            return that.WHEREhelperArray(secondLevelArray);
+            return this.WHEREhelperArray(secondLevelArray);
         } else{
             //Log.info("QueryController :: WHEREhelperObject(..) - about to return errors, these object keys are not proper operators: " + Object.keys(whereObject)[0]);
             return 400;
