@@ -37,6 +37,7 @@ describe("QueryReturns", function () {
             let result: {}[] = table.result;
             Log.info("Size of result array should be 2: " + result.length);
             Log.info("GOT HERE?");
+            Log.info("FATAL ERROR:: SEAN, I am watching you...");
             let test: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
             expect(result).to.deep.equal(test);
         }).catch(function (response: InsightResponse) {

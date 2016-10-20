@@ -53,6 +53,7 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(424);
         expect(missingIDs[0]).to.equal("course");
+
     });
 
     it("Invalid query - wrong mcomparator, should return 400", function () {
@@ -273,9 +274,9 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    it("Should be able to invalidate an invalid query - dataset ID in WHERE not yet PUT", function () {
+    it("Invalid query - 'something 'dataset ID in WHERE not yet PUT", function () {
         let query: QueryRequest = {
-            "GET": ["courses_dept", "course_avg"],
+            "GET": ["courses_dept", "courses_avg"],
             "WHERE" : {"GT" : {"courses_avg" : 90}},
             "ORDER" : "courses_avg",
             "AS" : "TABLE"
@@ -286,12 +287,29 @@ describe("QueryController", function () {
         let missingIDs = controller.returnWrongIDs();
 
         expect(isValid).to.equal(424);
+        expect(missingIDs[0]).to.equal("courses");
+    });
+
+    it("Should be able to invalidate an invalid query - dataset ID in WHERE not yet PUT", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_avg"],
+            "WHERE" : {"GT" : {"course_avg" : 90}},
+            "ORDER" : "courses_avg",
+            "AS" : "TABLE"
+        };
+        let dataset: Datasets = {courses: []}; // should leave datasets empty, or put different dataset -S
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+        let missingIDs = controller.returnWrongIDs();
+
+        expect(isValid).to.equal(424);
         expect(missingIDs[0]).to.equal("course");
     });
 
+
     it("Should be able to invalidate an invalid query - key in GET not valid", function () {
         let query: QueryRequest = {
-            "GET": ["courses_depto", "course_avg"],
+            "GET": ["courses_depto", "courses_avg"],
             "WHERE" : {"GT" : {"courses_avg" : 90}},
             "ORDER" : "courses_avg",
             "AS" : "TABLE"
@@ -353,12 +371,16 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
-    it("Valid query - BLAH", function(){
+    it("Valid query - supports multiple levels of AND", function(){
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "courses_instructor"],
             "WHERE": {
-                "OR": [
+                "AND": [
                     {"AND": [
+                        {"AND" : [
+                            {"IS": {"courses_dept": "ENGL"}},
+                            {"LT" : {"courses_avg" : 90}}
+                        ]},
                         {"GT": {"courses_avg": 70}},
                         {"IS": {"courses_dept": "cp*"}},
                         {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
@@ -372,10 +394,108 @@ describe("QueryController", function () {
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.equal(400);
-
+        expect(isValid).to.equal(200);
     });
 
+    it("Valid query - supports 5 levels of OR", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "OR": [
+                    {"OR": [
+                        {"OR" : [
+                            {"OR" : [
+                                {"OR": [
+                                    {"IS": {"courses_instructor": "mcgrenere, joanna"}},
+                                    {"IS": {"courses_instructor": "kiczales, gregor"}}
+                                    ]},
+                                {"GT": {"courses_avg": 92}},
+                                {"LT": {"courses_avg": 52}},
+                            ]},
+                            {"IS": {"courses_dept": "ENGL"}},
+                            {"LT" : {"courses_avg" : 90}}
+                        ]},
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_instructor": "*gregor*"}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+
+
+    it("Invalid query - invalid dataset in 3th level", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "AND": [
+                    {"AND": [
+                        {"AND" : [
+                            {"IS": {"sean_dept": "ENGL"}},
+                            {"LT" : {"courses_avg" : 90}}
+                        ]},
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_instructor": "*gregor*"}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+        let missingIDs = controller.returnWrongIDs();
+
+        expect(isValid).to.equal(424);
+        expect(missingIDs[0]).to.equal("sean");
+    });
+
+    it("Invalid query - invalid dataset in 5th level", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "OR": [
+                    {"OR": [
+                        {"OR" : [
+                            {"OR" : [
+                                {"OR": [
+                                    {"IS": {"courses_instructor": "mcgrenere, joanna"}},
+                                    {"IS": {"chacha_instructor": "kiczales, gregor"}}
+                                ]},
+                                {"GT": {"courses_avg": 92}},
+                                {"LT": {"courses_avg": 52}},
+                            ]},
+                            {"IS": {"courses_dept": "ENGL"}},
+                            {"LT" : {"courses_avg" : 90}}
+                        ]},
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_instructor": "*gregor*"}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+        let missingIDs = controller.returnWrongIDs();
+
+        expect(isValid).to.equal(424);
+        expect(missingIDs[0]).to.equal("chacha");
+    });
 
 
 
