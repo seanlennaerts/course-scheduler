@@ -12,13 +12,12 @@ import DatasetController from "./DatasetController";
 import {Datasets} from "./DatasetController";
 import Log from "../Util";
 
-
 export default class InsightFacade implements IInsightFacade {
 
     private static datasetController: DatasetController = new DatasetController;
     // private static queryController: QueryController = null;
 
-    constructor(){
+    constructor() {
         Log.info("InsightFacade::init() ");
         //InsightFacade.datasetController = new DatasetController;
         //let datasets = InsightFacade.datasetController.getDatasets(); // removed this line because it makes PUT 204 impossible to test -S
@@ -42,8 +41,8 @@ export default class InsightFacade implements IInsightFacade {
                 }
             }).catch(function (err: Error) {
                 Log.trace('InsightFacade::addDataset(..) - ERROR: ' + err.message);
-                reject({code: 400, error: err.message})
-                //res.json(400, {err: err.message});
+                reject({code: 400, error: err.message});
+                // res.json(400, {err: err.message});
             });
         });
     }

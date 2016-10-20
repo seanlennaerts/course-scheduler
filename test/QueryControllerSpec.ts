@@ -286,7 +286,8 @@ describe("QueryController", function () {
         let missingIDs = controller.returnWrongIDs();
 
         expect(isValid).to.equal(424);
-        expect(missingIDs[0]).to.equal("course");
+        expect(missingIDs[0]).to.equal("courses");
+        expect(missingIDs.length).to.equal(1);
     });
 
     it("Should be able to invalidate an invalid query - key in GET not valid", function () {

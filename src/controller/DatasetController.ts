@@ -6,13 +6,8 @@
 import Log from "../Util";
 import JSZip = require('jszip');
 import Course from "../model/Course";
-var fs = require('fs');   //var is good -S                    //to use file system in node.js
+var fs = require('fs');
 
-//temp -S
-//var countMissingSections = 0;
-
-
-// PUT
 /**
  * In memory representation of all datasets.
  */
@@ -22,73 +17,14 @@ export interface Datasets {
 
 export default class DatasetController {
 
-    private processedData: Course[] = []; //-S
-
+    private processedData: Course[] = [];
     private datasets: Datasets = {};
 
     constructor() {
         Log.trace('DatasetController::init()');
     }
-    /**
-     * Returns the referenced dataset. If the dataset is not in memory, it should be
-     * loaded from disk and put in memory. If it is not in disk, then it should return
-     * null.
-     *
-     * @param id
-     * @returns {{}}
-     */
-    // public getDataset(id: string): any {
-    //     // this should check if the dataset is on disk in ./data if it is not already in memory.
-    //
-    //     // if the "id in this.datasets" doesn't work try a try/catch block -S
-    //     if (id in this.datasets) {
-    //         return this.datasets[id];
-    //     }
-    //     fs.readFile("./data/" + id + ".json", "utf8", function (err: Error, file: string) {
-    //         if (err) {
-    //             Log.error("getDataset(): reading file from disk " + err);
-    //             return null;
-    //         }
-    //         return JSON.parse(file);
-    //     });
-    // }
 
     public getDatasets(): Datasets {
-        // check first if memory has stored datasets
-        // if (Object.keys(this.datasets).length > 0) {
-        //     return this.datasets;
-        // }
-        // if ("courses" in this.datasets) {
-        //     Log.info("returning in if");
-        //     return this.datasets;
-        // }
-        // fs.readFile("./data/courses.json", "utf8", function (err: Error, file: string) {
-        //     if (err) {
-        //         Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
-        //     }
-        //     this.datasets["courses"] = JSON.parse(file);
-        //     Log.info("returning");
-        //     return this.datasets;
-        // });
-        //checking disk
-        // fs.readdir("./data", function (err: Error, files: string[]) {
-        //     if (err) {
-        //         Log.error("getDatasets(): trouble reading files in directory " + err);
-        //     }
-        //     //for (var fileName of files) {
-        //     var fileName: string = "courses.json";
-        //     fs.readFile("./data/" +fileName, "utf8", function (err: Error, file: string) {
-        //         if (err) {
-        //             Log.error("getDatasets(): trying to read file, probably something wrong with file name " + err);
-        //         }
-        //         Log.info("file name before split: " + fileName);
-        //         var name: string = fileName.split(".")[0];
-        //         this.datasets[name] = JSON.parse(file);
-        //         return this.datasets;
-        //     });
-        //     //}
-        // })
-
         if ("courses" in this.datasets) {
             Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
@@ -150,7 +86,8 @@ export default class DatasetController {
                 // }
                 if (!root.result) {
                     Log.info("readFile(): not valid zip");
-                    throw new Error("readFile(): not valid zip");
+                    //throw new Error("readFile(): not valid zip");
+                    reject(new Error("Not a valid zip file"));
                 }
 
                 for (var i = 0; i < root.result.length; i++) {
@@ -182,49 +119,13 @@ export default class DatasetController {
 
                     var newSection = new Course (uniqueId, dept, id, title, avg, instructorArray, pass, fail, audit);
                     that.processedData.push(newSection);
-
-                    // DEAD CODE =======================================
-                    // var key: string = dept + id;
-                    // if (!(key in that.processedData)) {
-                    //     var newCourse: Course = new Course(dept, id);
-                    //     newCourse.title = title;
-                    //     // make course once per file
-                    // }
-
-                    // var courseToPush: Course;
-                    // var exists: boolean = false;
-                    // for (var course of that.processedData) {
-                    //     if (course.dept === dept && course.id === id) {
-                    //         courseToPush = course;
-                    //         exists = true;
-                    //     }
-                    // }
-                    // if (!exists) {
-                    //     courseToPush = new Course(dept, id, title);
-                    // }
-
-                    //can't store bidirectional relationship in JSON :( unless serialize objects before stringify..
-                    //in the interest of time not going to use instructor class -S
-
-
-                    // var newSection: Section = new Section(uniqueId);
-                    // newSection.average = avg;
-                    // newSection.instructor = instructorArray;
-                    // newSection.pass = pass;
-                    // newSection.fail = fail;
-                    // newSection.audit = audit;
-
-                    // courseToPush.addSection(newSection);
-                    //
-                    // if (!exists) {
-                    //     that.processedData.push(courseToPush);
-                    // }
                 } //end for loop
             }).then(function() {
                 fulfill(true);
-            }).catch(function (reason: any) {
+            }).catch(function (reason: Error) {
                 //reject(reason);
-                throw Error(reason);
+                //throw Error(reason);
+                reject(new Error(reason.message));
             });
         });
     }
@@ -269,12 +170,14 @@ export default class DatasetController {
                             });
                             break;
                         default:
-                            throw Error("I'm not programmed to recognize this ID yet :( ");
+                            //throw Error("I'm not programmed to recognize this ID yet");
+                            reject(new Error("I'm not programmed to recognize this ID yet"));
                     }
                     Log.info("process(): all readFile promises are ready!");
-                    Log.info("process(): there are " + promises.length + " files");
-                    if (promises.length < 1) {
-                        throw new Error("process(): Not valid dataset");
+                    Log.info("process(): there are " + promises.length + " valid files");
+                    if (promises.length === 0) {
+                        // throw new Error("process(): Not valid dataset");
+                        reject(new Error("Not valid dataset"));
                     }
                     return Promise.all(promises);
 
@@ -304,9 +207,6 @@ export default class DatasetController {
         this.datasets[id] = this.processedData;
 
         // actually write to disk in the ./data directory
-
-        //check if directory data exits
-        //bad practice, better handle the error instead and not use sync either -S
         if (!fs.existsSync("./data")) {
             fs.mkdirSync("./data");
         }
