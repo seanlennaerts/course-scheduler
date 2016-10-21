@@ -461,7 +461,7 @@ describe("QueryController", function () {
         expect(missingIDs[0]).to.equal("sean");
     });
 
-    it("Invalid query - invalid dataset in 5th level", function(){
+    it("~ FESTER~ : Invalid query - invalid dataset in 5th level", function(){
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "courses_instructor"],
             "WHERE": {
