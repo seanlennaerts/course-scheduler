@@ -33,11 +33,35 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_dept: "cpsc"}, {courses_dept: "cpsc"}];
+            let expectedResult: {}[] = [{courses_dept: "cpsc"},
+                                        {courses_dept: "cpsc"}];
 
             Log.test("GT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
             expect(result.length).to.equal(2);
+        });
+    });
+
+    //TIME TO TACKLE NOT
+    it("Basic NOT, should be opposite of GT 75 so LT 75", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"GT": {"courses_avg": 75}}},
+            "ORDER": "courses_dept",
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_dept: "comm"},
+                                        {courses_dept: "comm"},
+                                        {courses_dept: "comm"},
+                                        {courses_dept: "comm"},
+                                        {courses_dept: "cpsc"}];
+
+            Log.test("GT:\n" + JSON.stringify(result));
+            expect(result).to.deep.equal(expectedResult);
+            expect(result.length).to.equal(5);
         });
     });
 
@@ -155,9 +179,9 @@ describe("QueryReturns", function () {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
             let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0},
-                {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
-                {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
+                                        {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
+                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);

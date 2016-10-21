@@ -262,44 +262,45 @@ export default class QueryController {
 
 
     private handleNOT (obj: {}) {
-        //Log.info("handleNOT(" + JSON.stringify(obj) + ")");
-        //Log.info("handleNOT(): tempArray size before running inner filter: " + this.tempResults.length);
-        //var keyFull: string = Object.keys(obj)[0];
+        // var that = this;
+        //
+        Log.info("handleNOT(" + JSON.stringify(obj) + ")");
         this.nextObjectOrArray(obj);
-        //Log.info("handleNOT(): tempArray size after running inner filter: " + this.tempResults.length);
-        //Log.info("handleNOT(): tempArray[0] size: " + this.tempResults[0].length);
-        //Log.info("handleNOT(): datasets[courses] size: " + this.datasets["courses"].length);
-
-
-        //var resultArray: Course[] = [];
-        //var exists: boolean = false;
-        //Log.info("entering for loop in handlNOT");
-        // for (var section of this.datasets["courses"]) {
-        //     exists = false;
-        //     var id: number = section.uniqueId;
-        //     //Log.info("entering second for loop in handleNOT");
-        //     //Log.info("tempResults length in handleNOT:" + this.tempResults.length);
-        //     for (var checkCourse of this.tempResults[0]){
-        //         if (checkCourse.uniqueId === id) {
-        //             exists = true;
+        Log.info("handleNOT() ... returned form handling inner filter")
+        //
+        // var tempMaster: Course[] = that.datasets["courses"];
+        // tempMaster.filter(function removeSomeCourses(course: Course) {
+        //     for (var courseTemp of that.tempResults[0]) {
+        //         if (courseTemp.uniqueId === course.uniqueId) {
+        //             Log.info("Found course we don't want: " + JSON.stringify(course));
+        //             return false;
         //         }
         //     }
-        //     if (!exists) {
-        //         resultArray.push(section);
-        //     }
-        // }
-        var that = this;
+        //     Log.info("Adding course we want in final array: " + JSON.stringify(course));
+        //     return true;
+        // });
+        // that.tempResults = [];
+        // that.tempResults.push(tempMaster);
 
-        that.tempResults[0].filter(function something(course: Course) {
-            for (var mCourse of that.datasets["courses"]) {
-                if (mCourse.uniqueId === course.uniqueId) {
-                    return true;
+        var tempMaster: Course[] = this.datasets["courses"];
+        var filteredResult: Course[] = [];
+        //Log.info("Size of master array: " + tempMaster.length);
+        //Log.info("Size of array after filter: " + this.tempResults[0].length);
+        for (var c1 of tempMaster) {
+            var exists: boolean = false;
+            for (var c2 of this.tempResults[0]) {
+                if (c1.uniqueId === c2.uniqueId) {
+                    exists = true;
+                    //Log.info("Removing class: " +  JSON.stringify(c1));
                 }
             }
-            return false;
-        });
-        //this.tempResults = [];
-        //this.tempResults[0] =resultArray;
+            if (!exists) {
+                //Log.info("Keeping class: " + JSON.stringify(c1));
+                filteredResult.push(c1);
+            }
+        }
+        this.tempResults = [];
+        this.tempResults.push(filteredResult);
     }
 
     private handleLT (obj: {}) {
@@ -369,9 +370,9 @@ export default class QueryController {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
-                    for(var s in strings){
+                    for(var s of strings){
                         //Log.info(strings[s]);
-                        if (strings[s].includes(trimmedStr)){
+                        if (s.includes(trimmedStr)){
                            // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
@@ -395,9 +396,9 @@ export default class QueryController {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
-                    for(var s in strings){
+                    for(var s of strings){
                         //Log.info(strings[s]);
-                        if (strings[s].endsWith(trimmedStr)){
+                        if (s.endsWith(trimmedStr)){
                           //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
@@ -419,9 +420,9 @@ export default class QueryController {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
-                    for(var s in strings){
+                    for(var s of strings){
                         //Log.info(strings[s]);
-                        if (strings[s].startsWith(trimmedStr)){
+                        if (s.startsWith(trimmedStr)){
                           //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
                         }
@@ -443,10 +444,10 @@ export default class QueryController {
                     if(keyRight === "instructor") {
                         //Log.info("It should be an instructor that we are looking for: " + value);
                         var strings: string[] = section.getInstructors();
-                        for(var s in strings){
+                        for(var s of strings){
                             //Log.info(strings[s]);
-                            if (strings[s] === value){
-                               // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
+                            if (s === value){
+                                // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                                 filteredResult.push(section);
                             }
                         }
