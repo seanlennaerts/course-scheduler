@@ -6,7 +6,7 @@
 export default class Course {
 
     //identified by:
-    private _sectionId: number;
+    private _uuid: number;
 
     //course info:
     private _dept: string;
@@ -21,9 +21,9 @@ export default class Course {
     private _audit: number;
 
 
-    constructor(uniqueId: number, dept: string, id: string, title: string, avg: number, instructor: string[],
+    constructor(uuid: number, dept: string, id: string, title: string, avg: number, instructor: string[],
                 pass: number, fail: number, audit: number) {
-        this._sectionId = uniqueId;
+        this._uuid = uuid;
         this._dept = dept;
         this._id = id;
         this._title = title;
@@ -35,7 +35,7 @@ export default class Course {
     }
 
     get uniqueId(): number {
-        return this._sectionId;
+        return this._uuid;
     }
 
     public getInstructors(){

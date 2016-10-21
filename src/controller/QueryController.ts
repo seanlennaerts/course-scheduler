@@ -9,7 +9,10 @@ import Course from "../model/Course";
 export interface QueryRequest {
     GET: string[]; //has to be string array -S
     WHERE: {};
+    // ORDER?: {};      // how it should be for D2, won't compile for now
     ORDER?: string; //order is optional -S
+    GROUP?: string[];
+    APPLY?:{}[];
     AS: string;
 }
 
@@ -55,6 +58,14 @@ export default class QueryController {
         return 200;
     }
 
+    private validKeys(s: string): boolean{
+        if (s === "dept" || s === "id" || s === "avg" || s === "instructor" || s === "title" || s === "pass" || s === "fail" ||
+            s === "audit" || s === "uuid"  ){
+            return true;
+        }
+        return false;
+    }
+
     private WHEREhelperObject(whereObject: {}): number {
         if (Object.keys(whereObject).length > 1 || Object.keys(whereObject).length === 0 ){
             //Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
@@ -69,10 +80,7 @@ export default class QueryController {
                // Log.info("wrongDataSetIDs[0] is: " + this.wrongDatasetIDs[0]);
                 return 424;
             } else {
-                if (Object.keys(whereObject)[0].split("_")[1] === "dept" || Object.keys(whereObject)[0].split("_")[1] === "id" ||
-                    Object.keys(whereObject)[0].split("_")[1] === "avg" || Object.keys(whereObject)[0].split("_")[1] === "instructor" ||
-                    Object.keys(whereObject)[0].split("_")[1] === "title" || Object.keys(whereObject)[0].split("_")[1] === "pass" ||
-                    Object.keys(whereObject)[0].split("_")[1] === "fail"|| Object.keys(whereObject)[0].split("_")[1] === "audit") {
+                if (this.validKeys(Object.keys(whereObject)[0].split("_")[1])){
                     //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
                     return 200;
                 }
@@ -154,9 +162,7 @@ export default class QueryController {
                     //Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
                     var datasetField = GETelement[1];
                     //Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
-                    if (!(datasetField === "dept" || datasetField === "id" || datasetField === "avg" ||
-                        datasetField === "instructor" || datasetField === "title" ||
-                        datasetField === "pass" || datasetField === "fail" || datasetField === "audit")) {
+                    if (!(this.validKeys(datasetField))){
                         //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
                         return 400;
                     } else {
@@ -267,7 +273,7 @@ export default class QueryController {
         //Found on stackoverflow
         var poop = {};
         for (var i = 0; i < merged.length; i++) {
-            (<any>poop)[merged[i]["_sectionId"]] = merged[i];
+            (<any>poop)[merged[i]["_uuid"]] = merged[i];
         }
         merged = [];
         for (var key in poop) {
@@ -374,7 +380,7 @@ export default class QueryController {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s of strings){
-                        //Log.info(strings[s]);
+                       // Log.info(s);
                         if (s.includes(trimmedStr)){
                            // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
@@ -400,7 +406,7 @@ export default class QueryController {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s of strings){
-                        //Log.info(strings[s]);
+                       // Log.info(s);
                         if (s.endsWith(trimmedStr)){
                           //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
@@ -424,7 +430,7 @@ export default class QueryController {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
                     for(var s of strings){
-                        //Log.info(strings[s]);
+                       // Log.info(s);
                         if (s.startsWith(trimmedStr)){
                           //  Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                             filteredResult.push(section);
@@ -448,7 +454,7 @@ export default class QueryController {
                         //Log.info("It should be an instructor that we are looking for: " + value);
                         var strings: string[] = section.getInstructors();
                         for(var s of strings){
-                            //Log.info(strings[s]);
+                          //  Log.info(s);
                             if (s === value){
                                 // Log.info("handleIS() pushed " +  section.getField("dept") + section.getField("id") + " since instructor contains" + trimmedStr);
                                 filteredResult.push(section);

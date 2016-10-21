@@ -114,10 +114,10 @@ export default class DatasetController {
                     // Log.info("fail: " + fail);
                     var audit: number = root.result[i].Audit;
                     // Log.info("audit: " + audit);
-                    var uniqueId: number = root.result[i].id;
+                    var uuid: number = root.result[i].id;
                     // Log.info("uniqueId: " + uniqueId);
 
-                    var newSection = new Course (uniqueId, dept, id, title, avg, instructorArray, pass, fail, audit);
+                    var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit);
                     that.processedData.push(newSection);
                 } //end for loop
             }).then(function() {
