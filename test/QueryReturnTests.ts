@@ -168,7 +168,7 @@ describe("QueryReturns", function () {
     it("Check IS, *g* (for gregor and one other prof)", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "courses_instructor"],
-            "WHERE": {"IS": {"courses_title": "*g*"}},
+            "WHERE": {"IS": {"courses_instructor": "*g*"}},
             "ORDER": "courses_instructor",
             "AS": "TABLE"
         };
