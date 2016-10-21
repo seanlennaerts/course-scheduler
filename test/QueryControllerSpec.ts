@@ -288,6 +288,7 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(424);
         expect(missingIDs[0]).to.equal("courses");
+        expect(missingIDs.length).to.equal(1);
     });
 
     it("Should be able to invalidate an invalid query - dataset ID in WHERE not yet PUT", function () {
