@@ -29,20 +29,10 @@ export default class InsightFacade implements IInsightFacade {
             let controller = InsightFacade.datasetController;
             controller.process(id, content).then(function (result: number) {
                 Log.trace('InsightFacade::addDataset(..) - processed');
-                switch (result) {
-                    case 204:
-                        fulfill({code: 204});
-                        break;
-                    case 201:
-                        fulfill({code: 201});
-                        break;
-                    default:
-                        //
-                }
-            }).catch(function (err: Error) {
-                Log.trace('InsightFacade::addDataset(..) - ERROR: ' + err.message);
-                reject({code: 400, error: err.message});
-                // res.json(400, {err: err.message});
+                fulfill({code: result, body: {}});
+            }).catch(function (error: Error) {
+                Log.trace('InsightFacade::addDataset(..) - ERROR: ' + error.message);
+                reject({code: 400, body: {error: error.message}});
             });
         });
     }
@@ -52,10 +42,10 @@ export default class InsightFacade implements IInsightFacade {
             let result = InsightFacade.datasetController.deleteDataset(id);
             switch (result) {
                 case 204:
-                    fulfill({code: 204});
+                    fulfill({code: 204, body: {}});
                     break;
                 case 404:
-                    reject({code: 404});
+                    reject({code: 404, body: {}});
                     break;
                 default:
                    //
@@ -77,10 +67,10 @@ export default class InsightFacade implements IInsightFacade {
                     Log.info("Lenght of result array after performing query: " + result.result.length);
                     break;
                 case 424:
-                    reject({code: 424, missing: controller.returnWrongIDs()});
+                    reject({code: 424, body: {missing: controller.returnWrongIDs()}});
                     break;
                 default:
-                    reject({code: 400, error: "invalid query"});
+                    reject({code: 400, body: {error: "Invalid query"}});
             }
         });
     }

@@ -65,9 +65,9 @@ export default class RouteHandler {
 
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){
-            res.send(result.code);
+            res.json(result.code, result.body);
         }).catch (function (error) {
-            res.send(error.code);
+            res.json(error.code, error.body);
         });
 
         //catch res.send(403)

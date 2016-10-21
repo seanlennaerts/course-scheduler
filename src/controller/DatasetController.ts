@@ -87,7 +87,7 @@ export default class DatasetController {
                 if (!root.result) {
                     Log.info("readFile(): not valid zip");
                     //throw new Error("readFile(): not valid zip");
-                    reject(new Error("Not a valid zip file"));
+                    reject(new Error("Invalid archive"));
                 }
 
                 for (var i = 0; i < root.result.length; i++) {
@@ -122,10 +122,8 @@ export default class DatasetController {
                 } //end for loop
             }).then(function() {
                 fulfill(true);
-            }).catch(function (reason: Error) {
-                //reject(reason);
-                //throw Error(reason);
-                reject(new Error(reason.message));
+            }).catch(function (err: Error) {
+                reject(err);
             });
         });
     }
@@ -152,6 +150,14 @@ export default class DatasetController {
         return new Promise(function (fulfill, reject) {
             Log.info("process(): start");
             try {
+                if (id != "courses") {
+                    throw new Error("Invalid id");
+                }
+                //another hacky fix that should be refactored
+                var invalidDataset: boolean = false;
+
+                //
+
                 let myZip = new JSZip();
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
@@ -162,31 +168,29 @@ export default class DatasetController {
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
                     var promises: string[] = [];
-                    switch (id) {
-                        case "courses":
-                            zip.folder(id).forEach(function (relativePath, file) { // find name of the zipfile and replace "courses"
-                                //Log.info("relativePath: " + relativePath + ", file: " + file);
-                                promises.push(<any>that.readFile(zip, file.name));
-                            });
-                            break;
-                        default:
-                            //throw Error("I'm not programmed to recognize this ID yet");
-                            reject(new Error("I'm not programmed to recognize this ID yet"));
-                    }
+                    zip.folder(id).forEach(function (relativePath, file) { // find name of the zipfile and replace "courses"
+                        //Log.info("relativePath: " + relativePath + ", file: " + file);
+                        promises.push(<any>that.readFile(zip, file.name));
+                    });
                     Log.info("process(): all readFile promises are ready!");
                     Log.info("process(): there are " + promises.length + " valid files");
                     if (promises.length === 0) {
                         // throw new Error("process(): Not valid dataset");
-                        reject(new Error("Not valid dataset"));
+                        //reject(new Error("Invalid dataset"));
+                        invalidDataset = true;
                     }
                     return Promise.all(promises);
 
-                }).then(function(result: string[]) { //array of promises
-                    that.save(id);
-                    fulfill(code);
+                }).then(function() {
+                    if (invalidDataset) {
+                        reject(new Error("Invalid dataset"));
+                    } else {
+                        that.save(id);
+                        fulfill(code);
+                    }
                 }).catch(function (err: Error) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
-                    reject(err);
+                    reject(new Error("Invalid archive"));
                 });
             } catch (err) {
                 Log.trace('DatasetController::process(..) - ERROR: ' + err);
