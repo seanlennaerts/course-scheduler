@@ -28,57 +28,49 @@ export default class RouteHandler {
 
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
-        try {
-            var id: string = req.params.id;
+        var id: string = req.params.id;
 
-            // stream bytes from request into buffer and convert to base64
-            // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
-            let buffer: any = [];
-            req.on('data', function onRequestData(chunk: any) {
-                Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
-                buffer.push(chunk);
+        // stream bytes from request into buffer and convert to base64
+        // adapted from: https://github.com/restify/node-restify/issues/880#issuecomment-133485821
+        let buffer: any = [];
+        req.on('data', function onRequestData(chunk: any) {
+            Log.trace('RouteHandler::postDataset(..) on data; chunk length: ' + chunk.length);
+            buffer.push(chunk);
+        });
+
+        req.once('end', function () {
+            let concated = Buffer.concat(buffer);
+            req.body = concated.toString('base64');
+            Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
+
+            RouteHandler.insightFacade.addDataset(req.params.id, req.body).then(function(result){
+                res.json(result.code, result.body);
+            }).catch (function(error) {
+                res.json(error.code, error.body);
             });
-
-            req.once('end', function () {
-                let concated = Buffer.concat(buffer);
-                req.body = concated.toString('base64');
-                Log.trace('RouteHandler::postDataset(..) on end; total length: ' + req.body.length);
-
-                RouteHandler.insightFacade.addDataset(req.params.id, req.body).then(function(result){
-                    res.json(result.code, result.body);
-                });
-
-            });
-        } catch (err) {
-            Log.error('RouteHandler::postDataset(..) - ERROR: ' + err.message);
-            res.send(400, {err: err.message});
-        }
+        });
         return next();
     }
 
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
-        try {
-            let query: QueryRequest = req.params;
-            RouteHandler.insightFacade.performQuery(query).then(function(result){
-                res.json(result.code, result.body);
-            });
-        } catch (err) {
-            Log.error('RouteHandler::postQuery(..) - ERROR: ' + err);
-            res.send(403);
-        }
+        let query: QueryRequest = req.params;
+        RouteHandler.insightFacade.performQuery(query).then(function(result){
+            res.json(result.code, result.body);
+        }).catch (function(error) {
+            res.json(error.code, error.body);
+        });
         return next();
     }
 
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
-        try {
-            RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){
-                res.send(result.code);
-            });
-        } catch (err) {
-            Log.error("RouteHandler::deleteDataset(..) - ERROR: " + err);
-            res.send(403);
-        }
+        RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){
+            res.send(result.code);
+        }).catch (function (error) {
+            res.send(error.code);
+        });
+
+        //catch res.send(403)
         return next();
     }
 }
