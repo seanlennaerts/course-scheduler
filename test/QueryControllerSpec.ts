@@ -462,7 +462,7 @@ describe("QueryController", function () {
         expect(missingIDs[0]).to.equal("sean");
     });
 
-    it("Invalid query - invalid dataset in 5th level", function(){
+    it("~ FESTER~ : Invalid query - invalid dataset in 5th level", function(){
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "courses_instructor"],
             "WHERE": {
@@ -498,6 +498,41 @@ describe("QueryController", function () {
         expect(missingIDs[0]).to.equal("chacha");
     });
 
+    it("Invalid: empty query and dataset exists, should return 400", function () {
+        let query: any = {};
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
 
+        expect(isValid).to.equal(400);
+    });
+
+    it("Invalid: query with all fields empty and dataset exists, should return 400", function () {
+        let query: QueryRequest = {
+            "GET": [],
+            "WHERE": {},
+            "ORDER": "",
+            "AS": ""
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
+    it("Should be able to invalidate an invalid query - ORDER key not in GET keys ", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_avg"],
+            "WHERE" : {"GT" : {"courses_avg" : 90}},
+            "ORDER" : "courses_ana",
+            "AS" : "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
 
 });

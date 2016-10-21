@@ -69,7 +69,7 @@ export default class QueryController {
                 if (Object.keys(whereObject)[0].split("_")[1] === "dept" || Object.keys(whereObject)[0].split("_")[1] === "id" ||
                     Object.keys(whereObject)[0].split("_")[1] === "avg" || Object.keys(whereObject)[0].split("_")[1] === "instructor" ||
                     Object.keys(whereObject)[0].split("_")[1] === "title" || Object.keys(whereObject)[0].split("_")[1] === "pass" ||
-                    Object.keys(whereObject)[0].split("_")[1] === "fail") {
+                    Object.keys(whereObject)[0].split("_")[1] === "fail"|| Object.keys(whereObject)[0].split("_")[1] === "audit") {
                     //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
                     return 200;
                 }
@@ -167,7 +167,6 @@ export default class QueryController {
     }
 
     public isValid(query: QueryRequest): number {
-        let that = this;
         if (typeof query !== 'undefined' && query !== null ) {
             if (query.GET && query.WHERE && query.AS) {
                 // GET part of query
@@ -360,13 +359,10 @@ export default class QueryController {
         var value: string = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: Course[] = [];
-        if (Object.keys(obj)[0] === "instructor"){
-
-        }
-
-
-        // case4: value = *adhe*
-        if (value.indexOf("*") == 0 && value.lastIndexOf("*") == (value.length - 1)){
+       // if (Object.keys(obj)[0] === "instructor"){
+       // }
+        // case1: value = *adhe*
+        if (value.indexOf("*") === 0 && value.lastIndexOf("*") == (value.length - 1)){
            // Log.info("it is case4");
             var trimmedStr: string = value.substr(1,(value.length-2));
             //Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
@@ -391,8 +387,8 @@ export default class QueryController {
                 }
             }
         }
-        // case1: value = *adhe
-        else if (value.indexOf("*") == 0){
+        // case2: value = *adhe
+        else if (value.indexOf("*") === 0){
             //Log.info("it is case1");
             var trimmedStr: string = value.substr(1, (value.length - 1));
             //Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
@@ -417,7 +413,7 @@ export default class QueryController {
             }
         }
         // case3: value = adhe*
-        else if (value.lastIndexOf("*") == value.length - 1){
+        else if (value.lastIndexOf("*") === value.length - 1){
             var trimmedStr: string = value.split("*")[0];
             //Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
             for (var section of this.datasets["courses"]) {
@@ -441,7 +437,7 @@ export default class QueryController {
                 }
             }
         } else {
-            // case2: value = adhe
+            // case4: value = adhe
            // Log.info("it is case2: value is: " + value);
             if (!(value.includes("*"))) {
                 for (var section of this.datasets["courses"]) {
