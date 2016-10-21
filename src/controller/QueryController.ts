@@ -262,8 +262,21 @@ export default class QueryController {
         }
         Log.info("... back to handleOR - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
         var merged: Course[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
+
+        //SWEEP FOR DUPLICATES
+        //Found on stackoverflow
+        var poop = {};
+        for (var i = 0; i < merged.length; i++) {
+            (<any>poop)[merged[i]["_sectionId"]] = merged[i];
+        }
+        merged = [];
+        for (var key in poop) {
+            merged.push((<any>poop)[key]);
+        }
+
         //this.tempResults = [];
         this.tempResults[--this.tempResultsIndex].push(merged);
+        Log.info("STORED IN: " + this.tempResultsIndex + ", hopefully this is 0");
         Log.info("END handleOR");
     }
 
@@ -533,7 +546,7 @@ export default class QueryController {
         }
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
-        
+
         return {render: query.AS, result: finalTable};
     }
 }

@@ -298,8 +298,36 @@ describe("QueryReturns", function () {
                                         {courses_dept: "cpsc", courses_id: "110", courses_instructor: ["mcgrenere, joanna"]}];
 
             Log.test("LT:\n" + JSON.stringify(result));
-            expect(result).to.deep.equal(expectedResult);
+            expect(result).to.deep.include.members(expectedResult);
             expect(result.length).to.equal(3);
+        });
+    });
+
+    it("Check OR", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_avg"],
+            "WHERE": {
+                "OR": [
+                    {"GT": {"courses_avg": 75}},
+                    {"IS": {"courses_dept": "comm"}}
+                ]
+            },
+            "ORDER": "courses_avg",
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_dept: "comm", courses_id: "101", courses_avg: 72.34},
+                                        {courses_dept: "comm", courses_id: "101", courses_avg: 72.76},
+                                        {courses_dept: "comm", courses_id: "101", courses_avg: 73.24},
+                                        {courses_dept: "comm", courses_id: "101", courses_avg: 74.12},
+                                        {courses_dept: "cpsc", courses_id: "110", courses_avg: 76.94},
+                                        {courses_dept: "cpsc", courses_id: "110", courses_avg: 77.43}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.equal(expectedResult);
+            expect(result.length).to.equal(6);
         });
     });
 
