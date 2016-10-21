@@ -20,7 +20,10 @@ export interface QueryResponse {
 
 export default class QueryController {
     private datasets: Datasets = null;
-    private tempResults: Course[][] = [];
+
+    private tempResults: Course[][][] = [];
+    private tempResultsIndex: number = 0;
+
     private dataset: Course[] = [];
     private queryKeys: string[] = [];
     private wrongDatasetIDs: string[] = [];
@@ -212,21 +215,22 @@ export default class QueryController {
     }
 
     private handleAND (arr: {}[]) {
-        Log.info("handleAND(" + JSON.stringify(arr) + ")");
-
-        //TODO (4):
+        Log.info("START handleAND(" + JSON.stringify(arr) + ")");
+        this.tempResults[++this.tempResultsIndex] = [];
+        Log.info("Adding tempResuts array, now size = " + this.tempResults.length);
         // - should check if section id is present in all tempResults arrays
         // - collect the one's that are and set tempResults = [] and store the new result
         for (var obj of arr) {
             this.nextObjectOrArray(obj);
         }
+        Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
         var filteredResult: Course[] = [];
-        for (var course of this.tempResults[0]) {
+        for (var course of this.tempResults[this.tempResultsIndex][0]) {
             var id: number = course.uniqueId;
             var exists: boolean = false;
-            for (var i = 1; i < this.tempResults.length; i++) {
+            for (var i = 1; i < this.tempResults[this.tempResultsIndex].length; i++) {
                 exists = false;
-                for (var checkCourse of this.tempResults[i]) {
+                for (var checkCourse of this.tempResults[this.tempResultsIndex][i]) {
                     if (checkCourse.uniqueId === id) {
                         //found. no use checking other courses in this list
                         exists = true;
@@ -242,53 +246,40 @@ export default class QueryController {
                 filteredResult.push(course);
             }
         }
-        this.tempResults = [];
-        this.tempResults.push(filteredResult);
+        //this.tempResults = [];
+        this.tempResults[--this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleAND");
     }
 
     private handleOR (arr: {}[]) {
-        Log.info("handleOR(" + JSON.stringify(arr) + ")");
-        //TODO (5):
+        Log.info("START handleOR(" + JSON.stringify(arr) + ")");
+        this.tempResults[++this.tempResultsIndex] = [];
+        Log.info("Adding tempResuts array, now size = " + this.tempResults.length);
         // - should combine all tempResults arrays into one array
         // - set tempResults = [] and store new result
         for (var obj of arr) {
             this.nextObjectOrArray(obj);
         }
-        var merged: Course[] = [].concat.apply([], this.tempResults);
-        this.tempResults = [];
-        this.tempResults.push(merged);
-
+        Log.info("... back to handleOR - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
+        var merged: Course[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
+        //this.tempResults = [];
+        this.tempResults[--this.tempResultsIndex].push(merged);
+        Log.info("END handleOR");
     }
 
 
     private handleNOT (obj: {}) {
-        // var that = this;
-        //
-        Log.info("handleNOT(" + JSON.stringify(obj) + ")");
+        Log.info("START handleNOT(" + JSON.stringify(obj) + ")");
+        this.tempResults[++this.tempResultsIndex] = [];
+        Log.info("Adding tempResuts array, now size = " + this.tempResults.length);
         this.nextObjectOrArray(obj);
-        Log.info("handleNOT() ... returned form handling inner filter")
-        //
-        // var tempMaster: Course[] = that.datasets["courses"];
-        // tempMaster.filter(function removeSomeCourses(course: Course) {
-        //     for (var courseTemp of that.tempResults[0]) {
-        //         if (courseTemp.uniqueId === course.uniqueId) {
-        //             Log.info("Found course we don't want: " + JSON.stringify(course));
-        //             return false;
-        //         }
-        //     }
-        //     Log.info("Adding course we want in final array: " + JSON.stringify(course));
-        //     return true;
-        // });
-        // that.tempResults = [];
-        // that.tempResults.push(tempMaster);
+        Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
 
         var tempMaster: Course[] = this.datasets["courses"];
         var filteredResult: Course[] = [];
-        //Log.info("Size of master array: " + tempMaster.length);
-        //Log.info("Size of array after filter: " + this.tempResults[0].length);
         for (var c1 of tempMaster) {
             var exists: boolean = false;
-            for (var c2 of this.tempResults[0]) {
+            for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
                 if (c1.uniqueId === c2.uniqueId) {
                     exists = true;
                     //Log.info("Removing class: " +  JSON.stringify(c1));
@@ -299,12 +290,13 @@ export default class QueryController {
                 filteredResult.push(c1);
             }
         }
-        this.tempResults = [];
-        this.tempResults.push(filteredResult);
+        //this.tempResults = [];
+        this.tempResults[--this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleNOT");
     }
 
     private handleLT (obj: {}) {
-        Log.info("handleLT(" + JSON.stringify(obj) + ")");
+        Log.info("START handleLT(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
@@ -315,11 +307,12 @@ export default class QueryController {
                 //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + ", avg: " + section.getField("avg"));
             }
         }
-        this.tempResults.push(filteredResult);
+        this.tempResults[this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleLT");
     }
 
     private handleGT (obj: {}) {
-        Log.info("handleGT(" + JSON.stringify(obj) + ")");
+        Log.info("START handleGT(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
@@ -330,12 +323,12 @@ export default class QueryController {
                 //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
             }
         }
-        this.tempResults.push(filteredResult);
-        Log.info("tempResults length after handleGT:" + this.tempResults.length);
+        this.tempResults[this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleGT");
     }
 
     private handleEQ (obj: {}) {
-        Log.info("handleEQ(" + JSON.stringify(obj) + ")");
+        Log.info("START handleEQ(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
@@ -346,15 +339,12 @@ export default class QueryController {
                 Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
             }
         }
-        this.tempResults.push(filteredResult);
-        Log.info("tempResults: ");
-        for (var temp of filteredResult) {
-            Log.info(<string>temp.getField("dept"));
-        }
+        this.tempResults[this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleEQ");
     }
 
     private handleIS (obj: {}) {
-        Log.info("QueryController:: handleIS(" + JSON.stringify(obj) + ")");
+        Log.info("START handleIS(" + JSON.stringify(obj) + ")");
         var keyFull: string = Object.keys(obj)[0];
         var value: string = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
@@ -458,12 +448,13 @@ export default class QueryController {
                 }
             }
         }
-        this.tempResults.push(filteredResult);
+        this.tempResults[this.tempResultsIndex].push(filteredResult);
+        Log.info("END handleIS");
     }
 
 
     private nextObjectOrArray (checkObj: any) {
-        Log.info("nextObjectOrArray(" + JSON.stringify(checkObj) + ")");
+        Log.info("NEXT(" + JSON.stringify(checkObj) + ")");
 
         if (checkObj.AND) {
             this.handleAND(checkObj.AND);
@@ -507,14 +498,12 @@ export default class QueryController {
     }
 
     public query(query: QueryRequest): QueryResponse {
-        for (var i = 0; i < this.tempResults.length; i++) {
-            this.tempResults[i] = [];
-        }
+        //initialize temp arrays
         this.tempResults = [];
-        //stringify turns JS object into JSON string
+        this.tempResults[0] = [];
+
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
-        //TODO (7): call all the handlers above and do "GET" and "ORDER" and return result
         this.nextObjectOrArray (query.WHERE);
 
         var finalTable: {}[] = [];
@@ -523,7 +512,7 @@ export default class QueryController {
             var wantKey: string = getVariables;
             wantedKeys.push(wantKey);
         }
-        for (var course of this.tempResults[0]) {
+        for (var course of this.tempResults[0][0]) {
             var obj: {} = {};
             for (var key of wantedKeys) {
                 var keyRight: string = key.split("_")[1];
@@ -544,9 +533,7 @@ export default class QueryController {
         }
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
-
-        //var resp: QueryResponse = {render: query.AS, result: finalTable};
-
+        
         return {render: query.AS, result: finalTable};
     }
 }

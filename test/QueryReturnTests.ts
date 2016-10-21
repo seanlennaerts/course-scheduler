@@ -298,7 +298,7 @@ describe("QueryReturns", function () {
                                         {courses_dept: "cpsc", courses_id: "110", courses_instructor: ["mcgrenere, joanna"]}];
 
             Log.test("LT:\n" + JSON.stringify(result));
-            expect(result).to.deep.include.members(expectedResult);
+            expect(result).to.deep.equal(expectedResult);
             expect(result.length).to.equal(3);
         });
     });
