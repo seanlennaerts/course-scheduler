@@ -535,14 +535,15 @@ export default class QueryController {
         } else if (checkObj.NOT) {
             this.handleNOT(checkObj.NOT);
         } else {
-            //
+            Log.info("Empty where detected");
+            this.tempResults[0][0] = this.datasets["courses"];
         }
     }
 
     //From stack overflow
     //http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
     private dynamicSort(property: string) {
-        Log.info("dynamicSort(): sorting...")
+        Log.info("dynamicSort(): sorting...");
         var sortOrder = 1;
         if (property[0] === "-") {
             sortOrder = -1;
@@ -585,17 +586,17 @@ export default class QueryController {
             }
             finalTable.push(obj);
         }
-/*
-        if (query.ORDER) { //if is important because optional
-            if (typeof(query.ORDER) === "string") {
-                finalTable.sort(this.dynamicSort(query.ORDER));
 
-            } else {
-                finalTable.sort(this.dynamicSortNumber(query.ORDER));
+        // if (query.ORDER) { //if is important because optional
+        //     if (typeof(query.ORDER) === "string") {
+        //         finalTable.sort(this.dynamicSort(query.ORDER));
+        //
+        //     } else {
+        //         finalTable.sort(this.dynamicSortNumber(query.ORDER));
+        //
+        //     }
+        // }
 
-            }
-        }
-        */
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 

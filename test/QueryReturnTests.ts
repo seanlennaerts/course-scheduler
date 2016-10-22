@@ -331,4 +331,20 @@ describe("QueryReturns", function () {
         });
     });
 
+    // **************************   D2 tests *********************************
+
+    it("Testing empty WHERE", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+
+            expect(result.length).to.equal(7);
+        });
+    });
+
 });
