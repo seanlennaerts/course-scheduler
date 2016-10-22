@@ -9,8 +9,8 @@ import Course from "../model/Course";
 export interface QueryRequest {
     GET: string[]; //has to be string array -S
     WHERE: {};
-    // ORDER?: {};      // how it should be for D2, won't compile for now
-    ORDER?: string; //order is optional -S
+    ORDER?: {}|string;      // how it should be for D2, won't compile for now
+    //ORDER?: string; //order is optional -S
     GROUP?: string[];
     APPLY?:{}[];
     AS: string;
@@ -19,6 +19,11 @@ export interface QueryRequest {
 export interface QueryResponse {
     render: string;
     result: {}[];
+}
+
+export interface OrderObject {
+    dir: string;
+    keys: string[];
 }
 
 export default class QueryController {
@@ -35,27 +40,31 @@ export default class QueryController {
         this.datasets = datasets;
      //   this.datasetID = id;
      //   this.dataset = this.getDataset(id);
-
     }
 
     public returnWrongIDs(): string[]{
         return this.wrongDatasetIDs;
     }
 
-    private WHEREhelperArray(array:{}[]): number {
-        var resultNumbers :number[] = [];
-        for(var i of array){
-            var tempNumber: number = this.WHEREhelperObject(i);
-            //Log.info("this is tempNumber: " + tempNumber);
-            resultNumbers.push(tempNumber);
-            if (tempNumber === 400){
+    private weedOutErrorResults(results: number[]) : number {
+        for (var i of results){
+            if (i === 400) {
                 return 400;
             }
-            if (tempNumber === 424){
+            if(i === 424){
                 return 424;
+            } else {
+                return 200;
             }
         }
-        return 200;
+    }
+
+    private WHEREhelperArray(array:{}[]): number {
+        var resultNumbers :number[] = [];
+        for(var i of array) {
+            resultNumbers.push(this.WHEREhelperObject(i));
+        }
+        return this.weedOutErrorResults(resultNumbers)
     }
 
     private validKeys(s: string): boolean{
@@ -106,7 +115,7 @@ export default class QueryController {
         }
     }
 
-    public isValidOrderHandler(orderString: string): number {
+    private isValidOrderHandler(orderString: string): number {
         //Log.info("QueryController :: isValidOrderHandler(..) - ORDER key is:" + orderString);
         if (orderString.length === 0){
             return 400;
@@ -129,7 +138,27 @@ export default class QueryController {
         }
     }
 
-    public isValidAsHandler(asString: string): number{
+
+    private isValidOrderObject(obj: OrderObject): number{
+        if (obj.dir){
+            if (obj.dir === "UP" || obj.dir == "DOWN"){
+                // check for obj.keys === "" needed?
+                if (obj.keys){
+                    var orderKeysArray = obj.keys;
+                    for(var o of orderKeysArray){
+                        if (this.queryKeys.indexOf(o) === -1){
+                            return 400;
+                        } else {
+                            return 200;
+                        }
+                    }
+                }
+            }
+        }
+        return 400;
+    }
+
+    private isValidAsHandler(asString: string): number{
         if (asString.length === 0) {
             return 400;
         }
@@ -142,7 +171,7 @@ export default class QueryController {
         }
     }
 
-    public isValidGetHandler(getArray:string[]): number{
+    private isValidGetHandler(getArray:string[]): number{
         if (getArray.length <= 0) {
             return 400;
         } else {
@@ -175,6 +204,11 @@ export default class QueryController {
         }
     }
 
+
+    private APPLYandORDERhandler(apply: {}[], group: string[]): number {
+        return 0;
+    }
+
     public isValid(query: QueryRequest): number {
         if (typeof query !== 'undefined' && query !== null ) {
             if (query.GET && query.WHERE && query.AS) {
@@ -185,22 +219,36 @@ export default class QueryController {
                 if (GETresult === 200){
                     var ASresult = this.isValidAsHandler(query.AS);
                     if (ASresult === 200){
-                        // ORDER is optional
-                        if (query.ORDER === ""){
-                            return 400;
-                        }
-                        if (query.ORDER){
-                            var ORDERresult = this.isValidOrderHandler(query.ORDER);
-                            //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
-                            if(ORDERresult === 200) {
-                                return this.WHEREhelperObject(query.WHERE);
-                            } else {
-                                return ORDERresult;
+                        var WHEREresult = this.WHEREhelperObject(query.WHERE);
+                        if (WHEREresult === 200) {
+                           if (query.ORDER === ""){
+                                return 400;
                             }
-                        } else {
-                            //Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
-                            return this.WHEREhelperObject(query.WHERE);
+                           if (query.ORDER || query.APPLY || query.GROUP){
+                               var optionalKeysResults: number[] = [] ;
+                               var ORDERresult: number;
+                               var APPLYandORDERresult: number;
+                               if (query.ORDER){
+                                   if (typeof query.ORDER === "string"){
+                                       var ORDERstring: string = <any>(query.ORDER);
+                                       ORDERresult = this.isValidOrderHandler(ORDERstring);
+                                       optionalKeysResults.push(ORDERresult);
+                                       //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                                   }
+                                   else if (typeof query.ORDER === "object") {
+                                       var ORDERobject:OrderObject = <any>(query.ORDER);
+                                       ORDERresult = this.isValidOrderObject(ORDERobject);
+                                       optionalKeysResults.push(ORDERresult);
+                                   }
+                               }
+                               if(query.APPLY || query.GROUP){
+                                   APPLYandORDERresult = this.APPLYandORDERhandler(query.APPLY, query.GROUP);
+                                   optionalKeysResults.push(APPLYandORDERresult);
+                               }
+                               return this.weedOutErrorResults(optionalKeysResults);
+                           }
                         }
+                        return WHEREresult;
                     } else {
                         return ASresult;
                     }
@@ -209,7 +257,6 @@ export default class QueryController {
                 }
             }
             //Log.info("QueryController :: isValid(..) - query doesn't include GET, WHERE, AS");
-            return 400;
         }
         //Log.info("QueryController :: isValid(..) - query is either undefined, null" );
         return 400;
@@ -540,7 +587,7 @@ export default class QueryController {
             }
             finalTable.push(obj);
         }
-
+/*
         if (query.ORDER) { //if is important because optional
             if (typeof(query.ORDER) === "string") {
                 finalTable.sort(this.dynamicSort(query.ORDER));
@@ -550,6 +597,7 @@ export default class QueryController {
 
             }
         }
+        */
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
