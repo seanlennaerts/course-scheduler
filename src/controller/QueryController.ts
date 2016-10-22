@@ -53,10 +53,9 @@ export default class QueryController {
             }
             if(i === 424){
                 return 424;
-            } else {
-                return 200;
             }
         }
+        return 200;
     }
 
     private WHEREhelperArray(array:{}[]): number {
@@ -69,7 +68,7 @@ export default class QueryController {
 
     private validKeys(s: string): boolean{
         if (s === "dept" || s === "id" || s === "avg" || s === "instructor" || s === "title" || s === "pass" || s === "fail" ||
-            s === "audit" || s === "uuid"  ){
+            s === "audit" || s === "uuid"){
             return true;
         }
         return false;
@@ -148,10 +147,9 @@ export default class QueryController {
                     for(var o of orderKeysArray){
                         if (this.queryKeys.indexOf(o) === -1){
                             return 400;
-                        } else {
-                            return 200;
                         }
                     }
+                    return 200;
                 }
             }
         }
