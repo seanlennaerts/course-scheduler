@@ -198,7 +198,7 @@ describe("QueryController", function () {
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.equal(400);
+        expect(isValid).to.equal(200);
     });
 
     it("Should be able to invalidate an invalid query - empty ORDER string", function () {
@@ -758,5 +758,20 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
+    it("Invalid - dir value is empty", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "numSections"],
+            "WHERE": {},
+            "GROUP": [ "courses_dept", "courses_id" ],
+            "APPLY": [ {"numSections": {"COUNT": "courses_uuid"}} ],
+            "ORDER": { "dir": "", "keys": ["numSections", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
 
 });

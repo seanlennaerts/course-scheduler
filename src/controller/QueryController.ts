@@ -35,6 +35,7 @@ export default class QueryController {
     private dataset: Course[] = [];
     private queryKeys: string[] = [];
     private wrongDatasetIDs: string[] = [];
+    private GROUPandAPPLYkeys: string[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -75,7 +76,10 @@ export default class QueryController {
     }
 
     private WHEREhelperObject(whereObject: {}): number {
-        if (Object.keys(whereObject).length > 1 || Object.keys(whereObject).length === 0 ){
+        if (Object.keys(whereObject).length === 0){
+            return 200;
+        }
+        if (Object.keys(whereObject).length > 1){
             //Log.info("QueryController :: WHEREhelperObject(..) - Object has more than one key or is empty");
             return 400;
         }
@@ -203,8 +207,11 @@ export default class QueryController {
     }
 
 
-    private APPLYandORDERhandler(apply: {}[], group: string[]): number {
-        return 0;
+    private APPLYandGROUPhandler(query: QueryRequest) : number {
+        if (query.APPLY && query.GROUP){
+
+        }
+        return 400;
     }
 
     public isValid(query: QueryRequest): number {
@@ -219,10 +226,12 @@ export default class QueryController {
                     if (ASresult === 200){
                         var WHEREresult = this.WHEREhelperObject(query.WHERE);
                         if (WHEREresult === 200) {
+                            Log.info("this is query.ORDER" + query.ORDER);
                            if (query.ORDER === ""){
                                 return 400;
                             }
                            if (query.ORDER || query.APPLY || query.GROUP){
+                               //Log.info("it returned T for query.ORDER");
                                var optionalKeysResults: number[] = [] ;
                                var ORDERresult: number;
                                var APPLYandORDERresult: number;
@@ -240,7 +249,7 @@ export default class QueryController {
                                    }
                                }
                                if(query.APPLY || query.GROUP){
-                                   APPLYandORDERresult = this.APPLYandORDERhandler(query.APPLY, query.GROUP);
+                                   APPLYandORDERresult = this.APPLYandGROUPhandler(query);
                                    optionalKeysResults.push(APPLYandORDERresult);
                                }
                                return this.weedOutErrorResults(optionalKeysResults);
