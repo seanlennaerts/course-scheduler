@@ -60,6 +60,8 @@ export default class Course {
                 return this._fail;
             case "audit":
                 return this._audit;
+            case "uuid":
+                return this._uuid;
             default:
             //
         }

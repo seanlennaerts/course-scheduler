@@ -630,6 +630,17 @@ export default class QueryController {
 
     }
 
+    private dynamicSortTwo(field: string, reverse: any){
+
+        var key = function(x: any) {return x[field]};
+
+        reverse = !reverse ? 1 : -1;
+
+        return function (a: any, b: any) {
+            return a = key(a), b = key(b), reverse * (<any>(a > b) - <any>(b > a));
+        }
+    }
+
     public query(query: QueryRequest): QueryResponse {
         //initialize temp arrays
         this.tempResults = [];
@@ -712,15 +723,31 @@ export default class QueryController {
             }
         }
 
-        // if (query.ORDER) { //if is important because optional
-        //     if (typeof(query.ORDER) === "string") {
-        //         finalTable.sort(this.dynamicSort(query.ORDER));
-        //
-        //     } else {
-        //         finalTable.sort(this.dynamicSortNumber(query.ORDER));
-        //
-        //     }
-        // }
+        if (query.ORDER) { //if is important because optional
+            if (typeof(query.ORDER) === "string") {
+                //d1
+                // var sort = (<string>query.ORDER).split("_")[1];
+                // if (sort === "dept" || sort === "id" || sort === "title") {
+                //     finalTable.sort(this.dynamicSort(<string>query.ORDER));
+                // } else if (sort === "instructor") {
+                //     finalTable.sort(this.dynamicSort(<string>query.ORDER));
+                //     //should use JSON.stringify to accomodate sorting array in future
+                // } else {
+                //     finalTable.sort(this.dynamicSortNumber(<string>query.ORDER));
+                // }
+                finalTable.sort(this.dynamicSortTwo(<string>query.ORDER, false));
+
+            } else {
+                var orderObj = <OrderObject>query.ORDER;
+                var direction: boolean = false;
+                if (orderObj.dir === "DOWN") {
+                    direction = true;
+                }
+                for (var i = orderObj.keys.length - 1 ; i > -1; i--) {
+                    finalTable.sort(this.dynamicSortTwo(orderObj.keys[i], direction));
+                }
+            }
+        }
 
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
