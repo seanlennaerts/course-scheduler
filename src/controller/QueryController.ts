@@ -32,6 +32,8 @@ export default class QueryController {
     private tempResults: Course[][][] = [];
     private tempResultsIndex: number = 0;
 
+    private groupedResults: Course[][] = [];
+
     private dataset: Course[] = [];
     private queryKeys: string[] = [];
     private wrongDatasetIDs: string[] = [];
@@ -716,14 +718,72 @@ export default class QueryController {
         } else if (checkObj.NOT) {
             this.handleNOT(checkObj.NOT);
         } else {
-            //
+            Log.info("Empty where detected");
+            this.tempResults[0][0] = this.datasets["courses"];
+        }
+    }
+
+    private handleMAX (key: string, groupIndex: number): number {
+        var max: number = <number>this.groupedResults[groupIndex][0].getField(key);
+        for (var course of this.groupedResults[groupIndex]) {
+            if (course.getField(key) > max) {
+                max = <number>course.getField(key);
+            }
+        }
+        // return Math.round(max * 100) / 100;
+        return Number(max.toFixed(2));
+    }
+
+    private handleMIN (key: string, groupIndex: number): number {
+        var min: number = <number>this.groupedResults[groupIndex][0].getField(key);
+        for (var course of this.groupedResults[groupIndex]) {
+            if (course.getField(key) < min) {
+                min = <number>course.getField(key);
+            }
+        }
+        return Math.round(min * 100) / 100;
+    }
+
+    private handleAVG (key: string, groupIndex: number): number {
+        key = key.split("_")[1];
+        var sum = 0;
+        var i = 0;
+        for (i; i < this.groupedResults[groupIndex].length; i++) {
+            var course: Course = this.groupedResults[groupIndex][i];
+            var add: number = <number>course.getField(key);
+            sum += add;
+        }
+        return Math.round((sum / i) * 100) / 100;
+    }
+
+    private handleCOUNT (key: string, groupIndex: number): number {
+        return this.groupedResults[groupIndex].length;
+    }
+
+    private handleApply (applyArray: {}[], applyToken: string, groupIndex: number): {} {
+        for (var o of applyArray) {
+            var obj: any = <any>o;
+            if (obj[applyToken]) {
+                var applyFunctionName: string = Object.keys(obj[applyToken])[0];
+                if (applyFunctionName === "MAX") {
+                    return this.handleMAX(obj[applyToken]["MAX"], groupIndex);
+                } else if (applyFunctionName === "MIN") {
+                    return this.handleMIN(obj[applyToken]["MIN"], groupIndex);
+                } else if (applyFunctionName === "AVG") {
+                    return this.handleAVG(obj[applyToken]["AVG"], groupIndex);
+                } else if (applyFunctionName === "COUNT") {
+                    return this.handleCOUNT(obj[applyToken]["COUNT"], groupIndex);
+                } else {
+                    //
+                }
+            }
         }
     }
 
     //From stack overflow
     //http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
     private dynamicSort(property: string) {
-        Log.info("dynamicSort(): sorting...")
+        Log.info("dynamicSort(): sorting...");
         var sortOrder = 1;
         if (property[0] === "-") {
             sortOrder = -1;
@@ -742,41 +802,125 @@ export default class QueryController {
 
     }
 
+    private dynamicSortTwo(field: string, reverse: any){
+
+        var key = function(x: any) {return x[field]};
+
+        reverse = !reverse ? 1 : -1;
+
+        return function (a: any, b: any) {
+            return a = key(a), b = key(b), reverse * (<any>(a > b) - <any>(b > a));
+        }
+    }
+
     public query(query: QueryRequest): QueryResponse {
         //initialize temp arrays
         this.tempResults = [];
         this.tempResults[0] = [];
+        this.groupedResults = [];
 
         Log.trace('QueryController::query( ' + JSON.stringify(query) + ' )');
 
         this.nextObjectOrArray (query.WHERE);
 
         var finalTable: {}[] = [];
-        var wantedKeys: string[] = [];
-        for (var getVariables of query.GET) {
-            var wantKey: string = getVariables;
-            wantedKeys.push(wantKey);
-        }
-        for (var course of this.tempResults[0][0]) {
-            var obj: {} = {};
-            for (var key of wantedKeys) {
-                var keyRight: string = key.split("_")[1];
-                (<any>obj)[key] = course.getField(keyRight);
-                //Log.info("Check it out!: " + obj[key]);
+        if (query.GROUP && query.APPLY) {
+            // can be replace by Ana Cris' global variables: this.GROUPkeys and this.APPLYkeys
+            var groupTerms: string[] = [];
+            var applyTerms: string[] = [];
+            for (var term of query.GET) {
+                if ((<string>term).includes("_")) {
+                    groupTerms.push(term);
+                } else {
+                    applyTerms.push(term);
+                }
             }
-            finalTable.push(obj);
+            //Make groups
+            var termPairingsAlreadyFound: {[pair: string]: number} = {}; //leads term pairings to index of group course[] (for better time complexity) -S
+            var termPairingsAlreadyFoundIndex: number = 0;
+            for (var course of this.tempResults[0][0]) {
+                var allSame: boolean = true;
+                var buildTermPairing: string = "";
+                for (var term of groupTerms) {
+                    var keyRight:string = term.split("_")[1];
+                    var fieldValue = course.getField(keyRight);
+                    if (typeof (fieldValue) === "number") {
+                        buildTermPairing += (<number>fieldValue).toString();
+                    } else if (typeof (fieldValue) === "string") {
+                        buildTermPairing += (<string>fieldValue);
+                    } else {
+                        //typeof String[]
+                        buildTermPairing += JSON.stringify(<string[]>fieldValue);
+                    }
+                }
+                if (buildTermPairing in termPairingsAlreadyFound) {
+                    this.groupedResults[termPairingsAlreadyFound[buildTermPairing]].push(course);
+                } else {
+                    termPairingsAlreadyFound[buildTermPairing] = termPairingsAlreadyFoundIndex;
+                    this.groupedResults[termPairingsAlreadyFound[buildTermPairing]] = [];
+                    termPairingsAlreadyFoundIndex++;
+                    this.groupedResults[termPairingsAlreadyFound[buildTermPairing]].push(course);
+                }
+            }
+
+            //start building new table
+            //query.GET is already string[]
+            //invariant: all courses in groups will have the same value for Group keys
+            for (var i = 0; i < this.groupedResults.length; i++) {
+                var row: {} = {};
+                for (var term of query.GET) {
+                    if (term.includes("_")) {
+                        var groupValue = this.groupedResults[i][0].getField(term.split("_")[1]);
+                        (<any>row)[term] = groupValue;
+                    } else {
+                        (<any>row)[term] = this.handleApply(query.APPLY, term, i);
+                    }
+                }
+                finalTable.push(row);
+            }
+        } else {
+            var wantedKeys: string[] = [];
+            for (var getVariables of query.GET) {
+                var wantKey: string = getVariables;
+                wantedKeys.push(wantKey);
+            }
+            for (var course of this.tempResults[0][0]) {
+                var obj: {} = {};
+                for (var key of wantedKeys) {
+                    var keyRight: string = key.split("_")[1];
+                    (<any>obj)[key] = course.getField(keyRight);
+                    //Log.info("Check it out!: " + obj[key]);
+                }
+                finalTable.push(obj);
+            }
         }
-/*
+
         if (query.ORDER) { //if is important because optional
             if (typeof(query.ORDER) === "string") {
-                finalTable.sort(this.dynamicSort(query.ORDER));
+                //d1
+                // var sort = (<string>query.ORDER).split("_")[1];
+                // if (sort === "dept" || sort === "id" || sort === "title") {
+                //     finalTable.sort(this.dynamicSort(<string>query.ORDER));
+                // } else if (sort === "instructor") {
+                //     finalTable.sort(this.dynamicSort(<string>query.ORDER));
+                //     //should use JSON.stringify to accomodate sorting array in future
+                // } else {
+                //     finalTable.sort(this.dynamicSortNumber(<string>query.ORDER));
+                // }
+                finalTable.sort(this.dynamicSortTwo(<string>query.ORDER, false));
 
             } else {
-                finalTable.sort(this.dynamicSortNumber(query.ORDER));
-
+                var orderObj = <OrderObject>query.ORDER;
+                var direction: boolean = false;
+                if (orderObj.dir === "DOWN") {
+                    direction = true;
+                }
+                for (var i = orderObj.keys.length - 1 ; i > -1; i--) {
+                    finalTable.sort(this.dynamicSortTwo(orderObj.keys[i], direction));
+                }
             }
         }
-        */
+
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 

@@ -331,4 +331,60 @@ describe("QueryReturns", function () {
         });
     });
 
+    // **************************   D2 tests *********************************
+
+    it("Testing empty WHERE", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+
+            expect(result.length).to.equal(7);
+        });
+    });
+
+    it("First test of GROUP and APPLY", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courseAvg"],
+            "WHERE": {},
+            "GROUP": ["courses_dept", "courses_id"],
+            "APPLY": [{"courseAvg": {"AVG": "courses_avg"}}],
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_dept: "cpsc", courses_id: "110", courseAvg: 75.15},
+                                        {courses_dept: "comm", courses_id: "101", courseAvg: 73.12}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.include.members(expectedResult);
+            expect(result.length).to.equal(2);
+        });
+    });
+
+    it("Given group and apply test 2", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id", "courseAverage"],
+            "WHERE": {"IS": {"courses_dept": "cpsc"}} ,
+            "GROUP": [ "courses_id" ],
+            "APPLY": [ {"courseAverage": {"AVG": "courses_avg"}} ],
+            //"ORDER": { "dir": "UP", "keys": ["courseAverage", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_id: "110", courseAverage: 75.15}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.include.members(expectedResult);
+            expect(result.length).to.equal(1);
+        });
+    });
+
 });
