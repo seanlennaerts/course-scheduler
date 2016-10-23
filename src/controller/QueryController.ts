@@ -37,7 +37,9 @@ export default class QueryController {
     private dataset: Course[] = [];
     private queryKeys: string[] = [];
     private wrongDatasetIDs: string[] = [];
-    private GROUPandAPPLYkeys: string[] = [];
+    private GROUPkeys: string[] = [];
+    private completeGROUPkeys: string[] = [];
+    private APPLYkeys: string[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -79,6 +81,7 @@ export default class QueryController {
 
     private WHEREhelperObject(whereObject: {}): number {
         if (Object.keys(whereObject).length === 0){
+            Log.info("WHEREhelperObject:: empty WhHERE object");
             return 200;
         }
         if (Object.keys(whereObject).length > 1){
@@ -100,7 +103,6 @@ export default class QueryController {
                 }
             }
         }
-       // }
         // check LOGIC operators
         if (Object.keys(whereObject)[0] === "LT" || Object.keys(whereObject)[0] === "GT" || Object.keys(whereObject)[0] === "EQ" ||
             Object.keys(whereObject)[0] === "IS" || Object.keys(whereObject)[0] === "NOT") {
@@ -124,34 +126,37 @@ export default class QueryController {
         //Log.info("QueryController :: isValidOrderHandler(..) - ORDER key is:" + orderString);
         if (orderString.length === 0){
             return 400;
-        } if (!(orderString.includes("_"))){
-            return 400;
-        } else {
-            // it used to be: (this.queryKeys.indexOf(orderString.split("_")[1], 0) == -1)
-            if (!(orderString.split("_")[0] in this.datasets)){
-                this.wrongDatasetIDs[0] = orderString.split("_")[0];
-                //Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
-                return 424;
-            }
-            if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
-                //Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
-                return 400;
-            } else {
-                //Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
-                return 200;
-            }
         }
+        if (!(orderString.includes("_"))){
+            return 400;
+        }
+        // it used to be: (this.queryKeys.indexOf(orderString.split("_")[1], 0) == -1)
+        if (!(orderString.split("_")[0] in this.datasets)){
+            this.wrongDatasetIDs[0] = orderString.split("_")[0];
+            //Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
+            return 424;
+        }
+        if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
+            //Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
+            return 400;
+        }
+        //Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
+        return 200;
     }
 
-
     private isValidOrderObject(obj: OrderObject): number{
-        if (obj.dir){
+        if (Object.keys(obj).length !== 2) {
+            return 400;
+        }
+        if ("dir" in obj && obj.dir.length !== 0){
             if (obj.dir === "UP" || obj.dir == "DOWN"){
-                // check for obj.keys === "" needed?
-                if (obj.keys){
-                    var orderKeysArray = obj.keys;
+                if ("keys" in obj && obj.keys.length !== 0){
+                    var orderKeysArray : string[] = obj.keys;
+                    var GROUPandAPPLYkeys: string[] = this.completeGROUPkeys.concat(this.APPLYkeys);
                     for(var o of orderKeysArray){
-                        if (this.queryKeys.indexOf(o) === -1){
+                        Log.info("isValidOrderObject:: this is the key being tried: " + o);
+                        if (GROUPandAPPLYkeys.indexOf(o) === -1){
+                            Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
                             return 400;
                         }
                     }
@@ -175,32 +180,31 @@ export default class QueryController {
         }
     }
 
-    private isValidGetHandler(getArray:string[]): number{
+    private d1isValidGetHandler(getArray : string[]): number{
         if (getArray.length <= 0) {
             return 400;
         } else {
-            for (var i = 0; i < getArray.length; i++) {
-                if (!(getArray[i].includes("_"))){
-                    return 400;
-                }
-                var GETelement: string[] = getArray[i].split("_");
-                var id: string = GETelement[0];
-                //Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
-                if (!(id in this.datasets)) {
-                    this.wrongDatasetIDs.push(id);
-                    //Log.info("QueryController :: isValidGetHandler(..) - 424 error: " + id + " hasn't been put");
-                    //Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
-                    return (424);
-                } else {
-                    //Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
-                    var datasetField = GETelement[1];
-                    //Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
-                    if (!(this.validKeys(datasetField))){
-                        //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+            for (var i of getArray) {
+                if (!(i.includes("_"))) {
+                    if (this.APPLYkeys.indexOf(i) === -1) {
                         return 400;
+                    }
+                } else {
+                    var GETelement: string[] = i.split("_");
+                    var id: string = GETelement[0];
+                    //Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
+                    if (!(id in this.datasets)) {
+                        this.wrongDatasetIDs.push(id);
+                        return (424);
                     } else {
-                        //Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
-                        this.queryKeys.push(datasetField);
+                        var datasetField = GETelement[1];
+                        if (!(this.validKeys(datasetField))) {
+                            //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+                            return 400;
+                        } else {
+                            //Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                            this.queryKeys.push(datasetField);
+                        }
                     }
                 }
             }
@@ -208,61 +212,219 @@ export default class QueryController {
         }
     }
 
-
-    private APPLYandGROUPhandler(query: QueryRequest) : number {
-        if (query.APPLY && query.GROUP){
-
+    private isValidGetHandler(getArray:string[]): number{
+        Log.info("isValidGetHandler:: STARTED");
+        if (getArray.length === 0) {
+            Log.info("isValidGetHandler:: input has size 0");
+            return 400;
+        } else {
+            for (var i of getArray) {
+                if (!(i.includes("_"))){
+                    Log.info("isValidGetHandler:: GET key: " + i + " doesn't include _");
+                    if (this.APPLYkeys.indexOf(i) === -1){
+                        Log.info("isValidGetHandler:: GET key not found in APPLYkeys");
+                        return 400;
+                    }
+                } else {
+                    var GETelement: string[] = i.split("_");
+                    var id: string = GETelement[0];
+                    //Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
+                    if (!(id in this.datasets)) {
+                        this.wrongDatasetIDs.push(id);
+                        //Log.info("QueryController :: isValidGetHandler(..) - 424 error: " + id + " hasn't been put");
+                        //Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
+                        return (424);
+                    }
+                    //Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
+                    var datasetField = GETelement[1];
+                    //Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
+                    /*if (!(this.validKeys(datasetField))){
+                     //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+                     return 400;
+                     } else {
+                     //Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                     this.queryKeys.push(datasetField);
+                     }
+                     */
+                    if (this.GROUPkeys.indexOf(datasetField) === -1) {
+                        return 400;
+                    }
+                }
+            }
+            return 200;
         }
-        return 400;
     }
 
-    public isValid(query: QueryRequest): number {
+    private APPLYandGROUPhandler(query: QueryRequest) : number {
+        if ("APPLY" in query && "GROUP" in query){
+            if (query.GROUP.length === 0){
+                return 400;
+            }
+            var groupArray: string[] = query.GROUP;
+            for (var i of groupArray){
+                if (!(i.includes("_"))){
+                    return 400;
+                }
+                var GROUPelement: string[] = i.split("_");
+                var id = GROUPelement[0];
+                Log.info("APPLYandGROUPhandler:: This is id: " + id);
+                if (!(id in this.datasets)) {
+                    this.wrongDatasetIDs.push(id);
+                    Log.info("About to return 424, group element id not in dataset");
+                    return (424);
+
+                } else {
+                    var groupKey = GROUPelement[1];
+                    if (!(this.validKeys(groupKey))) {
+                        return 400;
+                    } else {
+                        Log.info("String I want being pushed to GROUP keys: " + i);
+                        this.completeGROUPkeys.push(i);
+                        this.GROUPkeys.push(groupKey);
+                    }
+                }
+            }
+
+            var applyStruct:{}[] = query.APPLY;
+            for (var j of applyStruct){
+                var wantedComputation: {} = j;
+                var stringName: string = Object.keys(wantedComputation)[0];
+                Log.info("String being pushed to APPLYkeys: " + stringName);
+                this.APPLYkeys.push(stringName);
+                var APPLYkeyObject: {} = (<any>wantedComputation)[stringName];
+                var key : string = Object.keys(APPLYkeyObject)[0];
+                if (!(key === "AVG" || key === "COUNT" || key === "MAX" || key === "MIN")){
+                    return 400;
+                }
+                var field: string = (<any>APPLYkeyObject)[key];
+                if (key === "MAX" || key === "MIN" || key === "MAX"){
+                    if (!(field === "avg" || field === "pass" || field === "fail" ||field === "audit")){
+                        return 400;
+                    }
+                }
+
+                var idAndField: string = (<any>APPLYkeyObject)[key];
+                var APPLYelement : string[] = idAndField.split("_");
+                var APPLYid : string = APPLYelement[0];
+                Log.info("APPLYid is: " + APPLYid);
+                if (!(APPLYid in this.datasets)){
+                    Log.info("About to return 424, APPLY inner element id not in dataset");
+                    return 424;
+                } else {
+                    var APPLYfield : string = APPLYelement[1];
+                    if (!(this.validKeys(APPLYfield))){
+                        return 400;
+                    }
+                }
+            }
+            return 200;
+        }
+    }
+
+    public d1IsValid(query: QueryRequest): number {
         if (typeof query !== 'undefined' && query !== null ) {
-            if (query.GET && query.WHERE && query.AS) {
+            if ("GET" in query && "WHERE" in query && "AS" in query) {
                 // GET part of query
                 var GETelements: string[] = query.GET;
-               // Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
-                var GETresult = this.isValidGetHandler(GETelements);
-                if (GETresult === 200){
+                // Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
+                var GETresult = this.d1isValidGetHandler(GETelements);
+                if (GETresult === 200) {
                     var ASresult = this.isValidAsHandler(query.AS);
-                    if (ASresult === 200){
-                        var WHEREresult = this.WHEREhelperObject(query.WHERE);
-                        if (WHEREresult === 200) {
-                            Log.info("this is query.ORDER" + query.ORDER);
-                           if (query.ORDER === ""){
-                                return 400;
-                            }
-                           if (query.ORDER || query.APPLY || query.GROUP){
-                               //Log.info("it returned T for query.ORDER");
-                               var optionalKeysResults: number[] = [] ;
-                               var ORDERresult: number;
-                               var APPLYandORDERresult: number;
-                               if (query.ORDER){
-                                   if (typeof query.ORDER === "string"){
-                                       var ORDERstring: string = <any>(query.ORDER);
-                                       ORDERresult = this.isValidOrderHandler(ORDERstring);
-                                       optionalKeysResults.push(ORDERresult);
-                                       //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
-                                   }
-                                   else if (typeof query.ORDER === "object") {
-                                       var ORDERobject:OrderObject = <any>(query.ORDER);
-                                       ORDERresult = this.isValidOrderObject(ORDERobject);
-                                       optionalKeysResults.push(ORDERresult);
-                                   }
-                               }
-                               if(query.APPLY || query.GROUP){
-                                   APPLYandORDERresult = this.APPLYandGROUPhandler(query);
-                                   optionalKeysResults.push(APPLYandORDERresult);
-                               }
-                               return this.weedOutErrorResults(optionalKeysResults);
-                           }
+                    if (ASresult === 200) {
+                        // ORDER is optional
+                        if (query.ORDER === "") {
+                            return 400;
                         }
-                        return WHEREresult;
+                        if (query.ORDER) {
+                            var ORDERresult: number;
+                            if (typeof query.ORDER === "string") {
+                                var ORDERstring: string = <any>(query.ORDER);
+                                ORDERresult = this.isValidOrderHandler(ORDERstring);
+                                //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                            }
+                            if (ORDERresult === 200) {
+                                return this.WHEREhelperObject(query.WHERE);
+                            } else {
+                                return ORDERresult;
+                            }
+                        } else {
+                            //Log.info("QueryController :: isValid(..) - no ORDER key, query is now going to  WHEREhelperObject");
+                            return this.WHEREhelperObject(query.WHERE);
+                        }
                     } else {
                         return ASresult;
                     }
                 } else {
                     return GETresult;
+                }
+            }
+        }
+        return 400;
+    }
+
+    public isValid(query: QueryRequest): number {
+        Log.info("isValid:: STARTED");
+        if (typeof query !== 'undefined' && query !== null ){
+            Log.info("isValid:: query not undefined or null");
+
+            if (!("GROUP" in query || "APPLY" in query)){
+                Log.info("Query is type d1")
+                return this.d1IsValid(query);
+            }
+
+            else if ("GROUP" in query && "APPLY" in query) {
+                Log.info("isValid:: query is D2 type");
+                var APPLYandORDERresult = this.APPLYandGROUPhandler(query);
+                if (APPLYandORDERresult !== 200) {
+                    Log.info("APPLYandORDERresult: " + APPLYandORDERresult)
+                    return APPLYandORDERresult;
+                } else{
+                    if ("GET" in query && "WHERE" in query && "AS" in query) {
+                        Log.info("isValid:: query has WHERE, AS, and GET");
+                        // GET part of query
+                        var GETelements: string[] = query.GET;
+                        // Log.info("QueryController :: isValid(..) - GETelements are: " + JSON.stringify(GETelements) + "going into isValidGetHandler");
+                        var GETresult: number = this.isValidGetHandler(GETelements);
+                        Log.info("isValid:: this is GETresult: " + GETresult);
+                        if (GETresult === 200) {
+                            Log.info("isValid:: going now to AS handler");
+                            var ASresult = this.isValidAsHandler(query.AS);
+                            if (ASresult === 200) {
+                                Log.info("isValid:: AS returned 200, going to WHERE helper");
+                                var WHEREresult = this.WHEREhelperObject(query.WHERE);
+                                if (WHEREresult === 200) {
+                                    if (query.ORDER === "") {
+                                        return 400;
+                                    }
+                                    if ("ORDER" in query) {
+                                        Log.info("isValid:: query has optional key ORDER");
+                                        //Log.info("it returned T for query.ORDER");
+                                        var ORDERresult: number = 0;
+                                        if (query.ORDER) {
+                                            Log.info("isValid:: query not undefined or null");
+                                            if (typeof query.ORDER === "string") {
+                                                var ORDERstring: string = <any>(query.ORDER);
+                                                Log.info("isValid:: ORDER is string");
+                                                ORDERresult = this.isValidOrderHandler(ORDERstring);
+                                                //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                                            }
+                                            else if (typeof query.ORDER === "object") {
+                                                var ORDERobject: OrderObject = <any>(query.ORDER);
+                                                Log.info("isValid:: ORDER is an object");
+                                                ORDERresult = this.isValidOrderObject(ORDERobject);
+                                            }
+                                        }
+                                        return ORDERresult;
+                                    }
+                                }
+                                return WHEREresult;
+                            } else {
+                                return ASresult;
+                            }
+                        } else {
+                            return GETresult;
+                        }
+                    }
                 }
             }
             //Log.info("QueryController :: isValid(..) - query doesn't include GET, WHERE, AS");
