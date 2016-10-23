@@ -57,21 +57,21 @@ export default class InsightFacade implements IInsightFacade {
         return new Promise(function(fulfill, reject){
             let datasets: Datasets = InsightFacade.datasetController.getDatasets();
             let controller = new QueryController(datasets);
-            let isValid = controller.isValid(query);
-            Log.info("InsightFacade :: performQuery(..) - isValid is now:" + isValid);
+            //let isValid = controller.isValid(query);
+            //Log.info("InsightFacade :: performQuery(..) - isValid is now:" + isValid);
 
-            switch (isValid) {
-                case 200:
+            // switch (isValid) {
+            //     case 200:
                     let result = controller.query(query);
                     fulfill({code: 200, body: result});
                     Log.info("Lenght of result array after performing query: " + result.result.length);
-                    break;
-                case 424:
-                    reject({code: 424, body: {missing: controller.returnWrongIDs()}});
-                    break;
-                default:
-                    reject({code: 400, body: {error: "Invalid query"}});
-            }
+            //         break;
+            //     case 424:
+            //         reject({code: 424, body: {missing: controller.returnWrongIDs()}});
+            //         break;
+            //     default:
+            //         reject({code: 400, body: {error: "Invalid query"}});
+            // }
         });
     }
 }
