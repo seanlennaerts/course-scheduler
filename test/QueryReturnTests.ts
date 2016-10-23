@@ -387,4 +387,44 @@ describe("QueryReturns", function () {
         });
     });
 
+    it("Check order", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id", "courseAverage"],
+            "WHERE": {"IS": {"courses_dept": "cpsc"}} ,
+            "GROUP": [ "courses_id" ],
+            "APPLY": [ {"courseAverage": {"AVG": "courses_avg"}} ],
+            "ORDER": { "dir": "UP", "keys": ["courseAverage", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_id: "110", courseAverage: 75.15}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.include.members(expectedResult);
+            expect(result.length).to.equal(1);
+        });
+    });
+
+    it("Check order 2", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id", "maxPass"],
+            "WHERE": {},
+            "GROUP": [ "courses_id" ],
+            "APPLY": [ {"maxPass": {"MAX": "courses_pass"}} ],
+            "ORDER": { "dir": "DOWN", "keys": ["maxPass", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_id: "101", maxPass: 662},
+                                        {courses_id: "110", maxPass: 180}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.include.members(expectedResult);
+            expect(result.length).to.equal(2);
+        });
+    });
 });
