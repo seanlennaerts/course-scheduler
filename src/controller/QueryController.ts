@@ -294,6 +294,13 @@ export default class QueryController {
                 if (!(key === "AVG" || key === "COUNT" || key === "MAX" || key === "MIN")){
                     return 400;
                 }
+                var field: string = (<any>APPLYkeyObject)[key];
+                if (key === "MAX" || key === "MIN" || key === "MAX"){
+                    if (!(field === "avg" || field === "pass" || field === "fail" ||field === "audit")){
+                        return 400;
+                    }
+                }
+
                 var idAndField: string = (<any>APPLYkeyObject)[key];
                 var APPLYelement : string[] = idAndField.split("_");
                 var APPLYid : string = APPLYelement[0];
