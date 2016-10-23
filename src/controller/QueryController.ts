@@ -267,7 +267,7 @@ export default class QueryController {
                 }
                 var GROUPelement: string[] = i.split("_");
                 var id = GROUPelement[0];
-                Log.info("APPLYandGROUPhandler:: This is id: " + id);
+                Log.info("APPLYandGROUPhandler:: GROUP - This is id: " + id);
                 if (!(id in this.datasets)) {
                     this.wrongDatasetIDs.push(id);
                     Log.info("About to return 424, group element id not in dataset");
@@ -278,7 +278,7 @@ export default class QueryController {
                     if (!(this.validKeys(groupKey))) {
                         return 400;
                     } else {
-                        Log.info("String I want being pushed to GROUP keys: " + i);
+                        Log.info("String I pushed to GROUP keys: " + groupKey);
                         this.completeGROUPkeys.push(i);
                         this.GROUPkeys.push(groupKey);
                     }
@@ -293,12 +293,22 @@ export default class QueryController {
                 this.APPLYkeys.push(stringName);
                 var APPLYkeyObject: {} = (<any>wantedComputation)[stringName];
                 var key : string = Object.keys(APPLYkeyObject)[0];
+                Log.info("Operator of APPLY inner object is: " + key);
                 if (!(key === "AVG" || key === "COUNT" || key === "MAX" || key === "MIN")){
                     return 400;
                 }
-                var field: string = (<any>APPLYkeyObject)[key];
-                if (key === "MAX" || key === "MIN" || key === "MAX"){
-                    if (!(field === "avg" || field === "pass" || field === "fail" ||field === "audit")){
+                var idAndField: string = (<any>APPLYkeyObject)[key];
+                var splitIt: string[] = idAndField.split("_");
+                if (!(splitIt[0] in this.datasets)) {
+                    this.wrongDatasetIDs.push(splitIt[0]);
+                    Log.info("About to return 424, group element id not in dataset");
+                    return (424);
+                }
+                var field : string = splitIt[1];
+                Log.info("Corresponding field for that key is: " + field);
+                if (key === "MAX" || key === "MIN" || key === "AVG"){
+                    if (!(field === "avg" || field === "pass" || field === "fail" || field === "audit" || field === "uuid")){
+                        Log.info("MAX, MIN, AVG doesn't have numeric field")
                         return 400;
                     }
                 }
