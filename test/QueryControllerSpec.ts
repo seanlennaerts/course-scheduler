@@ -586,6 +586,22 @@ describe("QueryController", function () {
 
     it("Valid query - empty APPLY but should return 200", function () {
         let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id"],
+            "WHERE": {},
+            "GROUP": [ "courses_dept", "courses_id" ],
+            "APPLY": [],
+            "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Invalid query - empty APPLY but GET has element not from GROUP/APPLY", function () {
+        let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "numSections"],
             "WHERE": {},
             "GROUP": [ "courses_dept", "courses_id" ],
@@ -597,9 +613,8 @@ describe("QueryController", function () {
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
-        expect(isValid).to.equal(200);
+        expect(isValid).to.equal(400);
     });
-
     it("Invalid query - GROUP but no APPLY - Should return 400", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id", "numSections"],
