@@ -40,6 +40,7 @@ export default class QueryController {
     private GROUPkeys: string[] = [];
     private completeGROUPkeys: string[] = [];
     private APPLYkeys: string[] = [];
+    private duplicateKeys: string[] = [];
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
@@ -49,6 +50,10 @@ export default class QueryController {
 
     public returnWrongIDs(): string[]{
         return this.wrongDatasetIDs;
+    }
+
+    public returnDuplicates(): string[] {
+        return this.duplicateKeys;
     }
 
     private weedOutErrorResults(results: number[]) : number {
@@ -289,8 +294,15 @@ export default class QueryController {
             for (var j of applyStruct){
                 var wantedComputation: {} = j;
                 var stringName: string = Object.keys(wantedComputation)[0];
-                Log.info("String being pushed to APPLYkeys: " + stringName);
-                this.APPLYkeys.push(stringName);
+                Log.info("APPLYandGROUPhandler:: String in APPLY outer object: " + stringName);
+                if (!(this.APPLYkeys.includes(stringName))){
+                    Log.info("APPLYandGROUPhandler:: String pushed into APPLYkeys: " + stringName);
+                    this.APPLYkeys.push(stringName);
+                } else {
+                    Log.info("APPLYandGROUPhandler:: " + stringName + "is a duplicate, pushed to duplicateKeys");
+                    this.duplicateKeys.push(stringName);
+                    return 400;
+                }
                 var APPLYkeyObject: {} = (<any>wantedComputation)[stringName];
                 var key : string = Object.keys(APPLYkeyObject)[0];
                 Log.info("Operator of APPLY inner object is: " + key);
@@ -305,6 +317,11 @@ export default class QueryController {
                     return (424);
                 }
                 var field : string = splitIt[1];
+                if (this.GROUPkeys.includes(field)){
+                    Log.info("Returning 400, APPLY inner field: " + field + "already in GROUPkeys")
+                    this.duplicateKeys.push(field);
+                    return 400;
+                }
                 Log.info("Corresponding field for that key is: " + field);
                 if (key === "MAX" || key === "MIN" || key === "AVG"){
                     if (!(field === "avg" || field === "pass" || field === "fail" || field === "audit" || field === "uuid")){

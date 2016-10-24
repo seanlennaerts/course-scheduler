@@ -60,4 +60,15 @@ describe("InsightFacade", function () {
             expect(response.code).to.equal(400);
         });
     });
+
+    it("Should not be able to delete a valid dataset (400)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        facade.addDataset('courses', zipFileContents);
+        return facade.removeDataset("courses").then(function (response: InsightResponse) {
+            expect(response.code).to.equal(204);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
 });
