@@ -34,7 +34,7 @@ export default class Course {
         this._audit = audit;
     }
 
-    get uniqueId(): number {
+    public getUniqueId(): number {
         return this._uuid;
     }
 

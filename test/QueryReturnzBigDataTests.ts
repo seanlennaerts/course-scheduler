@@ -134,5 +134,57 @@ describe("QueryReturnBigData", function () {
         });
     });
 
+    it("Check MOONSHINE", function () {
+        let query: QueryRequest = {	"GET" : ["courses_dept", "courses_id", "numberOfferings", "gradeAverages", "numPasses", "avgFails"],
+            "WHERE" : {"IS" : {"courses_dept": "cpsc"}},
+            "GROUP" : [ "courses_id", "courses_dept"],
+            "APPLY" : [ {"numberOfferings": {"COUNT": "courses_uuid"}}, {"gradeAverages":{"AVG" : "courses_avg"}}, {"numPasses" : {"COUNT" : "courses_pass"}}, {"avgFails" : {"AVG" : "courses_fail"}}],
+            "ORDER" : { "dir": "DOWN", "keys": ["courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    it("Check NAUTILUS", function () {
+        let query: QueryRequest = {   "GET": ["courses_dept", "courses_id", "minFails", "maxAudits"],
+            "WHERE":  {"AND" : [{"IS": {"courses_dept": "c*"}},
+                {"OR" : [{"IS" : {"courses_id" : "4*"}},{"IS" : {"courses_id" : "5*"}}]}]},
+            "GROUP": [ "courses_id", "courses_dept"],
+            "APPLY": [ {"minFails": {"MIN": "courses_fail"}}, {"maxAudits":{"MAX" : "courses_audit"}} ],
+            "ORDER": { "dir": "UP", "keys": ["minFails", "maxAudits", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    it("Check ORION", function () {
+        let query: QueryRequest = {   "GET" : ["courses_dept", "courses_id", "minFails", "maxAudits"],
+            "WHERE" : {"AND": [{"EQ": {"course_avg" : 101}},{"IS": {"courses_dept": "c*"}}]},
+            "GROUP" : [ "courses_id", "courses_dept"],
+            "APPLY" : [ {"minFails": {"MIN": "courses_fail"}}, {"maxAudits":{"MAX" : "courses_audit"}} ],
+            "ORDER" : { "dir": "UP", "keys": ["minFails", "maxAudits", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
 
 });

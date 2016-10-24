@@ -477,12 +477,12 @@ export default class QueryController {
         Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
         var filteredResult: Course[] = [];
         for (var course of this.tempResults[this.tempResultsIndex][0]) {
-            var id: number = course.uniqueId;
+            var id: number = course.getUniqueId();
             var exists: boolean = false;
             for (var i = 1; i < this.tempResults[this.tempResultsIndex].length; i++) {
                 exists = false;
                 for (var checkCourse of this.tempResults[this.tempResultsIndex][i]) {
-                    if (checkCourse.uniqueId === id) {
+                    if (checkCourse.getUniqueId() === id) {
                         //found. no use checking other courses in this list
                         exists = true;
                         break; //go to next course array in tempResults
@@ -544,7 +544,7 @@ export default class QueryController {
         for (var c1 of tempMaster) {
             var exists: boolean = false;
             for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
-                if (c1.uniqueId === c2.uniqueId) {
+                if (c1.getUniqueId() === c2.getUniqueId()) {
                     exists = true;
                     //Log.info("Removing class: " +  JSON.stringify(c1));
                 }
@@ -600,7 +600,7 @@ export default class QueryController {
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) === value) {
                 filteredResult.push(section);
-                Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
+                Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.getUniqueId() + "-" + section.getField("avg"));
             }
         }
         this.tempResults[this.tempResultsIndex].push(filteredResult);
@@ -776,7 +776,17 @@ export default class QueryController {
     }
 
     private handleCOUNT (key: string, groupIndex: number): number {
-        return this.groupedResults[groupIndex].length;
+        var total: number = 0;
+        var uuidDict: {[pair: string]: number} = {}; //leads term pairings to index of group course[] (for better time complexity) -S
+        for (var i = 0; i < this.groupedResults[groupIndex].length; i++) {
+            var uniqueId: number = this.groupedResults[groupIndex][i].getUniqueId();
+            if (!(uniqueId in uuidDict)) {
+                uuidDict[uniqueId] = i;
+                total++;
+            }
+        }
+        return total;
+        //return this.groupedResults[groupIndex].length;
     }
 
     private handleApply (applyArray: {}[], applyToken: string, groupIndex: number): {} {
