@@ -561,6 +561,7 @@ export default class QueryController {
             for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
                 if (c1.getUniqueId() === c2.getUniqueId()) {
                     exists = true;
+                    break; //I ADDED THIS RECENTLY. IF NOT IS NOT WORKING REMOVE break
                     //Log.info("Removing class: " +  JSON.stringify(c1));
                 }
             }
@@ -790,18 +791,59 @@ export default class QueryController {
         return Number((sum / i).toFixed(2));
     }
 
-    private handleCOUNT (key: string, groupIndex: number): number {
-        var total: number = 0;
-        var uuidDict: {[pair: string]: number} = {}; //leads term pairings to index of group course[] (for better time complexity) -S
-        for (var i = 0; i < this.groupedResults[groupIndex].length; i++) {
-            var uniqueId: number = this.groupedResults[groupIndex][i].getUniqueId();
-            if (!(uniqueId in uuidDict)) {
-                uuidDict[uniqueId] = i;
-                total++;
+    private countHelperString (key: string, groupIndex: number): number {
+        var uniqueDictionary: {[value: string]: number[]} = {}; //number[] is uuid[]
+        for (var course of this.groupedResults[groupIndex]) {
+            var value: string = <string>course.getField(key);
+            if (!(value in uniqueDictionary)) {
+                uniqueDictionary[value] = [];
+                uniqueDictionary[value].push(course.getUniqueId());
+            } else {
+                var alreadyExists = false;
+                for (var uuid of uniqueDictionary[value]) {
+                    if (course.getUniqueId() === uuid) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (alreadyExists) {
+                    uniqueDictionary[value].push(course.getUniqueId());
+                }
             }
         }
-        return total;
-        //return this.groupedResults[groupIndex].length;
+        return Object.keys(uniqueDictionary).length;
+    }
+
+    private countHelperNumber (key: string, groupIndex: number): number {
+        var uniqueDictionary: {[value: number]: number[]} = {}; //number[] is uuid[]
+        for (var course of this.groupedResults[groupIndex]) {
+            var value: number = <number>course.getField(key);
+            if (!(value in uniqueDictionary)) {
+                uniqueDictionary[value] = [];
+                uniqueDictionary[value].push(course.getUniqueId());
+            } else {
+                var alreadyExists = false;
+                for (var uuid of uniqueDictionary[value]) {
+                    if (course.getUniqueId() === uuid) {
+                        alreadyExists = true;
+                        break;
+                    }
+                }
+                if (alreadyExists) {
+                    uniqueDictionary[value].push(course.getUniqueId());
+                }
+            }
+        }
+        return Object.keys(uniqueDictionary).length;
+    }
+
+    private handleCOUNT (key: string, groupIndex: number): number {
+        key = key.split("_")[1];
+        if (key === "dept" || key === "id" || key === "title") {
+            return this.countHelperString(key, groupIndex);
+        } else {
+            return this.countHelperNumber(key, groupIndex);
+        }
     }
 
     private handleApply (applyArray: {}[], applyToken: string, groupIndex: number): {} {
