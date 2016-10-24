@@ -149,7 +149,7 @@ export default class QueryController {
         return 200;
     }
 
-    private isValidOrderObject(obj: OrderObject): number{
+    private isValidOrderObject(obj: OrderObject, whichDeliverable: string): number{
         if (Object.keys(obj).length !== 2) {
             return 400;
         }
@@ -158,11 +158,21 @@ export default class QueryController {
                 if ("keys" in obj && obj.keys.length !== 0){
                     var orderKeysArray : string[] = obj.keys;
                     var GROUPandAPPLYkeys: string[] = this.completeGROUPkeys.concat(this.APPLYkeys);
+                    Log.info("Deliverable is: " + whichDeliverable);
                     for(var o of orderKeysArray){
                         Log.info("isValidOrderObject:: this is the key being tried: " + o);
-                        if (GROUPandAPPLYkeys.indexOf(o) === -1){
-                            Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
-                            return 400;
+                        if (whichDeliverable === "d2"){
+                            if (GROUPandAPPLYkeys.indexOf(o) === -1){
+                                Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
+                                return 400;
+                            }
+                        }
+                        else if (whichDeliverable === "d1"){
+                            var splitted: string[] = o.split("_");
+                            if (this.queryKeys.indexOf(splitted[1]) === -1){
+                                Log.info("isValidOrderObject ::"+ o + " is not in queryKeys");
+                                return 400;
+                            }
                         }
                     }
                     return 200;
@@ -197,7 +207,7 @@ export default class QueryController {
                 } else {
                     var GETelement: string[] = i.split("_");
                     var id: string = GETelement[0];
-                    //Log.info("QueryController :: isValidGetHandler(..) - id is: " + id);
+                    Log.info("QueryController :: isValidGetHandler(..) - id is: " + GETelement[1]);
                     if (!(id in this.datasets)) {
                         this.wrongDatasetIDs.push(id);
                         return (424);
@@ -207,7 +217,7 @@ export default class QueryController {
                             //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
                             return 400;
                         } else {
-                            //Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                            Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
                             this.queryKeys.push(datasetField);
                         }
                     }
@@ -369,6 +379,11 @@ export default class QueryController {
                                 ORDERresult = this.isValidOrderHandler(ORDERstring);
                                 //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
                             }
+                            else if (typeof query.ORDER === "object") {
+                                var ORDERobject: OrderObject = <any>(query.ORDER);
+                                Log.info("isValid:: ORDER is an object");
+                                ORDERresult = this.isValidOrderObject(ORDERobject, "d1");
+                            }
                             if (ORDERresult === 200) {
                                 return this.WHEREhelperObject(query.WHERE);
                             } else {
@@ -438,7 +453,7 @@ export default class QueryController {
                                             else if (typeof query.ORDER === "object") {
                                                 var ORDERobject: OrderObject = <any>(query.ORDER);
                                                 Log.info("isValid:: ORDER is an object");
-                                                ORDERresult = this.isValidOrderObject(ORDERobject);
+                                                ORDERresult = this.isValidOrderObject(ORDERobject, "d2");
                                             }
                                         }
                                         return ORDERresult;
