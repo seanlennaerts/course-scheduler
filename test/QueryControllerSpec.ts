@@ -139,6 +139,20 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
+    it("Should be able to validate query with ORDER from D2 but no GROUP/APPLY", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_avg"],
+            "WHERE": {"OR": [{"AND": [{"GT": {"courses_avg": 70}},{"IS": {"courses_dept": "adhe"}}]},{"EQ": {"courses_avg": 90}}]},
+            "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
     it("Shoulb be a valid nested three-level query", function () {
         let query: QueryRequest = {
             "GET": [
