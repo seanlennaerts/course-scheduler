@@ -38,5 +38,15 @@ describe("DatasetController", function () {
         });
     });
 
+    it("Retrieve persisted dataset", function () {
+        let controller = new DatasetController();
+        controller.getDatasets();
+        Log.warn("something");
+        Log.error("something else");
+    });
+
+    it("Invalid archive", function () {
+
+    })
 
 });

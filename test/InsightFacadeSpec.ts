@@ -31,6 +31,16 @@ describe("InsightFacade", function () {
         facade = new InsightFacade();
     });
 
+    it("Should not be able to delete dataset that doesn't exist (404)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        return facade.removeDataset("something").then(function (response: InsightResponse) {
+            expect.fail("Should not reach here");
+        }).catch(function (response: InsightResponse) {
+            expect(response.code).to.equal(404);
+        });
+    });
+
     it("Should be able to add a add a new dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
@@ -61,7 +71,7 @@ describe("InsightFacade", function () {
         });
     });
 
-    it("Should not be able to delete a valid dataset (400)", function () {
+    it("Should be able to delete an existing dataset (204)", function () {
         var that = this;
         Log.trace("Starting test: " + that.test.title);
         facade.addDataset('courses', zipFileContents);

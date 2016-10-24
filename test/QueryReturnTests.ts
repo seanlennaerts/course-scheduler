@@ -448,4 +448,53 @@ describe("QueryReturns", function () {
             expect(result.length).to.equal(2);
         });
     });
+
+    //increase code coverage
+    it("Check IS instructor *gregor", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id"],
+            "WHERE": {"IS": {"courses_instructor": "*gregor"}},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query);
+    });
+
+    it("Check IS instructor gregor*", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id"],
+            "WHERE": {"IS": {"courses_instructor": "gregor*"}},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query);
+    });
+
+    it("Check MIN", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id", "minPass"],
+            "WHERE": {},
+            "GROUP": [ "courses_id" ],
+            "APPLY": [ {"minPass": {"MIN": "courses_pass"}} ],
+            "ORDER": { "dir": "UP", "keys": ["minPass", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+
+            expect(result.length).to.equal(2);
+        });
+    });
+
+    it("Check COUNT with string type", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "numTitle"],
+            "WHERE": {},
+            "GROUP": [ "courses_dept" ],
+            "APPLY": [ {"numTitle": {"COUNT": "courses_title"}} ],
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query);
+    });
+
+
 });

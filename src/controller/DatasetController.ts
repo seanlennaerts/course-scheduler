@@ -85,7 +85,7 @@ export default class DatasetController {
                 //     countMissingSections++;
                 // }
                 if (!root.result) {
-                    Log.info("readFile(): not valid zip");
+                    // Log.info("readFile(): not valid zip");
                     //throw new Error("readFile(): not valid zip");
                     reject(new Error("Invalid archive"));
                 }
@@ -193,7 +193,7 @@ export default class DatasetController {
                     reject(new Error("Invalid archive"));
                 });
             } catch (err) {
-                Log.trace('DatasetController::process(..) - ERROR: ' + err);
+                // Log.trace('DatasetController::process(..) - ERROR: ' + err);
                 reject(err);
             }
         });
@@ -218,7 +218,7 @@ export default class DatasetController {
         var toWrite: string = JSON.stringify(this.processedData);
         fs.writeFile("./data/"+id+".json", toWrite, function (err: Error) {
             if (err) {
-                Log.error("save(): Error saving file after process " + err);
+                // Log.error("save(): Error saving file after process " + err);
                 throw err;
             }
             Log.info("save(): " + id + ".json was saved succesfully!");

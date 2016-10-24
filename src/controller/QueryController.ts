@@ -163,14 +163,14 @@ export default class QueryController {
                         Log.info("isValidOrderObject:: this is the key being tried: " + o);
                         if (whichDeliverable === "d2"){
                             if (GROUPandAPPLYkeys.indexOf(o) === -1){
-                                Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
+                                // Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
                                 return 400;
                             }
                         }
                         else if (whichDeliverable === "d1"){
                             var splitted: string[] = o.split("_");
                             if (this.queryKeys.indexOf(splitted[1]) === -1){
-                                Log.info("isValidOrderObject ::"+ o + " is not in queryKeys");
+                                // Log.info("isValidOrderObject ::"+ o + " is not in queryKeys");
                                 return 400;
                             }
                         }
@@ -230,7 +230,7 @@ export default class QueryController {
     private isValidGetHandler(getArray:string[]): number{
         Log.info("isValidGetHandler:: STARTED");
         if (getArray.length === 0) {
-            Log.info("isValidGetHandler:: input has size 0");
+            // Log.info("isValidGetHandler:: input has size 0");
             return 400;
         } else {
             for (var i of getArray) {
@@ -285,7 +285,7 @@ export default class QueryController {
                 Log.info("APPLYandGROUPhandler:: GROUP - This is id: " + id);
                 if (!(id in this.datasets)) {
                     this.wrongDatasetIDs.push(id);
-                    Log.info("About to return 424, group element id not in dataset");
+                    // Log.info("About to return 424, group element id not in dataset");
                     return (424);
 
                 } else {
@@ -323,7 +323,7 @@ export default class QueryController {
                 var splitIt: string[] = idAndField.split("_");
                 if (!(splitIt[0] in this.datasets)) {
                     this.wrongDatasetIDs.push(splitIt[0]);
-                    Log.info("About to return 424, group element id not in dataset");
+                    // Log.info("About to return 424, group element id not in dataset");
                     return (424);
                 }
                 var field : string = splitIt[1];
@@ -345,7 +345,7 @@ export default class QueryController {
                 var APPLYid : string = APPLYelement[0];
                 Log.info("APPLYid is: " + APPLYid);
                 if (!(APPLYid in this.datasets)){
-                    Log.info("About to return 424, APPLY inner element id not in dataset");
+                    // Log.info("About to return 424, APPLY inner element id not in dataset");
                     return 424;
                 } else {
                     var APPLYfield : string = APPLYelement[1];
@@ -446,7 +446,7 @@ export default class QueryController {
                                             Log.info("isValid:: query not undefined or null");
                                             if (typeof query.ORDER === "string") {
                                                 var ORDERstring: string = <any>(query.ORDER);
-                                                Log.info("isValid:: ORDER is string");
+                                                // Log.info("isValid:: ORDER is string");
                                                 ORDERresult = this.isValidOrderHandler(ORDERstring);
                                                 //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
                                             }
@@ -475,10 +475,10 @@ export default class QueryController {
         return 400;
     }
 
-    public getDataset(id: string): Course[]{
-        this.dataset = this.datasets[id];
-        return this.dataset;
-    }
+    // public getDataset(id: string): Course[]{
+    //     this.dataset = this.datasets[id];
+    //     return this.dataset;
+    // }
 
     private handleAND (arr: {}[]) {
         Log.info("START handleAND(" + JSON.stringify(arr) + ")");
