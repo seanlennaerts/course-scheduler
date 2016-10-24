@@ -407,7 +407,7 @@ describe("QueryReturns", function () {
         });
     });
 
-    it("Check order 2", function () {
+    it("Check order descending", function () {
         let query: QueryRequest = {
             "GET": ["courses_id", "maxPass"],
             "WHERE": {},
@@ -423,7 +423,28 @@ describe("QueryReturns", function () {
                                         {courses_id: "110", maxPass: 180}];
 
             Log.test("LT:\n" + JSON.stringify(result));
-            expect(result).to.deep.include.members(expectedResult);
+            expect(result).to.deep.equal(expectedResult);
+            expect(result.length).to.equal(2);
+        });
+    });
+
+    it("Check order ascending", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_id", "maxPass"],
+            "WHERE": {},
+            "GROUP": [ "courses_id" ],
+            "APPLY": [ {"maxPass": {"MAX": "courses_pass"}} ],
+            "ORDER": { "dir": "UP", "keys": ["maxPass", "courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{courses_id: "110", maxPass: 180},
+                                        {courses_id: "101", maxPass: 662}];
+
+            Log.test("LT:\n" + JSON.stringify(result));
+            expect(result).to.deep.equal(expectedResult);
             expect(result.length).to.equal(2);
         });
     });

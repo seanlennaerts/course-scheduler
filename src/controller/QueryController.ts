@@ -724,6 +724,7 @@ export default class QueryController {
     }
 
     private handleMAX (key: string, groupIndex: number): number {
+        key = key.split("_")[1];
         var max: number = <number>this.groupedResults[groupIndex][0].getField(key);
         for (var course of this.groupedResults[groupIndex]) {
             if (course.getField(key) > max) {
@@ -731,17 +732,18 @@ export default class QueryController {
             }
         }
         // return Math.round(max * 100) / 100;
-        return Number(max.toFixed(2));
+        return max;
     }
 
     private handleMIN (key: string, groupIndex: number): number {
+        key = key.split("_")[1];
         var min: number = <number>this.groupedResults[groupIndex][0].getField(key);
         for (var course of this.groupedResults[groupIndex]) {
             if (course.getField(key) < min) {
                 min = <number>course.getField(key);
             }
         }
-        return Math.round(min * 100) / 100;
+        return min;
     }
 
     private handleAVG (key: string, groupIndex: number): number {
@@ -753,7 +755,7 @@ export default class QueryController {
             var add: number = <number>course.getField(key);
             sum += add;
         }
-        return Math.round((sum / i) * 100) / 100;
+        return Number((sum / i).toFixed(2));
     }
 
     private handleCOUNT (key: string, groupIndex: number): number {
@@ -782,34 +784,41 @@ export default class QueryController {
 
     //From stack overflow
     //http://stackoverflow.com/questions/1129216/sort-array-of-objects-by-string-property-value-in-javascript
-    private dynamicSort(property: string) {
-        Log.info("dynamicSort(): sorting...");
-        var sortOrder = 1;
-        if (property[0] === "-") {
-            sortOrder = -1;
-            property = property.substr(1);
-        }
-        return function (a: any,b: any) {
-            var result = (a[property] < b[property]) ? -1: (a[property] > b[property]) ? 1 : 0;
-            return result * sortOrder;
-        }
-    }
 
-    private dynamicSortNumber(property: string) {
-        return function (a: any,b: any) {
-            return a[property] - b[property];
-        }
-
-    }
-
-    private dynamicSortTwo(field: string, reverse: any){
-
-        var key = function(x: any) {return x[field]};
-
-        reverse = !reverse ? 1 : -1;
+    private dynamicSort(field: string, reverse: boolean){
+        var key = function (x: any) {return x[field]};
 
         return function (a: any, b: any) {
-            return a = key(a), b = key(b), reverse * (<any>(a > b) - <any>(b > a));
+            var something: number = 0;
+            var A = key(a), B = key(b);
+            if (A === B) {
+                something = 0;
+            } else if (A < B) {
+                something = -1;
+            } else {
+                something = 1;
+            }
+            return something * [-1,1][+!!reverse];
+            //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
+        }
+    }
+
+    private dynamicSortThree(field: string, reverse: boolean){
+        var key = function (x: any) {return x[field]};
+
+        return function (a: any, b: any) {
+            var result: number = 0;
+            var A = key(a), B = key(b);
+            if (A === B) {
+                result = a.index - b.index;
+            } else if (A < B) {
+                result = -1;
+            } else {
+                result = 1;
+            }
+            result = result * [-1,1][+!!reverse];
+            return result;
+            //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
         }
     }
 
@@ -907,16 +916,22 @@ export default class QueryController {
                 // } else {
                 //     finalTable.sort(this.dynamicSortNumber(<string>query.ORDER));
                 // }
-                finalTable.sort(this.dynamicSortTwo(<string>query.ORDER, false));
+                finalTable.sort(this.dynamicSort(<string>query.ORDER, true));
 
             } else {
                 var orderObj = <OrderObject>query.ORDER;
-                var direction: boolean = false;
+                var direction: boolean = true;
                 if (orderObj.dir === "DOWN") {
-                    direction = true;
+                    direction = false;
                 }
                 for (var i = orderObj.keys.length - 1 ; i > -1; i--) {
-                    finalTable.sort(this.dynamicSortTwo(orderObj.keys[i], direction));
+                    for (var j = 0; j < finalTable.length; j++) {
+                        (<any>finalTable)[j]["index"] = j;
+                    }
+                    finalTable.sort(this.dynamicSortThree(orderObj.keys[i], direction));
+                }
+                for (var object of finalTable) {
+                    delete (<any>object)["index"];
                 }
             }
         }
