@@ -584,6 +584,54 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
+    it("Valid query# - Moonshine - Should return 200", function () {
+        let query: QueryRequest = {
+        	"GET" : ["courses_dept", "courses_id", "numberOfferings", "gradeAverages", "numPasses", "avgFails"],
+            "WHERE" : {"IS" : {"courses_dept": "CPSC"}},
+            "GROUP" : [ "courses_id", "courses_dept"],
+            "APPLY" : [ {"numberOfferings": {"COUNT": "courses_uuid"}}, {"gradeAverages":{"AVG" : "courses_avg"}}, {"numPasses" : {"COUNT" : "courses_pass"}}, {"avgFails" : {"AVG" : "courses_fail"}}],
+            "ORDER" : { "dir": "DOWN", "keys": ["courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid query - Nautilus - Should return 200", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "minFails", "maxAudits"],
+            "WHERE":  {"AND" : [{"IS": {"courses_dept": "c*"}},{"OR" : [{"IS" : {"courses_id" : "4*"}},{"IS" : {"courses_id" : "5*"}}]}]},
+            "GROUP": [ "courses_id", "courses_dept"],
+            "APPLY": [ {"minFails": {"MIN": "courses_fail"}}, {"maxAudits":{"MAX" : "courses_audit"}} ],
+            "ORDER": { "dir": "UP", "keys": ["minFails", "maxAudits", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid query - Orion - Should return 200", function () {
+        let query: QueryRequest = {
+            "GET" : ["courses_dept", "courses_id", "minFails", "maxAudits"],
+            "WHERE" : {"AND": [{"EQ": {"courses_avg" : 101}},{"IS": {"courses_dept": "c*"}}]},
+            "GROUP" : [ "courses_id", "courses_dept"],
+            "APPLY" : [ {"minFails": {"MIN": "courses_fail"}}, {"maxAudits":{"MAX" : "courses_audit"}} ],
+            "ORDER" : { "dir": "UP", "keys": ["minFails", "maxAudits", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
     it("Valid query - empty APPLY but should return 200", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id"],
@@ -759,18 +807,21 @@ describe("QueryController", function () {
 
     it("Invalid query - some APPLY targets are not unique", function () {
         let query: QueryRequest = {
-            "GET": ["courses_dept", "courses_id", "courseAverage", "maxFail"],
+            "GET": ["courses_dept", "courses_id", "courseAverage"],
             "WHERE": {},
             "GROUP": [ "courses_dept", "courses_id" ],
             "APPLY": [ {"courseAverage": {"AVG": "courses_avg"}}, {"courseAverage": {"MAX": "courses_fail"}}, {"courseAverage": {"MAX": "courses_fail"}} ],
-            "ORDER": { "dir": "UP", "keys": ["courseAverage", "maxFail", "courses_dept", "courses_id"]},
+            "ORDER": { "dir": "UP", "keys": ["courseAverage", "courses_dept", "courses_id"]},
             "AS":"TABLE"
         };
         let dataset: Datasets = {courses: []};
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
+        let APPLYduplicates = controller.returnDuplicates();
+
 
         expect(isValid).to.equal(400);
+        expect(APPLYduplicates[0]).to.equal("courseAverage");
     });
 
     it("Invalid - dir value is empty", function () {
@@ -789,4 +840,21 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
+    it("Invalid query - a key appearing in GROUP or APPLY cannot occur in the other", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "numSections"],
+            "WHERE": {},
+            "GROUP": [ "courses_dept", "courses_uuid" ],
+            "APPLY": [ {"numSections": {"COUNT": "courses_uuid"}} ],
+            "ORDER": { "dir": "UP", "keys": ["numSections", "courses_dept", "courses_id"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+        let duplicates = controller.returnDuplicates();
+
+        expect(isValid).to.equal(400);
+        expect(duplicates[0]).to.equal("uuid");
+    });
 });
