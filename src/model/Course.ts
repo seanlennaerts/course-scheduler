@@ -12,6 +12,8 @@ export default class Course {
     private _dept: string;
     private _id: string;
     private _title: string;
+    //new in d3
+    private _year: number;
 
     //section info:
     private _avg: number;
