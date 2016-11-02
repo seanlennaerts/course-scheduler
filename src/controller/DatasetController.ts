@@ -137,9 +137,13 @@ export default class DatasetController {
         });
     }
 
-    private parseIndex(index: JSZipObject): string[] {
+    private parseIndex(index: JSZipObject): Promise<string[]> {
+        var document = parse5.parse();
         //TODO
-        return [];
+        return new Promise(function (fulfill, reject) {
+            //TODO
+
+        });
     }
 
     /**
@@ -188,13 +192,16 @@ export default class DatasetController {
                             });
                             break;
                         case "rooms":
-                            var indexBuildings: string[] = that.parseIndex(zip.folder(id).file("index.htm"));
-                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                                if (indexBuildings.includes(file.name)) {
-                                    promises.push(<any>that.readFileHtml(zip, file.name));
-                                } else {
-                                    Log.info("rejecting: " + file.name);
-                                }
+                            var indexBuildings: string[] = [];
+                            return that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
+                                indexBuildings = fulfill;
+                                zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                    if (indexBuildings.includes(file.name)) {
+                                        promises.push(<any>that.readFileHtml(zip, file.name));
+                                    } else {
+                                        Log.info("rejecting: " + file.name);
+                                    }
+                                });
                             });
                             break;
                         default:
