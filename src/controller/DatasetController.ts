@@ -7,6 +7,7 @@ import Log from "../Util";
 import JSZip = require('jszip');
 import Course from "../model/Course";
 var fs = require('fs');
+var parse5 = require('parse5');
 
 /**
  * In memory representation of all datasets.
@@ -73,7 +74,7 @@ export default class DatasetController {
         }
     }
 
-    public readFile(zip: JSZip, path: string): Promise<any> {
+    public readFileZip(zip: JSZip, path: string): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
@@ -128,6 +129,18 @@ export default class DatasetController {
         });
     }
 
+    private readFileHtml(zip: JSZip, path: string): Promise<any> {
+        var that = this;
+        return new Promise(function (fulfill, reject) {
+            //TODO
+
+        });
+    }
+
+    private parseIndex(index: JSZipObject): string[] {
+        //TODO
+        return [];
+    }
 
     /**
      * Process the dataset; save it to disk when complete.
@@ -168,12 +181,30 @@ export default class DatasetController {
                     // You can depend on 'id' to differentiate how the zip should be handled,
                     // although you should still be tolerant to errors.
                     var promises: string[] = [];
-                    zip.folder(id).forEach(function (relativePath, file) { // find name of the zipfile and replace "courses"
-                        //Log.info("relativePath: " + relativePath + ", file: " + file);
-                        promises.push(<any>that.readFile(zip, file.name));
-                    });
+                    switch (id) {
+                        case "courses":
+                            zip.folder(id).forEach(function (relativePath, file) {
+                                promises.push(<any>that.readFileZip(zip, file.name));
+                            });
+                            break;
+                        case "rooms":
+                            var indexBuildings: string[] = that.parseIndex(zip.folder(id).file("index.htm"));
+                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                if (indexBuildings.includes(file.name)) {
+                                    promises.push(<any>that.readFileHtml(zip, file.name));
+                                } else {
+                                    Log.info("rejecting: " + file.name);
+                                }
+                            });
+                            break;
+                        default:
+                            throw new Error("Invalid id");
+                    }
+
                     Log.info("process(): all readFile promises are ready!");
                     Log.info("process(): there are " + promises.length + " valid files");
+
+
                     if (promises.length === 0) {
                         // throw new Error("process(): Not valid dataset");
                         //reject(new Error("Invalid dataset"));
