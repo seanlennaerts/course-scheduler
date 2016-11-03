@@ -6,6 +6,8 @@
 import Log from "../Util";
 import JSZip = require('jszip');
 import Course from "../model/Course";
+import {ASTNode} from "parse5";
+import Room from "../model/Room";
 var fs = require('fs');
 var parse5 = require('parse5');
 
@@ -32,7 +34,7 @@ export default class DatasetController {
         }
         try {
             var file: string = fs.readFileSync("./data/courses.json", "utf8");
-            //this.datasets["courses"] = JSON.parse(file);
+            // this.datasets["courses"] = JSON.parse(file);
             this.datasets["courses"] = [];
             this.parseAgain(JSON.parse(file));
             Log.info("getDatasets(): not in memory so reading from data directory");
@@ -74,7 +76,7 @@ export default class DatasetController {
         }
     }
 
-    public readFileZip(zip: JSZip, path: string): Promise<any> {
+    private readFileZip(zip: JSZip, path: string): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
@@ -129,11 +131,60 @@ export default class DatasetController {
         });
     }
 
+    public searchAST(root: ASTNode, nodeNameOfFinalValue: string, attrValue: string, parentNodeName: string, instance: number): string {
+        //for debugging
+        if (root.value && !root.value.includes("\n")) {
+            Log.info("Found root value: " + root.value);
+        }
+        // end for debuggin
+
+        if (root.nodeName === nodeNameOfFinalValue && root.parentNode.attrs && JSON.stringify(root.parentNode.attrs).includes(attrValue) && root.parentNode.nodeName === parentNodeName) {
+            // Log.info("Found an instance!: " + root.value);
+            return root.value;
+        }
+        var result: string = null;
+        if (root.childNodes) {
+            Log.info("Found children: " + root.childNodes.length);
+            var children: ASTNode[] = root.childNodes;
+            for (var i = 0; instance > -1 && i < children.length; i++) {
+                var temp = this.searchAST(children[i], nodeNameOfFinalValue, attrValue, parentNodeName, instance);
+                if (temp != null) {
+                    Log.info("Found an instance!: " + temp);
+                    instance--;
+                    result = temp;
+                }
+                if (instance === -1) {
+                    Log.info("Found final instance!: " + temp);
+                    result = temp.trim();
+                }
+            }
+        }
+        return result;
+    }
+
     private readFileHtml(zip: JSZip, path: string): Promise<any> {
         var that = this;
         return new Promise(function (fulfill, reject) {
             //TODO
+            zip.file(path).async("string").then(function (contents: string) {
+                let shortname: string = path;
+                let fullname: string = null;
+                let number: string = null;
+                let address: string = null;
+                let lat: number = null;
+                let lon: number = null;
+                let seats: number = null;
+                let type: string = null;
+                let furniture: string = null;
+                let href: string = null;
 
+                var document: ASTNode = parse5.parse(contents);
+
+            }).then(function() {
+                fulfill(true);
+            }).catch(function (err: Error) {
+                reject(err);
+            })
         });
     }
 
@@ -156,7 +207,7 @@ export default class DatasetController {
         if (id in this.datasets) {
             code = 201;
         } else {
-            code = 204
+            code = 204;
         }
 
         let that = this;
