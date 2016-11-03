@@ -6,6 +6,7 @@
 import Log from "../Util";
 import JSZip = require('jszip');
 import Course from "../model/Course";
+import {ASTNode} from "parse5";
 var fs = require('fs');
 var parse5 = require('parse5');
 
@@ -138,11 +139,18 @@ export default class DatasetController {
     }
 
     private parseIndex(index: JSZipObject): Promise<string[]> {
-        var document = parse5.parse();
-        //TODO
+        var that = this;
         return new Promise(function (fulfill, reject) {
+            var buildingsArray: string[];
             //TODO
-
+            index.async("string").then(function(contents: string){
+                var document: ASTNode = parse5.parse(contents);
+                var documentFragment = parse5.parseFragment('<tbody></tbody>');
+            }).then(function(){
+                fulfill(buildingsArray);
+            }).catch(function(err: Error){
+                reject(err);
+            })
         });
     }
 
@@ -202,6 +210,8 @@ export default class DatasetController {
                                         Log.info("rejecting: " + file.name);
                                     }
                                 });
+                            }).catch(function(){
+                                throw new Error("Invalid dataset");
                             });
                             break;
                         default:
