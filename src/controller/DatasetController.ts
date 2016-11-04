@@ -263,9 +263,20 @@ export default class DatasetController {
         });
     }
 
-    private parseIndex(index: JSZipObject): string[] {
-        //TODO
-        return [];
+    private parseIndex(index: JSZipObject): Promise<string[]> {
+        var that = this;
+        return new Promise(function (fulfill, reject) {
+            var buildingsArray: string[];
+            //TODO
+            index.async("string").then(function(contents: string){
+                var document: ASTNode = parse5.parse(contents);
+                var documentFragment = parse5.parseFragment('<tbody></tbody>');
+            }).then(function(){
+                fulfill(buildingsArray);
+            }).catch(function(err: Error){
+                reject(err);
+            })
+        });
     }
 
     /**
@@ -314,13 +325,18 @@ export default class DatasetController {
                             });
                             break;
                         case "rooms":
-                            var indexBuildings: string[] = that.parseIndex(zip.folder(id).file("index.htm"));
-                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                                if (indexBuildings.includes(file.name)) {
-                                    promises.push(<any>that.readFileHtml(zip, file.name));
-                                } else {
-                                    Log.info("rejecting: " + file.name);
-                                }
+                            var indexBuildings: string[] = [];
+                            return that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
+                                indexBuildings = fulfill;
+                                zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                    if (indexBuildings.includes(file.name)) {
+                                        promises.push(<any>that.readFileHtml(zip, file.name));
+                                    } else {
+                                        Log.info("rejecting: " + file.name);
+                                    }
+                                });
+                            }).catch(function(){
+                                throw new Error("Invalid dataset");
                             });
                             break;
                         default:
