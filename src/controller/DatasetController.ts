@@ -19,6 +19,12 @@ export interface Datasets {
     [id: string]: Course[];
 }
 
+export interface GeoResponse {
+    lat?: number;
+    lon?: number;
+    error?: string;
+}
+
 export default class DatasetController {
 
     private processedData: any[]  = [];
@@ -145,17 +151,16 @@ export default class DatasetController {
         }
         var result: string = null;
         if (root.childNodes) {
-            Log.info("Found children: " + root.childNodes.length);
             var children: ASTNode[] = root.childNodes;
             for (var i = 0; instance > -1 && i < children.length; i++) {
                 var temp = this.searchAST(children[i], nodeNameOfFinalValue, attrValue, parentNodeName, instance);
                 if (temp != null) {
-                    Log.info("Found an instance!: " + temp);
+                    // Log.info("Found an instance!: " + temp);
                     instance--;
                     result = temp;
                 }
                 if (instance === -1) {
-                    Log.info("Found final instance!: " + temp);
+                    // Log.info("Found final instance!: " + temp);
                     result = temp.trim();
                 }
             }
@@ -184,12 +189,17 @@ export default class DatasetController {
         return html.replace(/\r?\n|\r/g, "").replace(/\>\s*\</g, "><");
     }
 
-    private getLatLon(address: string): Promise<any> {
+    private getLatLon(address: string): Promise<GeoResponse> {
         address = encodeURI(address);
-        var url: string = "http://skaha.cs.ubc.ca:8022/api/v1/team2/" + address;
+        var options: {} = {
+            hostname: "skaha.cs.ubc.ca",
+            port: 8022,
+            path: "/api/v1/team2/" + address
+        };
         var that = this;
         return new Promise (function (fulfill, reject) {
-            const request = http.get(address, (response: any) => {
+            //FROM STACK OVERFLOW
+            const request = http.get(options, (response: any) => {
                 // handle http errors
                 if (response.statusCode < 200 || response.statusCode > 299) {
                     reject(new Error('Failed to load page, status code: ' + response.statusCode));
@@ -199,7 +209,7 @@ export default class DatasetController {
                 // on every content chunk, push it to the data array
                 response.on('data', (chunk: string) => body.push(chunk));
                 // we are done, resolve promise with those joined chunks
-                response.on('end', () => fulfill(JSON.parse(body.join(''))));
+                response.on('end', () => fulfill(JSON.parse(body.join('')))); // added JSON.parse -S
             });
             // handle connection errors of the request
             request.on('error', (err: Error) => reject(err))
@@ -214,7 +224,7 @@ export default class DatasetController {
             zip.file(path).async("string").then(function (contents: string) {
                 contents = that.cleanHTML(contents);
 
-                let shortname: string = path;
+                let shortname: string = path.split("/")[path.split("/").length - 1];
                 let fullname: string = null;
                 let number: string = null;
                 let address: string = null;
@@ -227,34 +237,36 @@ export default class DatasetController {
 
                 var document: ASTNode = parse5.parse(contents);
                 var main: ASTNode = that.getSmallerSection(document, "div", "view-buildings-and-classrooms");
-                var buildingInfoFrag: ASTNode = that.getSmallerSection(main, "div", "buildling-info");
+                var buildingInfoFrag: ASTNode = that.getSmallerSection(main, "div", "building-info");
                 var tbodyFrag: ASTNode = that.getSmallerSection(main, "tbody");
+                if (tbodyFrag) {
+                    fullname = that.searchAST(buildingInfoFrag, "#text", "field-content", "span", 0);
+                    address = that.searchAST(buildingInfoFrag, "#text", "field-content", "div", 0);
+                    var tableRowArray: ASTNode[] = [];
+                    for (var node of tbodyFrag.childNodes) {
+                        tableRowArray.push(that.getSmallerSection(node, "tr"));
+                    }
+                    for (var row of tableRowArray) {
+                        number = that.searchAST(row, "#text", "Room Details", "a", 0);
+                        seats = Number.parseInt(that.searchAST(row, "#text", "room-capacity", "td", 0));
+                        type = that.searchAST(row, "#text", "room-type", "td", 0);
+                        furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
+                        href = that.getSmallerSection(row, "a", "http").attrs[0].value;
+                    }
 
-                fullname = that.searchAST(buildingInfoFrag, "#text", "field-content", "span", 0);
-                address = that.searchAST(buildingInfoFrag, "#text", "field-content", "div", 0);
-                var tableRowArray: ASTNode[] = [];
-                for (var node of tbodyFrag.childNodes) {
-                    tableRowArray.push(that.getSmallerSection(node, "tr"));
+                    return that.getLatLon(address).then(function (latlon: GeoResponse) {
+                        Log.info("getLatLon returned: " + JSON.stringify(latlon));
+                        lat = latlon.lat;
+                        lon = latlon.lon;
+
+                        var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
+                        that.processedData.push(room);
+                    }).catch(function (err: GeoResponse) {
+                        //reject(err);
+                        Log.error("Error finding latlon: " + err.error);
+                    });
                 }
-                for (var row of tableRowArray) {
-                    number = that.searchAST(row, "#text", "Room Details", "a", 0);
-                    seats = Number.parseInt(that.searchAST(row, "#text", "room-capacity", "td", 0));
-                    type = that.searchAST(row, "#text", "room-type", "td", 0);
-                    furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
-                    href = that.getSmallerSection(row, "a", "http").attrs[0].value;
-                }
 
-                return that.getLatLon(address).then(function (latlon) {
-                    var llObject: {lat: number, lon: number} = latlon;
-                    lat = llObject.lat;
-                    lon = llObject.lon;
-
-                    //added this code in here to control flow?
-                    var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
-                    that.processedData.push(room);
-                }).catch(function (err: Error) {
-                    reject(err);
-                });
             }).then(function() {
                 fulfill(true);
             }).catch(function (err: Error) {
@@ -300,9 +312,9 @@ export default class DatasetController {
         return new Promise(function (fulfill, reject) {
             Log.info("process(): start");
             try {
-                if (id != "courses") {
-                    throw new Error("Invalid id");
-                }
+                // if (id != "courses") {
+                //     throw new Error("Invalid id");
+                // }
                 //another hacky fix that should be refactored
                 var invalidDataset: boolean = false;
 
@@ -325,18 +337,24 @@ export default class DatasetController {
                             });
                             break;
                         case "rooms":
-                            var indexBuildings: string[] = [];
-                            return that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
-                                indexBuildings = fulfill;
-                                zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                                    if (indexBuildings.includes(file.name)) {
-                                        promises.push(<any>that.readFileHtml(zip, file.name));
-                                    } else {
-                                        Log.info("rejecting: " + file.name);
-                                    }
-                                });
-                            }).catch(function(){
-                                throw new Error("Invalid dataset");
+                            // UNCOMMENT lines 341-353 to use Ana Cris' index helper
+                            // var indexBuildings: string[] = [];
+                            // return that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
+                            //     indexBuildings = fulfill;
+                            //     zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                            //         if (indexBuildings.includes(file.name)) {
+                            //             promises.push(<any>that.readFileHtml(zip, file.name));
+                            //         } else {
+                            //             Log.info("rejecting: " + file.name);
+                            //         }
+                            //     });
+                            // }).catch(function(){
+                            //     throw new Error("Invalid dataset");
+                            // });
+
+                            // COMMENT OUT lines 356-358 (next 3 lines) to use Ana Cris' index helper
+                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                promises.push(<any>that.readFileHtml(zip, file.name));
                             });
                             break;
                         default:
