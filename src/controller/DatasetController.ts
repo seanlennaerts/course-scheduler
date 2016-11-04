@@ -246,21 +246,19 @@ export default class DatasetController {
                     for (var node of tbodyFrag.childNodes) {
                         tableRowArray.push(that.getSmallerSection(node, "tr"));
                     }
-                    for (var row of tableRowArray) {
-                        number = that.searchAST(row, "#text", "Room Details", "a", 0);
-                        seats = Number.parseInt(that.searchAST(row, "#text", "room-capacity", "td", 0));
-                        type = that.searchAST(row, "#text", "room-type", "td", 0);
-                        furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
-                        href = that.getSmallerSection(row, "a", "http").attrs[0].value;
-                    }
-
                     return that.getLatLon(address).then(function (latlon: GeoResponse) {
-                        Log.info("getLatLon returned: " + JSON.stringify(latlon));
+                        // Log.info("getLatLon returned: " + JSON.stringify(latlon));
                         lat = latlon.lat;
                         lon = latlon.lon;
-
-                        var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
-                        that.processedData.push(room);
+                        for (var row of tableRowArray) {
+                            number = that.searchAST(row, "#text", "Room Details", "a", 0);
+                            seats = Number.parseInt(that.searchAST(row, "#text", "room-capacity", "td", 0));
+                            type = that.searchAST(row, "#text", "room-type", "td", 0);
+                            furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
+                            href = that.getSmallerSection(row, "a", "http").attrs[0].value;
+                            var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
+                            that.processedData.push(room);
+                        }
                     }).catch(function (err: GeoResponse) {
                         //reject(err);
                         Log.error("Error finding latlon: " + err.error);
