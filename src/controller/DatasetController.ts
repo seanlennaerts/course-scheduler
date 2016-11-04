@@ -10,6 +10,7 @@ import {ASTNode} from "parse5";
 import Room from "../model/Room";
 var fs = require('fs');
 var parse5 = require('parse5');
+var http = require('http');
 
 /**
  * In memory representation of all datasets.
@@ -20,7 +21,7 @@ export interface Datasets {
 
 export default class DatasetController {
 
-    private processedData: Course[] = [];
+    private processedData: any[]  = [];
     private datasets: Datasets = {};
 
     constructor() {
@@ -83,7 +84,7 @@ export default class DatasetController {
                 //Log.info(contents);
                 var root = JSON.parse(contents);
                 //Log.info("readFile(): there are " + root.result.length + " sections in " + path);
-                // if (root.result.length == 0) {
+                // if (root.result.length === 0) {
                 //     Log.info("readFile(): " + path + " has no sections!")
                 //     countMissingSections++;
                 // }
@@ -133,10 +134,10 @@ export default class DatasetController {
 
     public searchAST(root: ASTNode, nodeNameOfFinalValue: string, attrValue: string, parentNodeName: string, instance: number): string {
         //for debugging
-        if (root.value && !root.value.includes("\n")) {
-            Log.info("Found root value: " + root.value);
-        }
-        // end for debuggin
+        // if (root.value && !root.value.includes("\n")) {
+        //     Log.info("Found root value: " + root.value);
+        // }
+        // end for debugging
 
         if (root.nodeName === nodeNameOfFinalValue && root.parentNode.attrs && JSON.stringify(root.parentNode.attrs).includes(attrValue) && root.parentNode.nodeName === parentNodeName) {
             // Log.info("Found an instance!: " + root.value);
@@ -162,11 +163,57 @@ export default class DatasetController {
         return result;
     }
 
+    public getSmallerSection(root: ASTNode, id: string, attr?: string): ASTNode {
+        if (root.nodeName === id && !attr) {
+            return root;
+        }
+        if (root.nodeName === id && attr && JSON.stringify(root.attrs).includes(attr)) {
+            return root;
+        }
+        var result: ASTNode = null;
+        if (root.childNodes) {
+            var children: ASTNode[] = root.childNodes;
+            for (var i = 0; result === null && i < children.length; i++) {
+                result = this.getSmallerSection(children[i], id, attr);
+            }
+        }
+        return result;
+    }
+
+    private cleanHTML(html: string): string {
+        return html.replace(/\r?\n|\r/g, "").replace(/\>\s*\</g, "><");
+    }
+
+    private getLatLon(address: string): Promise<any> {
+        address = encodeURI(address);
+        var url: string = "http://skaha.cs.ubc.ca:8022/api/v1/team2/" + address;
+        var that = this;
+        return new Promise (function (fulfill, reject) {
+            const request = http.get(address, (response: any) => {
+                // handle http errors
+                if (response.statusCode < 200 || response.statusCode > 299) {
+                    reject(new Error('Failed to load page, status code: ' + response.statusCode));
+                }
+                // temporary data holder
+                const body: string[] = [];
+                // on every content chunk, push it to the data array
+                response.on('data', (chunk: string) => body.push(chunk));
+                // we are done, resolve promise with those joined chunks
+                response.on('end', () => fulfill(JSON.parse(body.join(''))));
+            });
+            // handle connection errors of the request
+            request.on('error', (err: Error) => reject(err))
+        });
+    }
+
+
     private readFileHtml(zip: JSZip, path: string): Promise<any> {
         var that = this;
         return new Promise(function (fulfill, reject) {
             //TODO
             zip.file(path).async("string").then(function (contents: string) {
+                contents = that.cleanHTML(contents);
+
                 let shortname: string = path;
                 let fullname: string = null;
                 let number: string = null;
@@ -179,7 +226,35 @@ export default class DatasetController {
                 let href: string = null;
 
                 var document: ASTNode = parse5.parse(contents);
+                var main: ASTNode = that.getSmallerSection(document, "div", "view-buildings-and-classrooms");
+                var buildingInfoFrag: ASTNode = that.getSmallerSection(main, "div", "buildling-info");
+                var tbodyFrag: ASTNode = that.getSmallerSection(main, "tbody");
 
+                fullname = that.searchAST(buildingInfoFrag, "#text", "field-content", "span", 0);
+                address = that.searchAST(buildingInfoFrag, "#text", "field-content", "div", 0);
+                var tableRowArray: ASTNode[] = [];
+                for (var node of tbodyFrag.childNodes) {
+                    tableRowArray.push(that.getSmallerSection(node, "tr"));
+                }
+                for (var row of tableRowArray) {
+                    number = that.searchAST(row, "#text", "Room Details", "a", 0);
+                    seats = Number.parseInt(that.searchAST(row, "#text", "room-capacity", "td", 0));
+                    type = that.searchAST(row, "#text", "room-type", "td", 0);
+                    furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
+                    href = that.getSmallerSection(row, "a", "http").attrs[0].value;
+                }
+
+                return that.getLatLon(address).then(function (latlon) {
+                    var llObject: {lat: number, lon: number} = latlon;
+                    lat = llObject.lat;
+                    lon = llObject.lon;
+
+                    //added this code in here to control flow?
+                    var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
+                    that.processedData.push(room);
+                }).catch(function (err: Error) {
+                    reject(err);
+                });
             }).then(function() {
                 fulfill(true);
             }).catch(function (err: Error) {
