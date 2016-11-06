@@ -273,17 +273,36 @@ export default class DatasetController {
         });
     }
 
+    // WHy let for other variables
+    // what happens if you don't clean HTML when you parse it?
+
     private parseIndex(index: JSZipObject): Promise<string[]> {
+        Log.info("DatasetController:: parseIndex(): starting")
         var that = this;
         return new Promise(function (fulfill, reject) {
-            var buildingsArray: string[];
+            var buildingsCodeArray: string[] = [];
             //TODO
             index.async("string").then(function(contents: string){
+                contents = that.cleanHTML(contents);
                 var document: ASTNode = parse5.parse(contents);
-                var documentFragment = parse5.parseFragment('<tbody></tbody>');
+                var main: ASTNode = that.getSmallerSection(document, "tbody");
+                for (var tBodyRow of main.childNodes){
+                    if (tBodyRow.nodeName === "tr"){
+                        for (var tDataRow of tBodyRow.childNodes){
+                            if(tDataRow.nodeName === "td"){
+                                if (tDataRow.attrs[0].value === "views-field views-field-field-building-code"){
+                                    var buildingCode = that.searchAST(tDataRow, "#text", "value", "td", 0);
+                                    buildingsCodeArray.push(buildingCode);
+                                }
+                            }
+                        }
+                    }
+                }
             }).then(function(){
-                fulfill(buildingsArray);
+                Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)")
+                fulfill(buildingsCodeArray);
             }).catch(function(err: Error){
+                Log.info("DatasetController:: parseIndex(): Boo Ana... It sucks")
                 reject(err);
             })
         });
@@ -336,24 +355,23 @@ export default class DatasetController {
                             break;
                         case "rooms":
                             // UNCOMMENT lines 341-353 to use Ana Cris' index helper
-                            // var indexBuildings: string[] = [];
-                            // return that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
-                            //     indexBuildings = fulfill;
-                            //     zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                            //         if (indexBuildings.includes(file.name)) {
-                            //             promises.push(<any>that.readFileHtml(zip, file.name));
-                            //         } else {
-                            //             Log.info("rejecting: " + file.name);
-                            //         }
-                            //     });
-                            // }).catch(function(){
-                            //     throw new Error("Invalid dataset");
-                            // });
+                            that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
+                                var indexBuildings: string[] = fulfill;
+                                zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                    if (indexBuildings.includes(file.name)) {
+                                        promises.push(<any>that.readFileHtml(zip, file.name));
+                                    } else {
+                                        Log.info("rejecting: " + file.name);
+                                    }
+                                });
+                            }).catch(function(){
+                                throw new Error("Invalid dataset");
+                            });
 
                             // COMMENT OUT lines 356-358 (next 3 lines) to use Ana Cris' index helper
-                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                                promises.push(<any>that.readFileHtml(zip, file.name));
-                            });
+                            // zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                            //     promises.push(<any>that.readFileHtml(zip, file.name));
+                            // });
                             break;
                         default:
                             throw new Error("Invalid id");
