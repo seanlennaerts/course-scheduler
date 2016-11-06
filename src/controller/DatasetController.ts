@@ -376,19 +376,22 @@ export default class DatasetController {
                         default:
                             throw new Error("Invalid id");
                     }
-
-                    Log.info("process(): all readFile promises are ready!");
-                    Log.info("process(): there are " + promises.length + " valid files");
-
-
-                    if (promises.length === 0) {
-                        // throw new Error("process(): Not valid dataset");
-                        //reject(new Error("Invalid dataset"));
-                        invalidDataset = true;
-                    }
                     return Promise.all(promises);
 
+
                 }).then(function() {
+                    // Log.info("process(): all readFile promises are ready!");
+                    // Log.info("process(): there are " + promises.length + " valid files");
+                    //
+                    //
+                    // if (promises.length === 0) {
+                    //     // throw new Error("process(): Not valid dataset");
+                    //     //reject(new Error("Invalid dataset"));
+                    //     invalidDataset = true;
+                    // }
+
+
+
                     if (invalidDataset) {
                         reject(new Error("Invalid dataset"));
                     } else {
