@@ -871,4 +871,128 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
         expect(duplicates[0]).to.equal("uuid");
     });
+
+    it("Valid query - basic rooms query", function(){
+        let query: QueryRequest = {
+            "GET": ["rooms_fullname", "rooms_number"],
+            "WHERE": {"IS": {"rooms_shortname": "DMP"}},
+            "ORDER": { "dir": "UP", "keys": ["rooms_number"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid query - complex rooms query", function(){
+        let query: QueryRequest =  {
+            "GET": ["rooms_shortname", "numRooms"],
+            "WHERE": {"GT": {"rooms_seats": 160}},
+            "GROUP": [ "rooms_shortname" ],
+            "APPLY": [ {"numRooms": {"COUNT": "rooms_name"}} ],
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Invalid query: 424 - query for rooms when dataset is courses", function(){
+        let query: QueryRequest = {
+            "GET": ["rooms_fullname", "rooms_number"],
+            "WHERE": {"IS": {"rooms_shortname": "DMP"}},
+            "ORDER": { "dir": "UP", "keys": ["rooms_number"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(424);
+    });
+
+    it("Invalid query - rooms keys in query when dataset is courses", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_fullname", "courses_number"],
+            "WHERE": {"IS": {"courses_shortname": "DMP"}},
+            "ORDER": { "dir": "UP", "keys": ["courses_number"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
+    it("Invalid query: 424 - query for courses when dataset is rooms ", function(){
+        let query: QueryRequest =  {
+            "GET": ["courses_dept", "courses_avg"],
+            "WHERE": {"GT": {"courses_avg": 90}},
+            "ORDER": "courses_avg",
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(424);
+    });
+
+    it("Invalid query - courses keys in query when dataset is rooms", function(){
+        let query: QueryRequest =  {
+            "GET": ["rooms_dept", "rooms_avg"],
+            "WHERE" : {"GET" : {"rooms_avg" : 90}},
+            "ORDER" : "rooms_avg",
+            "AS" : "TABLE"
+        };
+        let dataset: Datasets = {rooms: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+    /*
+
+    it("Valid query with new course key: year", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_avg", "courses_year"],
+            "WHERE": {"GT": {"courses_avg": 90}},
+            "ORDER": "courses_avg",
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid query with new course key: year", function(){
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id", "courses_instructor"],
+            "WHERE": {
+                "OR": [
+                    {"AND": [
+                        {"GT": {"courses_avg": 70}},
+                        {"IS": {"courses_dept": "cp*"}},
+                        {"NOT": {"IS": {"courses_instructor": "murphy, gail"}}}
+                    ]},
+                    {"IS": {"courses_year": 1990}}
+                ]
+            },
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+    */
+
 });

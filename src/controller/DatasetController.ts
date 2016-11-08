@@ -275,6 +275,7 @@ export default class DatasetController {
 
     // WHy let for other variables
     // what happens if you don't clean HTML when you parse it?
+    // how does the URL link get the "%"
 
     private parseIndex(index: JSZipObject): Promise<string[]> {
         Log.info("DatasetController:: parseIndex(): starting")

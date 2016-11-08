@@ -76,12 +76,30 @@ export default class QueryController {
         return this.weedOutErrorResults(resultNumbers)
     }
 
-    private validKeys(s: string): boolean{
-        if (s === "dept" || s === "id" || s === "avg" || s === "instructor" || s === "title" || s === "pass" || s === "fail" ||
-            s === "audit" || s === "uuid"){
-            return true;
+    private validKeys(s: string, id: string): boolean{
+        var result: boolean;
+        switch (id) {
+            case "courses":
+                if (s === "dept" || s === "id" || s === "avg" || s === "instructor" || s === "title" || s === "pass" || s === "fail" ||
+                    s === "audit" || s === "uuid" || s === "year"){
+                    result = true;
+                } else {
+                    result = false;
+                }
+                break;
+            case "rooms":
+                if (s === "fullname" || s === "shortname" || s === "number" || s === "name" ||
+                    s === "address" || s === "lat" || s === "lon" || s === "seats" ||
+                    s === "type" || s === "furniture" || s === "href"){
+                    result = true;
+                } else {
+                    result = false;
+                }
+                break;
+            default:
+                result = false;
         }
-        return false;
+        return result;
     }
 
     private WHEREhelperObject(whereObject: {}): number {
@@ -102,7 +120,7 @@ export default class QueryController {
                // Log.info("wrongDataSetIDs[0] is: " + this.wrongDatasetIDs[0]);
                 return 424;
             } else {
-                if (this.validKeys(Object.keys(whereObject)[0].split("_")[1])){
+                if (this.validKeys(Object.keys(whereObject)[0].split("_")[1], id)){
                     //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
                     return 200;
                 }
@@ -213,7 +231,7 @@ export default class QueryController {
                         return (424);
                     } else {
                         var datasetField = GETelement[1];
-                        if (!(this.validKeys(datasetField))) {
+                        if (!(this.validKeys(datasetField, id))) {
                             //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
                             return 400;
                         } else {
@@ -290,7 +308,7 @@ export default class QueryController {
 
                 } else {
                     var groupKey = GROUPelement[1];
-                    if (!(this.validKeys(groupKey))) {
+                    if (!(this.validKeys(groupKey, id))) {
                         return 400;
                     } else {
                         Log.info("String I pushed to GROUP keys: " + groupKey);
@@ -349,7 +367,7 @@ export default class QueryController {
                     return 424;
                 } else {
                     var APPLYfield : string = APPLYelement[1];
-                    if (!(this.validKeys(APPLYfield))){
+                    if (!(this.validKeys(APPLYfield, id))){
                         return 400;
                     }
                 }
