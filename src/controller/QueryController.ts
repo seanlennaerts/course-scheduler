@@ -508,7 +508,7 @@ export default class QueryController {
             this.nextObjectOrArray(obj);
         }
         Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var course of this.tempResults[this.tempResultsIndex][0]) {
             var id: number = course.getUniqueId();
             var exists: boolean = false;
@@ -545,7 +545,7 @@ export default class QueryController {
             this.nextObjectOrArray(obj);
         }
         Log.info("... back to handleOR - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
-        var merged: Course[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
+        var merged: any[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
 
         //SWEEP FOR DUPLICATES
         //Found on stackoverflow
@@ -572,8 +572,8 @@ export default class QueryController {
         this.nextObjectOrArray(obj);
         Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
 
-        var tempMaster: Course[] = this.datasets["courses"];
-        var filteredResult: Course[] = [];
+        var tempMaster: any[] = this.datasets["courses"];
+        var filteredResult: any[] = [];
         for (var c1 of tempMaster) {
             var exists: boolean = false;
             for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
@@ -598,7 +598,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) < value) {
                 filteredResult.push(section);
@@ -614,7 +614,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) > value) {
                 filteredResult.push(section);
@@ -630,7 +630,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) === value) {
                 filteredResult.push(section);
@@ -646,7 +646,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: string = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
        // if (Object.keys(obj)[0] === "instructor"){
        // }
         // case1: value = *adhe*
@@ -923,7 +923,6 @@ export default class QueryController {
             //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
         }
     }
-
     public query(query: QueryRequest): QueryResponse {
         //initialize temp arrays
         this.tempResults = [];

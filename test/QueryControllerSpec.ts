@@ -23,7 +23,7 @@ describe("QueryController", function () {
             "ORDER": "courses_avg",
             "AS": "TABLE"
         };
-        let dataset: Datasets = {courses: []};
+        let dataset: Datasets = {"courses": []};
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
@@ -955,6 +955,20 @@ describe("QueryController", function () {
         let isValid = controller.isValid(query);
 
         expect(isValid).to.equal(400);
+    });
+
+    it("Invalid query - rooms and courses in GET IDs", function(){
+        let query: QueryRequest = {
+            "GET": ["rooms_fullname", "courses_number"],
+            "WHERE": {"IS": {"rooms_shortname": "DMP"}},
+            "ORDER": { "dir": "UP", "keys": ["rooms_number"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: [], courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(424);
     });
     /*
 
