@@ -24,7 +24,7 @@ export default class Course {
 
 
     constructor(uuid: number, dept: string, id: string, title: string, avg: number, instructor: string[],
-                pass: number, fail: number, audit: number) {
+                pass: number, fail: number, audit: number, year: number) {
         this._uuid = uuid;
         this._dept = dept;
         this._id = id;
@@ -34,6 +34,7 @@ export default class Course {
         this._pass = pass;
         this._fail = fail;
         this._audit = audit;
+        this._year = year;
     }
 
     public getUniqueId(): number {

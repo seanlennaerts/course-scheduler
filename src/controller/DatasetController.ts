@@ -29,28 +29,36 @@ export default class DatasetController {
 
     private processedData: any[]  = [];
     private datasets: Datasets = {};
+    private validIDs: string[] = ["courses", "rooms"];
 
     constructor() {
         Log.trace('DatasetController::init()');
     }
 
+    private getPersisted(id: string) {
+        var file: string = fs.readFileSync("./data/" + id + ".json", "utf8");
+        this.datasets[id] = [];
+        if (id === "courses") {
+            this.parseAgain(JSON.parse(file));
+        } else {
+            this.parseAgainHTML(JSON.parse(file));
+        }
+        this.datasets[id] = this.processedData;
+    }
+
     public getDatasets(): Datasets {
-        if ("courses" in this.datasets) {
+        if (Object.keys(this.datasets).length === 2) {
             Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
         }
-        try {
-            var file: string = fs.readFileSync("./data/courses.json", "utf8");
-            // this.datasets["courses"] = JSON.parse(file);
-            this.datasets["courses"] = [];
-            this.parseAgain(JSON.parse(file));
-            Log.info("getDatasets(): not in memory so reading from data directory");
-            this.datasets["courses"] = this.processedData;
-            return this.datasets;
-        } catch (err) {
-            //
-            return this.datasets;
+        for (var id of this.validIDs) {
+            try {
+                this.getPersisted(id);
+            } catch (err) {
+                Log.info("Couldn't find " + id + "!");
+            }
         }
+        return this.datasets;
     }
 
     private parseAgain(json: any) {
@@ -64,70 +72,74 @@ export default class DatasetController {
             var fail: number = json[i]._fail;
             var audit: number = json[i]._audit;
             var uniqueId: number = json[i]._setionId;
+            var year: number = json[i]._year;
 
             var newCourse: Course = new Course(uniqueId, dept, id, title, avg,
-                instructor, pass, fail, audit);
+                instructor, pass, fail, audit, year);
 
             this.processedData.push(newCourse);
         }
     }
 
-    public deleteDataset(id: string): number{
-        if (id in this.datasets) {
-            delete this.datasets[id];
-            fs.unlinkSync("./data/" + id + ".json");
-            Log.info("deleteDataset(): deleted " + id + " succesfully!");
-            return 204;
-        } else {
-            return 404;
+    private parseAgainHTML(json: any) {
+        for (var i = 0; i < json.length; i++) {
+            var fullname: string = json[i]._fullname;
+            var shortname: string = json[i]._shortname;
+            var number: string = json[i]._number;
+            var address: string = json[i]._address;
+            var lat: number = json[i]._lat;
+            var lon: number = json[i]._lon;
+            var seats: number = json[i]._seats;
+            var type: string = json[i]._type;
+            var furniture: string = json[i]._furniture;
+            var href: string = json[i]._href;
+
+            var newRoom: Room = new Room(fullname, shortname, number, shortname + number, address, lat, lon,
+                                        seats, type, furniture, href);
+
+            this.processedData.push(newRoom);
         }
+    }
+
+    public deleteDataset(id: string): number{
+        var code: number = 404;
+        if (id in this.datasets) {
+            Log.info("deleteDataset(): " + id + " found in memory!");
+            delete this.datasets[id];
+            code = 204;
+        }
+        try {
+            fs.unlinkSync("./data/" + id + ".json");
+            code = 204;
+        } catch (err) {
+            Log.info("deleteDataset(): " + id + ".json not found on disk!");
+        }
+        Log.info("deleteDataset(): returning " + code);
+        return code;
     }
 
     private readFileZip(zip: JSZip, path: string): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
             zip.file(path).async("string").then(function (contents: string) {
-                //Log.info(contents);
                 var root = JSON.parse(contents);
-                //Log.info("readFile(): there are " + root.result.length + " sections in " + path);
-                // if (root.result.length === 0) {
-                //     Log.info("readFile(): " + path + " has no sections!")
-                //     countMissingSections++;
-                // }
                 if (!root.result) {
-                    // Log.info("readFile(): not valid zip");
-                    //throw new Error("readFile(): not valid zip");
                     reject(new Error("Invalid archive"));
                 }
-
                 for (var i = 0; i < root.result.length; i++) {
-
-                    //check for missing fields
-
                     var dept: string = root.result[i].Subject;
-                    // Log.info("dept: " + dept);
                     var id: string = root.result[i].Course;
-                    // Log.info("id: " + id);
                     var avg: number = root.result[i].Avg;
-                    // Log.info("avg: " + avg);
                     var instructor: string = root.result[i].Professor; //lower case lastname, firstname
                     var instructorArray: string[] = instructor.split(";");
-                    // if (instructorArray.length > 1) {
-                    //     Log.info("instructorArray: " + instructorArray.toString());
-                    // }
-                    // Log.info("instructor: " + instructor);
                     var title: string = root.result[i].Title;
-                    // Log.info("title: " + title);
                     var pass: number = root.result[i].Pass;
-                    // Log.info("pass: " + pass);
                     var fail: number = root.result[i].Fail;
-                    // Log.info("fail: " + fail);
                     var audit: number = root.result[i].Audit;
-                    // Log.info("audit: " + audit);
                     var uuid: number = root.result[i].id;
-                    // Log.info("uniqueId: " + uniqueId);
+                    var year: number = root.result[i].Year;
 
-                    var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit);
+                    var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year);
                     that.processedData.push(newSection);
                 } //end for loop
             }).then(function() {
@@ -318,35 +330,14 @@ export default class DatasetController {
      */
     public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
-
-        var code: number = 0;
-        if (id in this.datasets) {
-            code = 201;
-        } else {
-            code = 204;
-        }
-
         let that = this;
+        var code: number = id in this.datasets ? 201 : 204;
         return new Promise(function (fulfill, reject) {
             Log.info("process(): start");
             try {
-                // if (id != "courses") {
-                //     throw new Error("Invalid id");
-                // }
-                //another hacky fix that should be refactored
-                var invalidDataset: boolean = false;
-
-                //
-
                 let myZip = new JSZip();
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
                     Log.trace('DatasetController::process(..) - unzipped');
-
-                    // iterate through files in zip (zip.files)
-                    // The contents of the file will depend on the id provided. e.g.,
-                    // some zips will contain .html files, some will contain .json files.
-                    // You can depend on 'id' to differentiate how the zip should be handled,
-                    // although you should still be tolerant to errors.
                     var promises: string[] = [];
                     switch (id) {
                         case "courses":
@@ -355,7 +346,6 @@ export default class DatasetController {
                             });
                             break;
                         case "rooms":
-                            // UNCOMMENT lines 341-353 to use Ana Cris' index helper
                             that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
                                 var indexBuildings: string[] = fulfill;
                                 zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
@@ -368,37 +358,19 @@ export default class DatasetController {
                             }).catch(function(){
                                 throw new Error("Invalid dataset");
                             });
-
-                            // COMMENT OUT lines 356-358 (next 3 lines) to use Ana Cris' index helper
-                            // zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                            //     promises.push(<any>that.readFileHtml(zip, file.name));
-                            // });
                             break;
                         default:
                             throw new Error("Invalid id");
                     }
                     return Promise.all(promises);
-
-
-                }).then(function() {
-                    // Log.info("process(): all readFile promises are ready!");
-                    // Log.info("process(): there are " + promises.length + " valid files");
-                    //
-                    //
-                    // if (promises.length === 0) {
-                    //     // throw new Error("process(): Not valid dataset");
-                    //     //reject(new Error("Invalid dataset"));
-                    //     invalidDataset = true;
-                    // }
-
-
-
-                    if (invalidDataset) {
+                }).then(function(promises) {
+                    Log.info("process(): all readFile promises are ready!");
+                    Log.info("process(): there are " + promises.length + " valid files");
+                    if (promises.length === 0) {
                         reject(new Error("Invalid dataset"));
-                    } else {
-                        that.save(id);
-                        fulfill(code);
                     }
+                    that.save(id);
+                    fulfill(code);
                 }).catch(function (err: Error) {
                     Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
                     reject(new Error("Invalid archive"));
@@ -427,7 +399,7 @@ export default class DatasetController {
         }
 
         var toWrite: string = JSON.stringify(this.processedData);
-        fs.writeFile("./data/"+id+".json", toWrite, function (err: Error) {
+        fs.writeFile("./data/" + id + ".json", toWrite, function (err: Error) {
             if (err) {
                 // Log.error("save(): Error saving file after process " + err);
                 throw err;
