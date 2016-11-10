@@ -18,10 +18,6 @@ describe("QueryReturns", function () {
 
     beforeEach(function () {
         facade = new InsightFacade();
-        for (var id of ["courses", "rooms"]) {
-            facade.removeDataset(id)
-                .catch();
-        }
     });
 
     afterEach(function () {

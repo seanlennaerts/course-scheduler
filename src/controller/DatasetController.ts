@@ -47,15 +47,17 @@ export default class DatasetController {
     }
 
     public getDatasets(): Datasets {
-        if (Object.keys(this.datasets).length === 2) {
+        if (Object.keys(this.datasets).length === this.validIDs.length) {
             Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
         }
         for (var id of this.validIDs) {
-            try {
-                this.getPersisted(id);
-            } catch (err) {
-                Log.info("Couldn't find " + id + "!");
+            if (!(id in this.datasets)) {
+                try {
+                    this.getPersisted(id);
+                } catch (err) {
+                    Log.info("Couldn't find " + id + "!");
+                }
             }
         }
         return this.datasets;
@@ -118,10 +120,10 @@ export default class DatasetController {
         return code;
     }
 
-    private readFileZip(zip: JSZip, path: string): Promise<any> {
+    private readFileZip(file: JSZipObject): Promise<any> {
         let that = this;
         return new Promise(function (fulfill, reject) {
-            zip.file(path).async("string").then(function (contents: string) {
+            file.async("string").then(function (contents: string) {
                 var root = JSON.parse(contents);
                 if (!root.result) {
                     reject(new Error("Invalid archive"));
@@ -208,7 +210,6 @@ export default class DatasetController {
             port: 8022,
             path: "/api/v1/team2/" + address
         };
-        var that = this;
         return new Promise (function (fulfill, reject) {
             //FROM STACK OVERFLOW
             const request = http.get(options, (response: any) => {
@@ -228,15 +229,13 @@ export default class DatasetController {
         });
     }
 
-
-    private readFileHtml(zip: JSZip, path: string): Promise<any> {
+    private readFileHtml(file: JSZipObject): Promise<any> {
         var that = this;
         return new Promise(function (fulfill, reject) {
-            //TODO
-            zip.file(path).async("string").then(function (contents: string) {
+            file.async("string").then(function (contents: string) {
                 contents = that.cleanHTML(contents);
 
-                let shortname: string = path.split("/")[path.split("/").length - 1];
+                let shortname: string = file.name.split("/")[file.name.split("/").length - 1];
                 let fullname: string = null;
                 let number: string = null;
                 let address: string = null;
@@ -276,7 +275,6 @@ export default class DatasetController {
                         Log.error("Error finding latlon: " + err.error);
                     });
                 }
-
             }).then(function() {
                 fulfill(true);
             }).catch(function (err: Error) {
@@ -286,11 +284,10 @@ export default class DatasetController {
     }
 
     private parseIndex(index: JSZipObject): Promise<string[]> {
-        Log.info("DatasetController:: parseIndex(): starting")
+        Log.info("DatasetController:: parseIndex(): starting");
         var that = this;
         return new Promise(function (fulfill, reject) {
             var buildingsCodeArray: string[] = [];
-            //TODO
             index.async("string").then(function(contents: string){
                 contents = that.cleanHTML(contents);
                 var document: ASTNode = parse5.parse(contents);
@@ -308,10 +305,10 @@ export default class DatasetController {
                     }
                 }
             }).then(function(){
-                Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)")
+                Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)");
                 fulfill(buildingsCodeArray);
             }).catch(function(err: Error){
-                Log.info("DatasetController:: parseIndex(): Boo Ana... It sucks")
+                Log.info("DatasetController:: parseIndex(): Boo Ana... It sucks");
                 reject(err);
             })
         });
@@ -338,15 +335,15 @@ export default class DatasetController {
                     switch (id) {
                         case "courses":
                             zip.folder(id).forEach(function (relativePath, file) {
-                                promises.push(<any>that.readFileZip(zip, file.name));
+                                promises.push(<any>that.readFileZip(zip.file(file.name)));
                             });
                             break;
                         case "rooms":
                             that.parseIndex(zip.folder(id).file("index.htm")).then(function(fulfill){
                                 var indexBuildings: string[] = fulfill;
                                 zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                                    if (indexBuildings.includes(file.name)) {
-                                        promises.push(<any>that.readFileHtml(zip, file.name));
+                                    if (indexBuildings.includes(relativePath)) {
+                                        promises.push(<any>that.readFileHtml(zip.file(file.name)));
                                     } else {
                                         Log.info("rejecting: " + file.name);
                                     }
@@ -360,11 +357,11 @@ export default class DatasetController {
                     }
                     return Promise.all(promises);
                 }).then(function(promises) {
-                    Log.info("process(): all readFile promises are ready!");
-                    Log.info("process(): there are " + promises.length + " valid files");
-                    if (promises.length === 0) {
-                        reject(new Error("Invalid dataset"));
-                    }
+                    // Log.info("process(): all readFile promises are ready!");
+                    // Log.info("process(): there are " + promises.length + " valid files");
+                    // if (promises.length === 0) {
+                    //     reject(new Error("Invalid dataset"));
+                    // }
                     that.save(id);
                     fulfill(code);
                 }).catch(function (err: Error) {
