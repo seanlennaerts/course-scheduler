@@ -23,7 +23,7 @@ describe("QueryController", function () {
             "ORDER": "courses_avg",
             "AS": "TABLE"
         };
-        let dataset: Datasets = {courses: []};
+        let dataset: Datasets = {"courses": []};
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 
@@ -886,6 +886,20 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
+    it("Valid query - d1 style", function(){
+        let query: QueryRequest = {
+            "GET": ["rooms_fullname", "rooms_number"],
+            "WHERE": {"IS": {"rooms_shortname": "DMP"}},
+            "ORDER": "rooms_number",
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
     it("Valid query - complex rooms query", function(){
         let query: QueryRequest =  {
             "GET": ["rooms_shortname", "numRooms"],
@@ -956,6 +970,66 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(400);
     });
+
+    it("Invalid query - rooms and courses in IDs", function(){
+        let query: QueryRequest = {
+            "GET": ["rooms_fullname", "courses_avg"],
+            "WHERE": {"IS": {"rooms_shortname": "DMP"}},
+            "ORDER": { "dir": "UP", "keys": ["courses_avg"]},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: [], courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
+    it("Invalid query - rooms and courses in GET && GROUP IDs", function(){
+        let query: QueryRequest =  {
+            "GET": ["courses_avg", "numRooms"],
+            "WHERE": {"GT": {"rooms_seats": 160}},
+            "GROUP": [ "rooms_shortname", "courses_avg"],
+            "APPLY": [ {"numRooms": {"COUNT": "rooms_seats"}} ],
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: [], courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
+    it("Invalid query - rooms and courses in APPLY IDs", function(){
+        let query: QueryRequest =  {
+            "GET": ["rooms_shortname", "numRooms"],
+            "WHERE": {"GT": {"rooms_seats": 160}},
+            "GROUP": [ "rooms_shortname" ],
+            "APPLY": [ {"numRooms": {"COUNT": "courses_avg"}} ],
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: [], courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
+    it("Invalid query - rooms and courses in WHERE IDs", function(){
+        let query: QueryRequest =  {
+            "GET": ["rooms_shortname", "numRooms"],
+            "WHERE": {"GT": {"courses_avg": 160}},
+            "GROUP": [ "rooms_shortname" ],
+            "APPLY": [ {"numRooms": {"COUNT": "rooms_name"}} ],
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {rooms: [], courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(400);
+    });
+
     /*
 
     it("Valid query with new course key: year", function () {

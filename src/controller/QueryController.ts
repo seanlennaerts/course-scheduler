@@ -41,11 +41,23 @@ export default class QueryController {
     private completeGROUPkeys: string[] = [];
     private APPLYkeys: string[] = [];
     private duplicateKeys: string[] = [];
+    private IDconsistency: string[] = [];
+    private queryID: string;
 
     constructor(datasets: Datasets) {
         this.datasets = datasets;
      //   this.datasetID = id;
      //   this.dataset = this.getDataset(id);
+    }
+
+    private IDsConsistent(): boolean {
+        for (var i = 1; i < this.IDconsistency.length; i++){
+            if (this.IDconsistency[0] != this.IDconsistency[i]){
+                return false;
+            }
+        }
+        this.queryID = this.IDconsistency[0];
+        return true;
     }
 
     public returnWrongIDs(): string[]{
@@ -88,13 +100,16 @@ export default class QueryController {
                 }
                 break;
             case "rooms":
+                Log.info("it's case ROOMS, where s is:" + s);
                 if (s === "fullname" || s === "shortname" || s === "number" || s === "name" ||
                     s === "address" || s === "lat" || s === "lon" || s === "seats" ||
                     s === "type" || s === "furniture" || s === "href"){
+                    Log.info("s is a Valid key");
                     result = true;
                 } else {
                     result = false;
                 }
+                Log.info("Now we'll break");
                 break;
             default:
                 result = false;
@@ -104,7 +119,11 @@ export default class QueryController {
 
     private WHEREhelperObject(whereObject: {}): number {
         if (Object.keys(whereObject).length === 0){
-            Log.info("WHEREhelperObject:: empty WhHERE object");
+           // Log.info("WHEREhelperObject:: empty WhHERE object");
+            if (!(this.IDsConsistent())){
+                Log.info("Inconsistent IDs in query");
+                return 400;
+            }
             return 200;
         }
         if (Object.keys(whereObject).length > 1){
@@ -120,8 +139,13 @@ export default class QueryController {
                // Log.info("wrongDataSetIDs[0] is: " + this.wrongDatasetIDs[0]);
                 return 424;
             } else {
+                this.IDconsistency.push(id);
                 if (this.validKeys(Object.keys(whereObject)[0].split("_")[1], id)){
                     //Log.info("QueryController :: WHEREhelperObject(..) - reached base case (no more nested objects/arrays), object key is " + Object.keys(whereObject)[0]);
+                    if (!(this.IDsConsistent())){
+                        Log.info("Inconsistent IDs in query");
+                        return 400;
+                    }
                     return 200;
                 }
             }
@@ -159,11 +183,16 @@ export default class QueryController {
             //Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
             return 424;
         }
+        this.IDconsistency.push(orderString.split("_")[0]);
         if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
             //Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
             return 400;
         }
         //Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
+        if (!(this.IDsConsistent())){
+            Log.info("Inconsistent IDs in query");
+            return 400;
+        }
         return 200;
     }
 
@@ -193,6 +222,10 @@ export default class QueryController {
                             }
                         }
                     }
+                    if (!(this.IDsConsistent())){
+                        Log.info("Inconsistent IDs in query");
+                        return 400;
+                    }
                     return 200;
                 }
             }
@@ -209,6 +242,10 @@ export default class QueryController {
             return 400;
         } else {
             //Log.info("QueryController :: isValidAsHandler(..) - AS is'TABLE' :) ");
+            if (!(this.IDsConsistent())){
+                Log.info("Inconsistent IDs in query");
+                return 400;
+            }
             return 200;
         }
     }
@@ -225,21 +262,26 @@ export default class QueryController {
                 } else {
                     var GETelement: string[] = i.split("_");
                     var id: string = GETelement[0];
-                    Log.info("QueryController :: isValidGetHandler(..) - id is: " + GETelement[1]);
+                    Log.info("QueryController :: d1isValidGetHandler(..) - id is: " + GETelement[0]);
                     if (!(id in this.datasets)) {
                         this.wrongDatasetIDs.push(id);
                         return (424);
                     } else {
+                        this.IDconsistency.push(id);
                         var datasetField = GETelement[1];
                         if (!(this.validKeys(datasetField, id))) {
-                            //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
+                            //Log.info("QueryController :: deisValidGetHandler - wrong field in query submitted ");
                             return 400;
                         } else {
-                            Log.info("QueryController :: isValidGetHandler - pushing datasetField: " + datasetField);
+                            Log.info("QueryController :: d1isValidGetHandler - pushing datasetField: " + datasetField);
                             this.queryKeys.push(datasetField);
                         }
                     }
                 }
+            }
+            if (!(this.IDsConsistent())){
+                Log.info("Inconsistent IDs in query");
+                return 400;
             }
             return 200;
         }
@@ -268,9 +310,10 @@ export default class QueryController {
                         //Log.info("QueryController :: isValidGetHandler(..) - the wrongDatasetIDS are " + JSON.stringify(this.wrongDatasetIDs));
                         return (424);
                     }
+                    this.IDconsistency.push(id);
                     //Log.info("QueryController :: isValidGetHandler(..) - id is already in datasets");
                     var datasetField = GETelement[1];
-                    //Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
+                    Log.info("QueryController :: isValidGetHandler(..) - datasetField is: " + datasetField);
                     /*if (!(this.validKeys(datasetField))){
                      //Log.info("QueryController :: isValidGetHandler - wrong field in query submitted ");
                      return 400;
@@ -283,6 +326,10 @@ export default class QueryController {
                         return 400;
                     }
                 }
+            }
+            if (!(this.IDsConsistent())){
+                Log.info("Inconsistent IDs in query");
+                return 400;
             }
             return 200;
         }
@@ -307,6 +354,7 @@ export default class QueryController {
                     return (424);
 
                 } else {
+                    this.IDconsistency.push(id);
                     var groupKey = GROUPelement[1];
                     if (!(this.validKeys(groupKey, id))) {
                         return 400;
@@ -344,6 +392,7 @@ export default class QueryController {
                     // Log.info("About to return 424, group element id not in dataset");
                     return (424);
                 }
+                this.IDconsistency.push(splitIt[0]);
                 var field : string = splitIt[1];
                 if (this.GROUPkeys.includes(field)){
                     Log.info("Returning 400, APPLY inner field: " + field + "already in GROUPkeys")
@@ -366,11 +415,18 @@ export default class QueryController {
                     // Log.info("About to return 424, APPLY inner element id not in dataset");
                     return 424;
                 } else {
+                    this.IDconsistency.push(APPLYid);
                     var APPLYfield : string = APPLYelement[1];
-                    if (!(this.validKeys(APPLYfield, id))){
+                    Log.info("APPLYfield is " + APPLYfield);
+                    if (!(this.validKeys(APPLYfield, APPLYid))){
+                        Log.info("This is the APPLYfield not found: " + APPLYfield+ " with id: " + APPLYid)
                         return 400;
                     }
                 }
+            }
+            if (!(this.IDsConsistent())){
+                Log.info("Inconsistent IDs in query");
+                return 400;
             }
             return 200;
         }
@@ -508,7 +564,7 @@ export default class QueryController {
             this.nextObjectOrArray(obj);
         }
         Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var course of this.tempResults[this.tempResultsIndex][0]) {
             var id: number = course.getUniqueId();
             var exists: boolean = false;
@@ -545,7 +601,7 @@ export default class QueryController {
             this.nextObjectOrArray(obj);
         }
         Log.info("... back to handleOR - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
-        var merged: Course[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
+        var merged: any[] = [].concat.apply([], this.tempResults[this.tempResultsIndex]);
 
         //SWEEP FOR DUPLICATES
         //Found on stackoverflow
@@ -572,8 +628,8 @@ export default class QueryController {
         this.nextObjectOrArray(obj);
         Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
 
-        var tempMaster: Course[] = this.datasets["courses"];
-        var filteredResult: Course[] = [];
+        var tempMaster: any[] = this.datasets["courses"];
+        var filteredResult: any[] = [];
         for (var c1 of tempMaster) {
             var exists: boolean = false;
             for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
@@ -598,7 +654,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) < value) {
                 filteredResult.push(section);
@@ -614,7 +670,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) > value) {
                 filteredResult.push(section);
@@ -630,7 +686,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: number = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
         for (var section of this.datasets["courses"]) {
             if (section.getField(keyRight) === value) {
                 filteredResult.push(section);
@@ -646,7 +702,7 @@ export default class QueryController {
         var keyFull: string = Object.keys(obj)[0];
         var value: string = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
-        var filteredResult: Course[] = [];
+        var filteredResult: any[] = [];
        // if (Object.keys(obj)[0] === "instructor"){
        // }
         // case1: value = *adhe*
@@ -923,7 +979,6 @@ export default class QueryController {
             //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
         }
     }
-
     public query(query: QueryRequest): QueryResponse {
         //initialize temp arrays
         this.tempResults = [];
