@@ -357,11 +357,11 @@ export default class DatasetController {
                     }
                     return Promise.all(promises);
                 }).then(function(promises) {
-                    // Log.info("process(): all readFile promises are ready!");
-                    // Log.info("process(): there are " + promises.length + " valid files");
-                    // if (promises.length === 0) {
-                    //     reject(new Error("Invalid dataset"));
-                    // }
+                    Log.info("process(): all readFile promises are ready!");
+                    Log.info("process(): there are " + promises.length + " valid files");
+                    if (promises.length === 0) {
+                        reject(new Error("Invalid dataset"));
+                    }
                     that.save(id);
                     fulfill(code);
                 }).catch(function (err: Error) {
