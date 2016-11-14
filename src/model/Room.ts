@@ -5,11 +5,12 @@
 export default class Room {
 
     //identified by:
-    private _name: string;
+    private _uuid: string;
 
     //room info:
     private _fullname: string;
     private _shortname: string; //from html file
+    private _name: string;
     private _number: string;
     private _address: string;
     private _lat: number;
@@ -33,6 +34,11 @@ export default class Room {
         this._type = type;
         this._furniture = furniture;
         this._href = href;
+        this._uuid = name;
+    }
+
+    public getUniqueId(): string {
+        return this._uuid;
     }
 
     public getField (field: string): number|string {

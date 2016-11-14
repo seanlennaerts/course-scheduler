@@ -566,7 +566,7 @@ export default class QueryController {
         Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
         var filteredResult: any[] = [];
         for (var course of this.tempResults[this.tempResultsIndex][0]) {
-            var id: number = course.getUniqueId();
+            var id = course.getUniqueId();
             var exists: boolean = false;
             for (var i = 1; i < this.tempResults[this.tempResultsIndex].length; i++) {
                 exists = false;
@@ -628,7 +628,7 @@ export default class QueryController {
         this.nextObjectOrArray(obj);
         Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
 
-        var tempMaster: any[] = this.datasets["courses"];
+        var tempMaster: any[] = this.datasets[this.queryID];
         var filteredResult: any[] = [];
         for (var c1 of tempMaster) {
             var exists: boolean = false;
@@ -655,7 +655,7 @@ export default class QueryController {
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
         var filteredResult: any[] = [];
-        for (var section of this.datasets["courses"]) {
+        for (var section of this.datasets[this.queryID]) {
             if (section.getField(keyRight) < value) {
                 filteredResult.push(section);
                 //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + ", avg: " + section.getField("avg"));
@@ -671,7 +671,7 @@ export default class QueryController {
         var value: number = (<any>obj)[keyFull];
         var keyRight = keyFull.split("_")[1];
         var filteredResult: any[] = [];
-        for (var section of this.datasets["courses"]) {
+        for (var section of this.datasets[this.queryID]) {
             if (section.getField(keyRight) > value) {
                 filteredResult.push(section);
                 //Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.uniqueId + "-" + section.getField("avg"));
@@ -687,7 +687,7 @@ export default class QueryController {
         var value: number = (<any>obj)[keyFull];
         var keyRight: string = keyFull.split("_")[1];
         var filteredResult: any[] = [];
-        for (var section of this.datasets["courses"]) {
+        for (var section of this.datasets[this.queryID]) {
             if (section.getField(keyRight) === value) {
                 filteredResult.push(section);
                 Log.info("handleGT() pushed " + section.getField("dept") + section.getField("id") + "-" + section.getUniqueId() + "-" + section.getField("avg"));
@@ -710,7 +710,7 @@ export default class QueryController {
            // Log.info("it is case4");
             var trimmedStr: string = value.substr(1,(value.length-2));
             //Log.info("* is at the beggining AND end: stripping value of stars leaves only: " + trimmedStr);
-            for (var section of this.datasets["courses"]) {
+            for (var section of this.datasets[this.queryID]) {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
@@ -736,7 +736,7 @@ export default class QueryController {
             //Log.info("it is case1");
             var trimmedStr: string = value.substr(1, (value.length - 1));
             //Log.info("* is in the beginning: stripping value of stars leaves only: " + trimmedStr);
-            for (var section of this.datasets["courses"]) {
+            for (var section of this.datasets[this.queryID]) {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
@@ -760,7 +760,7 @@ export default class QueryController {
         else if (value.lastIndexOf("*") === value.length - 1){
             var trimmedStr: string = value.split("*")[0];
             //Log.info("* is at the end: stripping value of stars leaves only: " + trimmedStr);
-            for (var section of this.datasets["courses"]) {
+            for (var section of this.datasets[this.queryID]) {
                 if(keyRight === "instructor") {
                     //Log.info("It should be an instructor that we are looking for: " + trimmedStr);
                     var strings: string[] = section.getInstructors();
@@ -784,7 +784,7 @@ export default class QueryController {
             // case4: value = adhe
            // Log.info("it is case2: value is: " + value);
             if (!(value.includes("*"))) {
-                for (var section of this.datasets["courses"]) {
+                for (var section of this.datasets[this.queryID]) {
                     if(keyRight === "instructor") {
                         //Log.info("It should be an instructor that we are looking for: " + value);
                         var strings: string[] = section.getInstructors();
@@ -826,7 +826,7 @@ export default class QueryController {
             this.handleNOT(checkObj.NOT);
         } else {
             Log.info("Empty where detected");
-            this.tempResults[0][0] = this.datasets["courses"];
+            this.tempResults[0][0] = this.datasets[this.queryID];
         }
     }
 
@@ -858,7 +858,7 @@ export default class QueryController {
         var sum = 0;
         var i = 0;
         for (i; i < this.groupedResults[groupIndex].length; i++) {
-            var course: Course = this.groupedResults[groupIndex][i];
+            var course = this.groupedResults[groupIndex][i];
             var add: number = <number>course.getField(key);
             sum += add;
         }
