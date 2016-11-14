@@ -171,21 +171,21 @@ describe("QueryController", function () {
         expect(isValid).to.equal(200);
     });
 
-    it("Should be able to query, although the answer will be empty", function () {
-        let query: QueryRequest = {
-            "GET": ["courses_dept", "courses_avg"],
-            "WHERE": {"GT": {"courses_avg": 200}},
-            "ORDER": "courses_avg",
-            "AS": "TABLE"
-        };
-        let dataset: Datasets = {courses: []};
-        let controller = new QueryController(dataset);
-        let ret = controller.query(query);
-
-        Log.test('In: ' + JSON.stringify(query) + ', out: ' + JSON.stringify(ret));
-        expect(ret).not.to.be.equal(null);
-        expect(ret.result.length).to.equal(0);
-    });
+    // it("Should be able to query, although the answer will be empty", function () {
+    //     let query: QueryRequest = {
+    //         "GET": ["courses_dept", "courses_avg"],
+    //         "WHERE": {"GT": {"courses_avg": 200}},
+    //         "ORDER": "courses_avg",
+    //         "AS": "TABLE"
+    //     };
+    //     let dataset: Datasets = {courses: []};
+    //     let controller = new QueryController(dataset);
+    //     let ret = controller.query(query);
+    //
+    //     Log.test('In: ' + JSON.stringify(query) + ', out: ' + JSON.stringify(ret));
+    //     expect(ret).not.to.be.equal(null);
+    //     expect(ret.result.length).to.equal(0);
+    // });
 
     it("Should be able to invalidate an invalid query - empty GET array", function () {
         let query: QueryRequest = {

@@ -16,7 +16,7 @@ var http = require('http');
  * In memory representation of all datasets.
  */
 export interface Datasets {
-    [id: string]: Course[];
+    [id: string]: any[];
 }
 
 export interface GeoResponse {
@@ -64,6 +64,7 @@ export default class DatasetController {
     }
 
     private parseAgain(json: any) {
+        this.processedData = [];
         for (var i = 0; i < json.length; i++) {
             var dept: string = json[i]._dept;
             var id: string = json[i]._id;
@@ -84,6 +85,7 @@ export default class DatasetController {
     }
 
     private parseAgainHTML(json: any) {
+        this.processedData = [];
         for (var i = 0; i < json.length; i++) {
             var fullname: string = json[i]._fullname;
             var shortname: string = json[i]._shortname;
@@ -319,6 +321,7 @@ export default class DatasetController {
         return new Promise(function (fulfill, reject) {
             var code: number = (id in that.datasets) ? 201 : 204;
             Log.info("process(): start");
+            that.processedData = [];
             try {
                 let myZip = new JSZip();
                 myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
