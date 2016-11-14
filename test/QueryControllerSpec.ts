@@ -888,9 +888,9 @@ describe("QueryController", function () {
 
     it("Valid query - d1 style", function(){
         let query: QueryRequest = {
-            "GET": ["rooms_fullname", "rooms_number"],
+            "GET": ["rooms_fullname", "rooms_name"],
             "WHERE": {"IS": {"rooms_shortname": "DMP"}},
-            "ORDER": "rooms_number",
+            "ORDER": "rooms_name",
             "AS": "TABLE"
         };
         let dataset: Datasets = {rooms: []};

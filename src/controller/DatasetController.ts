@@ -326,11 +326,13 @@ export default class DatasetController {
                     var promises: string[] = [];
                     switch (id) {
                         case "courses":
+                            Log.info("it is case" + id);
                             zip.folder(id).forEach(function (relativePath, file) {
                                 promises.push(<any>that.readFileZip(zip.file(file.name)));
                             });
                             break;
                         case "rooms":
+                            Log.info("it is case" + id);
                             var indexBuildings: string[] = ["ACU", "ALRD", "ANSO", "AERL", "ACEN", "AAC", "AUDI", "AUDX", "BINN", "BIOL", "BRKX", "BUCH", "BUTO", "CHOI", "CIRS", "CHAN", "CHBE", "CHEM", "CEME", "COPP", "DLAM", "HSCC", "DSOM", "KENN", "EOSM", "ESB", "FNH", "FSC", "FORW", "KAIS", "LASR", "FRWO", "FRDM", "GEOG", "CUNN", "HEBB", "HENN", "ANGU", "GREN", "DMP", "ICCS", "IONA", "IBLC", "MCDN", "SOWK", "LSK", "LSC", "MCLD", "MCML", "MATH", "MATX", "MEDC", "MSB", "MUSC", "SCRF", "ORCH", "PHRM", "PONE", "PCOH", "PONF", "PONH", "OSBO", "SPPH", "SOJ", "SRC", "UCLL", "TFPB", "TFPX", "MGYM", "EDC", "WESB", "WMAX", "SWNG", "WOOD"];
                             zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
                                 if (indexBuildings.includes(relativePath)) {

@@ -180,12 +180,13 @@ export default class QueryController {
         // it used to be: (this.queryKeys.indexOf(orderString.split("_")[1], 0) == -1)
         if (!(orderString.split("_")[0] in this.datasets)){
             this.wrongDatasetIDs[0] = orderString.split("_")[0];
-            //Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
+            Log.info("QueryController :: isValidOrderHandler(..) - ORDER id is: not in datasets: " + orderString.split("_")[0]);
             return 424;
         }
         this.IDconsistency.push(orderString.split("_")[0]);
+        Log.info("id is" + orderString.split("_")[0])
         if (this.queryKeys.indexOf(orderString.split("_")[1]) === -1) {
-            //Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
+            Log.info("QueryController :: isValidOrderHandler(..) - " + orderString + " key is not included in GET keys");
             return 400;
         }
         //Log.info("QueryController :: isValidOrderHandler(..) - there is ORDER key included in GET keys ");
@@ -283,6 +284,7 @@ export default class QueryController {
                 Log.info("Inconsistent IDs in query");
                 return 400;
             }
+            Log.info("returning from d1isValidGetHandler")
             return 200;
         }
     }
@@ -451,7 +453,7 @@ export default class QueryController {
                             if (typeof query.ORDER === "string") {
                                 var ORDERstring: string = <any>(query.ORDER);
                                 ORDERresult = this.isValidOrderHandler(ORDERstring);
-                                //Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
+                                Log.info("isValid(..) - returned from isValidOrderHandler, ORDERresult: " + ORDERresult);
                             }
                             else if (typeof query.ORDER === "object") {
                                 var ORDERobject: OrderObject = <any>(query.ORDER);
