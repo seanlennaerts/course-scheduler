@@ -267,7 +267,7 @@ export default class DatasetController {
                             type = that.searchAST(row, "#text", "room-type", "td", 0);
                             furniture = that.searchAST(row, "#text", "room-furniture", "td", 0);
                             href = that.getSmallerSection(row, "a", "http").attrs[0].value;
-                            var room = new Room(fullname, shortname, number, shortname + number, address, lat, lon, seats, type, furniture, href);
+                            var room = new Room(fullname, shortname, number, shortname + "_" + number, address, lat, lon, seats, type, furniture, href);
                             that.processedData.push(room);
                         }
                     }).catch(function (err: Error) {

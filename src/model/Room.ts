@@ -27,6 +27,7 @@ export default class Room {
         this._shortname = shortname;
         this._number = number;
         this._name = name;
+        this._uuid = name;
         this._address = address;
         this._lat = lat;
         this._lon = lon;
@@ -34,7 +35,6 @@ export default class Room {
         this._type = type;
         this._furniture = furniture;
         this._href = href;
-        this._uuid = name;
     }
 
     public getUniqueId(): string {
