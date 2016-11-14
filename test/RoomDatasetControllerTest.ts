@@ -19,11 +19,13 @@ describe("Room Dataset Controller", function () {
         Log.info('InsightController::before() - start');
         // this zip might be in a different spot for you
         zipFileContents = new Buffer(fs.readFileSync('roomsALL.zip')).toString('base64');
-        try {
-            fs.unlinkSync("./data/rooms.json");
-        } catch (err) {
-            // fail silently (means there was nothing to delete)
-        }
+        facade = new InsightFacade;
+        facade.removeDataset("rooms");
+        // try {
+        //     fs.unlinkSync("./data/rooms.json");
+        // } catch (err) {
+        //     // fail silently (means there was nothing to delete)
+        // }
         Log.info('InsightController::before() - done');
     });
 

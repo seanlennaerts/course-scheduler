@@ -283,28 +283,28 @@ export default class DatasetController {
         });
     }
 
-    private parseIndex(index: JSZipObject): Promise<string[]> {
-        Log.info("DatasetController:: parseIndex(): starting");
-        var that = this;
-        return new Promise(function (fulfill, reject) {
-            var buildingsCodeArray: string[] = [];
-            index.async("string").then(function(contents: string){
-                contents = that.cleanHTML(contents);
-                var document: ASTNode = parse5.parse(contents);
-                var main: ASTNode = that.getSmallerSection(document, "tbody");
-                for (var tBodyRow of main.childNodes){
-                    var buildingCode = that.searchAST(main, "#text", "value", "td", 0);
-                    buildingsCodeArray.push(buildingCode);
-                }
-            }).then(function(){
-                Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)");
-                fulfill(buildingsCodeArray);
-            }).catch(function(err: Error){
-                Log.info("DatasetController:: parseIndex(): Boo Ana... It sucks");
-                reject(err);
-            })
-        });
-    }
+    // private parseIndex(index: JSZipObject): Promise<string[]> {
+    //     Log.info("DatasetController:: parseIndex(): starting");
+    //     var that = this;
+    //     return new Promise(function (fulfill, reject) {
+    //         var buildingsCodeArray: string[] = [];
+    //         index.async("string").then(function(contents: string){
+    //             contents = that.cleanHTML(contents);
+    //             var document: ASTNode = parse5.parse(contents);
+    //             var main: ASTNode = that.getSmallerSection(document, "tbody");
+    //             for (var tBodyRow of main.childNodes){
+    //                 var buildingCode = that.searchAST(main, "#text", "value", "td", 0);
+    //                 buildingsCodeArray.push(buildingCode);
+    //             }
+    //         }).then(function(){
+    //             Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)");
+    //             fulfill(buildingsCodeArray);
+    //         }).catch(function(err: Error){
+    //             Log.info("DatasetController:: parseIndex(): Boo Ana... It sucks");
+    //             reject(err);
+    //         })
+    //     });
+    // }
 
     /**
      * Process the dataset; save it to disk when complete.
@@ -316,45 +316,49 @@ export default class DatasetController {
     public process(id: string, data: any): Promise<number> {
         Log.trace('DatasetController::process( ' + id + '... )');
         let that = this;
-        var code: number = id in this.datasets ? 201 : 204;
+        var code: number = (id in this.datasets) ? 201 : 204;
         return new Promise(function (fulfill, reject) {
             Log.info("process(): start");
-            let myZip = new JSZip();
-            myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
-                Log.trace('DatasetController::process(..) - unzipped');
-                var promises: string[] = [];
-                switch (id) {
-                    case "courses":
-                        zip.folder(id).forEach(function (relativePath, file) {
-                            promises.push(<any>that.readFileZip(zip.file(file.name)));
-                        });
-                        break;
-                    case "rooms":
-                        var indexBuildings: string[] = ["ACU", "ALRD", "ANSO", "AERL", "ACEN", "AAC", "AUDI", "AUDX", "BINN", "BIOL", "BRKX", "BUCH", "BUTO", "CHOI", "CIRS", "CHAN", "CHBE", "CHEM", "CEME", "COPP", "DLAM", "HSCC", "DSOM", "KENN", "EOSM", "ESB", "FNH", "FSC", "FORW", "KAIS", "LASR", "FRWO", "FRDM", "GEOG", "CUNN", "HEBB", "HENN", "ANGU", "GREN", "DMP", "ICCS", "IONA", "IBLC", "MCDN", "SOWK", "LSK", "LSC", "MCLD", "MCML", "MATH", "MATX", "MEDC", "MSB", "MUSC", "SCRF", "ORCH", "PHRM", "PONE", "PCOH", "PONF", "PONH", "OSBO", "SPPH", "SOJ", "SRC", "UCLL", "TFPB", "TFPX", "MGYM", "EDC", "WESB", "WMAX", "SWNG", "WOOD"];
-                        zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
-                            if (indexBuildings.includes(relativePath)) {
-                                promises.push(<any>that.readFileHtml(zip.file(file.name)));
-                            } else {
-                                Log.info("rejecting: " + file.name);
-                            }
-                        });
-                        break;
-                    default:
-                        throw new Error("Invalid id");
-                }
-                return Promise.all(promises);
-            }).then(function(promises) {
-                Log.info("process(): all readFile promises are ready!");
-                Log.info("process(): there are " + promises.length + " valid files");
-                if (promises.length === 0) {
-                    reject(new Error("Invalid dataset"));
-                }
-                that.save(id);
-                fulfill(code);
-            }).catch(function (err: Error) {
-                Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
-                reject(new Error("Invalid archive"));
-            });
+            try {
+                let myZip = new JSZip();
+                myZip.loadAsync(data, {base64: true}).then(function (zip: JSZip) {
+                    Log.trace('DatasetController::process(..) - unzipped');
+                    var promises: string[] = [];
+                    switch (id) {
+                        case "courses":
+                            zip.folder(id).forEach(function (relativePath, file) {
+                                promises.push(<any>that.readFileZip(zip.file(file.name)));
+                            });
+                            break;
+                        case "rooms":
+                            var indexBuildings: string[] = ["ACU", "ALRD", "ANSO", "AERL", "ACEN", "AAC", "AUDI", "AUDX", "BINN", "BIOL", "BRKX", "BUCH", "BUTO", "CHOI", "CIRS", "CHAN", "CHBE", "CHEM", "CEME", "COPP", "DLAM", "HSCC", "DSOM", "KENN", "EOSM", "ESB", "FNH", "FSC", "FORW", "KAIS", "LASR", "FRWO", "FRDM", "GEOG", "CUNN", "HEBB", "HENN", "ANGU", "GREN", "DMP", "ICCS", "IONA", "IBLC", "MCDN", "SOWK", "LSK", "LSC", "MCLD", "MCML", "MATH", "MATX", "MEDC", "MSB", "MUSC", "SCRF", "ORCH", "PHRM", "PONE", "PCOH", "PONF", "PONH", "OSBO", "SPPH", "SOJ", "SRC", "UCLL", "TFPB", "TFPX", "MGYM", "EDC", "WESB", "WMAX", "SWNG", "WOOD"];
+                            zip.folder(id).folder("campus").folder("discover").folder("buildings-and-classrooms").forEach(function (relativePath, file) {
+                                if (indexBuildings.includes(relativePath)) {
+                                    promises.push(<any>that.readFileHtml(zip.file(file.name)));
+                                } else {
+                                    Log.info("rejecting: " + file.name);
+                                }
+                            });
+                            break;
+                        default:
+                            throw new Error("Invalid id");
+                    }
+                    return Promise.all(promises);
+                }).then(function (promises) {
+                    Log.info("process(): all readFile promises are ready!");
+                    Log.info("process(): there are " + promises.length + " valid files");
+                    if (promises.length === 0) {
+                        reject(new Error("Invalid dataset"));
+                    }
+                    that.save(id);
+                    fulfill(code);
+                }).catch(function (err: Error) {
+                    Log.trace('DatasetController::process(..) - unzip ERROR: ' + err.message);
+                    reject(new Error("Invalid archive"));
+                });
+            } catch (err) {
+                reject(err);
+            }
         });
     }
 
