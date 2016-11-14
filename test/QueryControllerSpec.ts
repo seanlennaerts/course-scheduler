@@ -1030,8 +1030,6 @@ describe("QueryController", function () {
         expect(isValid).to.equal(400);
     });
 
-    /*
-
     it("Valid query with new course key: year", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_avg", "courses_year"],
@@ -1067,6 +1065,4 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(200);
     });
-    */
-
 });
