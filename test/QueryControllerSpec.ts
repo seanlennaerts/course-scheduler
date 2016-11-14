@@ -1065,6 +1065,4 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(200);
     });
-
-
 });
