@@ -293,16 +293,8 @@ export default class DatasetController {
                 var document: ASTNode = parse5.parse(contents);
                 var main: ASTNode = that.getSmallerSection(document, "tbody");
                 for (var tBodyRow of main.childNodes){
-                    if (tBodyRow.nodeName === "tr"){
-                        for (var tDataRow of tBodyRow.childNodes){
-                            if(tDataRow.nodeName === "td"){
-                                if (tDataRow.attrs[0].value === "views-field views-field-field-building-code"){
-                                    var buildingCode = that.searchAST(tDataRow, "#text", "value", "td", 0);
-                                    buildingsCodeArray.push(buildingCode);
-                                }
-                            }
-                        }
-                    }
+                    var buildingCode = that.searchAST(main, "#text", "value", "td", 0);
+                    buildingsCodeArray.push(buildingCode);
                 }
             }).then(function(){
                 Log.info("DatasetController:: parseIndex(): Yay Ana! it worked nicely :)");
