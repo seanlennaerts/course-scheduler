@@ -36,7 +36,6 @@ describe("QueryReturns", function () {
             let result: {}[] = table.result;
 
             Log.test("GT:\n" + JSON.stringify(result));
-            expect(result.length).to.equal(76);
         });
     });
 });
