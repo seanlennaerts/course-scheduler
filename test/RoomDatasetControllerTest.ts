@@ -18,7 +18,7 @@ describe("Room Dataset Controller", function () {
     before(function () {
         Log.info('InsightController::before() - start');
         // this zip might be in a different spot for you
-        zipFileContents = new Buffer(fs.readFileSync('./datasets/rooms.zip')).toString('base64');
+        zipFileContents = new Buffer(fs.readFileSync('./full-datasets/rooms.zip')).toString('base64');
         facade = new InsightFacade;
         facade.removeDataset("rooms");
         // try {

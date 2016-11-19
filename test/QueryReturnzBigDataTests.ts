@@ -17,7 +17,7 @@ describe("QueryReturnBigData", function () {
     before(function () {
         var runLongTests: boolean = false; //set to true to run the tests on this page
 
-        zipFileContents = new Buffer(fs.readFileSync("./datasets/courses.zip")).toString("base64");
+        zipFileContents = new Buffer(fs.readFileSync("./full-datasets/courses.zip")).toString("base64");
         facade = new InsightFacade();
         return facade.addDataset("courses", zipFileContents);
     });
