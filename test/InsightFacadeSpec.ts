@@ -18,7 +18,7 @@ describe("InsightFacade", function () {
     before(function () {
         Log.info('InsightController::before() - start');
         // this zip might be in a different spot for you
-        zipFileContents = new Buffer(fs.readFileSync('coursesTESTS.zip')).toString('base64');
+        zipFileContents = new Buffer(fs.readFileSync('./test-datasets/coursesTESTS.zip')).toString('base64');
         try {
             fs.unlinkSync("./data/courses.json");
         } catch (err) {
