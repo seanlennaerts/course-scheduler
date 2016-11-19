@@ -12,7 +12,7 @@ describe("searchAstTests", function () {
 
     var file: string = null;
     before(function () {
-        file = fs.readFileSync("./DMP", "utf8").replace(/\r?\n|\r/g, "").replace(/\>\s*\</g, "><");
+        file = fs.readFileSync("./test-datasets/DMP", "utf8").replace(/\r?\n|\r/g, "").replace(/\>\s*\</g, "><");
     });
 
     it("try finding building longname", function () {
