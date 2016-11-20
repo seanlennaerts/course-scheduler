@@ -93,7 +93,7 @@ export default class QueryController {
         switch (id) {
             case "courses":
                 if (s === "dept" || s === "id" || s === "avg" || s === "instructor" || s === "title" || s === "pass" || s === "fail" ||
-                    s === "audit" || s === "uuid" || s === "year"){
+                    s === "audit" || s === "uuid" || s === "year" || s === "size"){
                     result = true;
                 } else {
                     result = false;
