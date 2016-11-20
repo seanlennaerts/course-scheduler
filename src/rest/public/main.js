@@ -1,13 +1,13 @@
 $(function () {
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
-        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
         query(getAllQuery)
     });
 
     $("#groupAll").click(function () {
-        var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","coursePass"],"WHERE":{"IS": {"courses_dept": "cpsc"}},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"coursePass":{"AVG":"courses_pass"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
-        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize"],"WHERE":{"IS": {"courses_dept": "cpsc"}},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"AVG":"courses_size"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
+        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
         if($(this).is(":checked")) {
             query(groupAllQuery)
         } else {
