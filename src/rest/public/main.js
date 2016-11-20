@@ -1,4 +1,24 @@
 $(function () {
+    $(document).ready(function() {
+        // "IS": {"courses_dept": "cpsc"} for debugging
+        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        query(getAllQuery)
+    });
+
+    $("#groupAll").click(function () {
+        var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","coursePass"],"WHERE":{"IS": {"courses_dept": "cpsc"}},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"coursePass":{"AVG":"courses_pass"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
+        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        if($(this).is(":checked")) {
+            query(groupAllQuery)
+        } else {
+            query(getAllQuery)
+        }
+    });
+
+    $(document).on("click", "#render > table > thead > tr > th", function(e) {
+        $("#debug").append("<p>" + "Clicked on: " + $(this).html() + "</p>")
+    });
+
     $("#datasetAdd").click(function () {
         var id = $("#datasetId").val();
         var zip = $("#datasetZip").prop('files')[0];
@@ -37,11 +57,25 @@ $(function () {
         }
     });
 
+    function query(queryJson) {
+        try {
+            $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
+                if (data["render"] === "TABLE") {
+                    generateTable(data["result"]);
+                }
+            }}).fail(function (e) {
+                spawnHttpErrorModal(e)
+            });
+        } catch (err) {
+            spawnErrorModal("Query Error", err);
+        }
+    }
+
     function generateTable(data) {
         var columns = [];
         Object.keys(data[0]).forEach(function (title) {
             columns.push({
-                head: title,
+                head: title, //.split("_")[1]
                 cl: "title",
                 html: function (d) {
                     return d[title]
@@ -51,7 +85,7 @@ $(function () {
         var container = d3.select("#render");
         container.html("");
         container.selectAll("*").remove();
-        var table = container.append("table").style("margin", "auto");
+        var table = container.append("table").attr("class", "table table-hover");
 
         table.append("thead").append("tr")
             .selectAll("th")

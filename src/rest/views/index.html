@@ -8,30 +8,30 @@
 	<!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 	<meta name="description" content="">
 	<meta name="author" content="">
-	<link rel="icon" href="../../favicon.ico">
+	<!--<link rel="icon" href="./public/favicon.ico">-->
 
-	<title>Starter Template for Bootstrap</title>
+	<title>Sean and Ana's Awesome Website</title>
 
 	<!-- Bootstrap core CSS -->
 	<link href="./public/bootstrap.min.css" rel="stylesheet">
 
 	<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-	<link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">
+	<!--<link href="../../assets/css/ie10-viewport-bug-workaround.css" rel="stylesheet">-->
 
 	<!-- Custom styles for this template -->
-	<link href="./public/starter-template.css" rel="stylesheet">
+	<link href="./public/main.css" rel="stylesheet">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
-	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+	<!--<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>-->
+	<!--<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>-->
 	<![endif]-->
 </head>
 
 <body>
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
-	<div class="container">
+	<div class="container-fluid">
 		<div class="navbar-header">
 			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
 				<span class="sr-only">Toggle navigation</span>
@@ -39,55 +39,85 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#">Sean and Ana's SUPA DUPA cool project name</a>
+			<a class="navbar-brand" href="#">Sean and Ana's Awesome Website</a>
 		</div>
-		<div id="navbar" class="collapse navbar-collapse">
+		<div id="navbar" class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
-				<li class="active"><a href="#">Course Explorer</a></li>
-				<li><a href="#about">Room Explorer</a></li>
-				<li><a href="#contact">Schedulizer</a></li>
+				<li><a href="#">Course Explorer</a></li>
+				<li><a href="#">Room Explorer</a></li>
+				<li><a href="#">Schedulizer</a></li>
 			</ul>
-		</div><!--/.nav-collapse -->
+		</div>
 	</div>
 </nav>
 
-<div class="container">
-	<div class="starter-template">
-		<div class="row">
-			<div class="col-md-4">
-				<label for="datasetId">ID:</label>
-				<input type="text" class="form-control" id="datasetId">
-			</div>
-			<div class="col-md-4">
-				<label for="datasetZip">Archive:</label>
-				<input type="file" class="form-control" id="datasetZip">
-			</div>
-			<div class="col-md-4">
-				<button type="button" class="btn btn-primary" id="datasetAdd">Click to go to hell</button>
-			</div>
-		</div>
-		<div class="row">
-			<div class ="col-md-2">
-				<div class="Filter">
-					<form id=filterBoxes">
-
-					</form>
+<div class="container-fluid">
+	<div class="row">
+		<div class="col-sm-4 col-md-3 sidebar">
+			<div class="well">
+				<div class="checkbox">
+					<label><input type="checkbox" id="groupAll">Group by course</label>
+				</div>
+				<div class="input-group">
+					<div class="input-group-btn search-panel">
+						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+							<span id="search_concept"></span> <span class="caret"></span>
+						</button>
+						<ul class="dropdown-menu" role="menu">
+							<li><a href="#contains">Contains</a></li>
+							<li><a href="#its_equal">It's equal</a></li>
+							<li><a href="#greather_than">Greather than ></a></li>
+							<li><a href="#less_than">Less than < </a></li>
+							<li class="divider"></li>
+							<li><a href="#all">Anything</a></li>
+						</ul>
+					</div>
+					<input type="hidden" name="search_param" value="all" id="search_param">
+					<input type="text" class="form-control" name="x" placeholder="Search term...">
+					<span class="input-group-btn">
+                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
+                </span>
 				</div>
 			</div>
-			<div class ="col-md-10">Table</div>
+			<div class="well">
+				<h5>Debugging Box</h5>
+				<div id="debug">
+				</div>
+			</div>
+		</div>
+		<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+			<div class="table-responsive" id="render">
+			</div>
 		</div>
 	</div>
+</div>
 
-</div><!-- /.container -->
-
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title"></h4>
+			</div>
+			<div class="modal-body">
+				<p></p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
 
 <!-- Bootstrap core JavaScript
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
-<script src="./public/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
 <script src="./public/bootstrap.min.js"></script>
+<script src="./public/d3.min.js"></script>
+<script src="./public/main.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
-<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>
+<!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>
 </html>

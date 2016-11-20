@@ -21,10 +21,12 @@ export default class Course {
     private _pass: number;
     private _fail: number;
     private _audit: number;
+    //new in d4
+    private _size: number;
 
 
     constructor(uuid: number, dept: string, id: string, title: string, avg: number, instructor: string[],
-                pass: number, fail: number, audit: number, year: number) {
+                pass: number, fail: number, audit: number, year: number, size: number) {
         this._uuid = uuid;
         this._dept = dept;
         this._id = id;
@@ -35,6 +37,7 @@ export default class Course {
         this._fail = fail;
         this._audit = audit;
         this._year = year;
+        this._size = size;
     }
 
     public getUniqueId(): number {

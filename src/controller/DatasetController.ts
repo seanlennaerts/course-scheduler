@@ -76,9 +76,10 @@ export default class DatasetController {
             var audit: number = json[i]._audit;
             var uniqueId: number = json[i]._setionId;
             var year: number = json[i]._year;
+            var size: number = json[i]._size;
 
             var newCourse: Course = new Course(uniqueId, dept, id, title, avg,
-                instructor, pass, fail, audit, year);
+                instructor, pass, fail, audit, year, size);
 
             this.processedData.push(newCourse);
         }
@@ -142,9 +143,12 @@ export default class DatasetController {
                     var audit: number = root.result[i].Audit;
                     var uuid: number = root.result[i].id;
                     var year: number = root.result[i].Year;
+                    var section: string = root.result[i].Section;
 
-                    var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year);
-                    that.processedData.push(newSection);
+                    if (section != "overall") {
+                        var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year, pass + fail);
+                        that.processedData.push(newSection);
+                    }
                 } //end for loop
             }).then(function() {
                 fulfill(true);
