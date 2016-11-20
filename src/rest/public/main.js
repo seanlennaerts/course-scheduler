@@ -1,7 +1,9 @@
 $(function () {
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
-        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        // var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_pass"], "WHERE": {}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+
         query(getAllQuery)
     });
 
@@ -62,12 +64,26 @@ $(function () {
             $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
                 if (data["render"] === "TABLE") {
                     generateTable(data["result"]);
+                    populateDepartments(data["result"]);
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
             });
         } catch (err) {
             spawnErrorModal("Query Error", err);
+        }
+    }
+
+    function populateDepartments(data) {
+        var departmentsSection = $("#departments");
+        var departmentArray = [];
+        departmentsSection.empty();
+        for (var i = 0; i < data.length; i++) {
+            var dept = data[i]["courses_dept"];
+            if (!departmentArray.includes(dept)) {
+                departmentsSection.append('<label><input type="checkbox">' + dept + '</label>');
+                departmentArray.push(dept);
+            }
         }
     }
 
