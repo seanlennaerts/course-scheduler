@@ -495,6 +495,4 @@ describe("QueryReturns", function () {
         };
         return facade.performQuery(query);
     });
-
-
 });

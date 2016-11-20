@@ -195,5 +195,21 @@ describe("QueryReturnBigData", function () {
         });
     });
 
+    it("Check query because I think it may be broken now", function () {
+        let query: QueryRequest = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size"],
+            "WHERE":{"OR":[{"IS":{"courses_dept":"cpsc"}},{"IS":{"courses_dept":"econ"}}]},
+            "ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function(response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+
+            let expectedResult = [{courses_id: "110", maxPass: 180},
+                {courses_id: "101", maxPass: 662}];
+            expect(result).to.equal(expectedResult);
+        })
+    });
+
 
 });

@@ -10,7 +10,7 @@
 	<meta name="author" content="">
 	<!--<link rel="icon" href="./public/favicon.ico">-->
 
-	<title>Sean and Ana's Awesome Website</title>
+	<title>Sean and Ana's SUPA DUPA Cool Website</title>
 
 	<!-- Bootstrap core CSS -->
 	<link href="./public/bootstrap.min.css" rel="stylesheet">
@@ -20,6 +20,7 @@
 
 	<!-- Custom styles for this template -->
 	<link href="./public/main.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/css/bootstrap-select.min.css">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -39,7 +40,7 @@
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="#">Sean and Ana's Awesome Website</a>
+			<a class="navbar-brand" href="#">Sean and Ana's SUPA DUPA Cool Website</a>
 		</div>
 		<div id="navbar" class="navbar-collapse collapse">
 			<ul class="nav navbar-nav">
@@ -58,39 +59,21 @@
 				<div class="checkbox">
 					<label><input type="checkbox" id="groupAll">Group by course</label>
 				</div>
-				<div class="checkbox" id="departments" style="overflow:scroll; height:100px;">
+				<div id="departments">
+					<label for="departments-scrollable">Department</label>
+					<select class="selectpicker form-control" data-live-search="true" id="departments-scrollable">
 
-				</div>
-				<div class="input-group">
-					<div class="input-group-btn search-panel">
-						<button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-							<span id="search_concept"></span> <span class="caret"></span>
-						</button>
-						<ul class="dropdown-menu" role="menu">
-							<li><a href="#contains">Contains</a></li>
-							<li><a href="#its_equal">It's equal</a></li>
-							<li><a href="#greather_than">Greather than ></a></li>
-							<li><a href="#less_than">Less than < </a></li>
-							<li class="divider"></li>
-							<li><a href="#all">Anything</a></li>
-						</ul>
-					</div>
-					<input type="hidden" name="search_param" value="all" id="search_param">
-					<input type="text" class="form-control" name="x" placeholder="Search term...">
-					<span class="input-group-btn">
-                    <button class="btn btn-default" type="button"><span class="glyphicon glyphicon-search"></span></button>
-                </span>
+					</select>
 				</div>
 			</div>
 			<div class="well">
-				<h5>Debugging Box</h5>
+				<label>Debugging Box</label>
 				<div id="debug">
 				</div>
 			</div>
 		</div>
 		<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
 			<div class="table-responsive" id="render">
-				<h3>Result</h3>
 			</div>
 		</div>
 	</div>
@@ -121,6 +104,7 @@
 <script src="./public/bootstrap.min.js"></script>
 <script src="./public/d3.min.js"></script>
 <script src="./public/main.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>

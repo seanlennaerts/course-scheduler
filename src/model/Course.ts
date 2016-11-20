@@ -68,6 +68,10 @@ export default class Course {
                 return this._audit;
             case "uuid":
                 return this._uuid;
+            case "year":
+                return this._year;
+            case "size":
+                return this._size;
             default:
             //
         }

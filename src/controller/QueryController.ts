@@ -404,7 +404,7 @@ export default class QueryController {
                 Log.info("Corresponding field for that key is: " + field);
                 if (key === "MAX" || key === "MIN" || key === "AVG"){
                     if (!(field === "avg" || field === "pass" || field === "fail" || field === "audit" || field === "uuid"
-                        || field === "lat" || field === "lon" || field === "seats")){
+                        || field === "lat" || field === "lon" || field === "seats" || field === "size")){
                         Log.info("MAX, MIN, AVG doesn't have numeric field")
                         return 400;
                     }

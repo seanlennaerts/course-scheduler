@@ -1,17 +1,18 @@
 $(function () {
+    var getAllQueryDebug = '{"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size"],"WHERE":{"OR":[{"IS":{"courses_dept":"cpsc"}},{"IS":{"courses_dept":"econ"}}]},"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
+    var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
-        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
-        query(getAllQuery)
+        query(getAllQueryDebug)
     });
 
     $("#groupAll").click(function () {
-        var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize"],"WHERE":{"IS": {"courses_dept": "cpsc"}},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"AVG":"courses_size"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
-        var getAllQuery = '{"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {"IS": {"courses_dept": "cpsc"}}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"}';
+        var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize"],"WHERE":{},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"AVG":"courses_size"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
         if($(this).is(":checked")) {
             query(groupAllQuery)
         } else {
-            query(getAllQuery)
+            query(getAllQueryDebug)
         }
     });
 
@@ -73,16 +74,17 @@ $(function () {
     }
 
     function populateDepartments(data) {
-        var departmentsSection = $("#departments");
+        var departmentsScrollable = $("#departments-scrollable");
         var departmentArray = [];
-        departmentsSection.empty();
+        departmentsScrollable.empty();
         for (var i = 0; i < data.length; i++) {
             var dept = data[i]["courses_dept"];
             if (!departmentArray.includes(dept)) {
-                departmentsSection.append('<label><input type="checkbox">' + dept + '</label>');
                 departmentArray.push(dept);
+                departmentsScrollable.append('<option>' + dept + '</option>');
             }
         }
+        departmentsScrollable.selectpicker('refresh');
     }
 
     function generateTable(data) {
