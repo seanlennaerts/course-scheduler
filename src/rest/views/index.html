@@ -62,27 +62,37 @@
 				</div>
 				<div class="filter" id="departments">
 					<label for="departments-scrollable">Department</label>
-					<select class="selectpicker form-control" data-live-search="true" data-container="body"
-                            data-dropup-auto="false" id="departments-scrollable"></select>
+					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="departments-bc"></span>
+					<select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" title="Select"
+							id="departments-scrollable"></select>
+
 				</div>
                 <div class="filter" id="sections">
                     <label for="sections-scrollable">Section</label>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" id="sections-scrollable"></select>
+					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="sections-bc"></span>
+					<select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" title="Select"
+							id="sections-scrollable"></select>
                 </div>
                 <div class="filter" id="instructors">
                     <label for="instructors-scrollable">Instructor</label>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" id="instructors-scrollable"></select>
+					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="instructors-bc"></span>
+					<select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" title="Select"
+							id="instructors-scrollable"></select>
                 </div>
                 <div class="filter" id="titles">
-                    <label for="titles-scrollable">Title</label>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" id="titles-scrollable"></select>
+					<label for="titles-scrollable">Title</label>
+					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="titles-bc"></span>
+					<select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" title="Select"
+							id="titles-scrollable"></select>
                 </div>
                 <div class="filter" id="size">
-                    <label for="size-range">Size</label>
-                    <div class="slider">
+					<label for="size-range">Size</label>
+					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
+					<div class="slider">
                         <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
                                data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
                     </div>
@@ -94,8 +104,6 @@
                     <div id="debug-where"></div>
                     <label>ORDER</label>
                     <div id="debug-order"></div>
-                    <label>Other debugging</label>
-                    <div id="debug-other"></div>
 				</div>
 			</div>
 		</div>

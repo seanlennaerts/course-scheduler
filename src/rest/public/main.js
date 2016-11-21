@@ -1,40 +1,135 @@
 $(function () {
-    var getAllQueryDebug = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size"],"WHERE":{"GT": {"courses_avg": 90}},"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"};
-    var getAllQuery = {"GET": ["courses_dept", "courses_id", "courses_title", "courses_avg", "courses_instructor", "courses_size"], "WHERE": {}, "ORDER": { "dir": "UP", "keys": ["courses_dept", "courses_id"]}, "AS": "TABLE"};
-    var buildQuery = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size"],
-                        "WHERE":{"GT": {"courses_avg": 90}},
+    var getAllQueryDebug = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size", "courses_pass", "courses_fail"],"WHERE":{"GT": {"courses_avg": 90}},"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"};
+    var buildQuery = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size","courses_pass","courses_fail"],
+                        "WHERE":{},
                         "ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},
                         "AS":"TABLE"
                     };
+    var prevQueryNoGroup = {};
 
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
         $("#size-range").slider({});
-        queryFirst(JSON.stringify(getAllQueryDebug));
+        query(JSON.stringify(buildQuery));
         updateDebugQuery();
     });
 
-    // $("#groupAll").click(function () {
-    //     var groupAllQuery = {"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize"],"WHERE":{},"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"AVG":"courses_size"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"};
-    //     if($(this).is(":checked")) {
-    //         query(JSON.stringify(groupAllQuery))
-    //     } else {
-    //         query(JSON.stringify(getAllQueryDebug))
-    //     }
-    // });
+    $("#groupAll").click(function () {
+        if($(this).is(":checked")) {
+            var currentWhere = JSON.stringify(buildQuery.WHERE);
+            var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize","coursePass","courseFail"],"WHERE":' + currentWhere +',"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"MAX":"courses_size"}},{"coursePass":{"MAX":"courses_pass"}},{"courseFail":{"MAX":"courses_fail"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
+            groupAllQuery = JSON.parse(groupAllQuery);
+            prevQueryNoGroup = buildQuery;
+            buildQuery = groupAllQuery;
+            $("#instructors-scrollable")
+                .prop("disabled", true)
+                .selectpicker('refresh');
+            query(JSON.stringify(buildQuery), "instructor");
+            updateDebugQuery();
+        } else {
+            buildQuery = prevQueryNoGroup;
+            prevQueryNoGroup = {};
+            $("#instructors-scrollable")
+                .prop("disabled", false)
+                .selectpicker('refresh');
+            query(JSON.stringify(buildQuery), "instructor");
+        }
+    });
 
     $(document).on("click", "#render > table > thead > tr > th", function() {
         //$(this).html() //captures value of header clicked
     });
 
     $(document).on("change", "#departments-scrollable", function() {
-        // alert($(this).find("option:selected").text());
-        var dept = $(this).find("option:selected").text();
-        buildQuery.WHERE = {"IS": {"courses_dept": dept}};
+        var departmentsClear = $("#departments-bc");
+        departmentsClear.show();
+        var dept = $(this).val();
+        if (dept) {
+            handleDropDowns("dept", dept);
+            query(JSON.stringify(buildQuery), "dept");
+        } else {
+            departmentsClear.hide();
+            buildQuery.WHERE = {};
+            query(JSON.stringify(buildQuery));
+        }
         updateDebugQuery();
-        // alert("'" + buildQuery + "'")
-        query(JSON.stringify(buildQuery));
     });
+
+    $(document).on("change", "#sections-scrollable", function() {
+        var sectionsClear = $("#sections-bc");
+        sectionsClear.show();
+        var id = $(this).val();
+        if (id) {
+            handleDropDowns("id", id);
+            query(JSON.stringify(buildQuery), "id");
+        } else {
+            sectionsClear.hide();
+            buildQuery.WHERE = {};
+            query(JSON.stringify(buildQuery));
+        }
+        updateDebugQuery();
+    });
+
+    $(document).on("change", "#instructors-scrollable", function() {
+        var instructorsClear = $("#instructors-bc");
+        instructorsClear.show();
+        var instructor = $(this).val();
+        if (instructor) {
+            handleDropDowns("instructor", instructor);
+            query(JSON.stringify(buildQuery), "instructor");
+        } else {
+            instructorsClear.hide();
+            buildQuery.WHERE = {};
+            query(JSON.stringify(buildQuery));
+        }
+        updateDebugQuery();
+    });
+
+    $(document).on("change", "#titles-scrollable", function() {
+        var titlesClear = $("#titles-bc");
+        titlesClear.show();
+        var title = $(this).val();
+        if (title) {
+            handleDropDowns("title", title);
+            query(JSON.stringify(buildQuery), "title");
+        } else {
+            titlesClear.hide();
+            buildQuery.WHERE = {};
+            query(JSON.stringify(buildQuery));
+        }
+        updateDebugQuery();
+    });
+
+    function getORArray(key) {
+        var index = -1;
+        var andArray = buildQuery.WHERE.AND;
+        for (var i=0; i < andArray.length; i++) {
+            var sampleORArray = andArray[i].OR[0].IS; //all ors in an AND have the same key so only need to check one
+            if (Object.keys(sampleORArray)[0].split("_")[1] === key) {
+                index = i;
+            }
+        }
+        return index;
+    }
+
+    function handleDropDowns(key, array) {
+        var objArray = [];
+        for (var i = 0; i < array.length; i++) {
+            var toPush = '{"IS": {"courses_' + key + '":"' + array[i] + '"}}';
+            objArray.push(JSON.parse(toPush));
+        }
+        objArray = {"OR": objArray};
+        if (!buildQuery.WHERE.AND) {
+            buildQuery.WHERE = {"AND": []};
+        }
+        var index = getORArray(key);
+        if (index != -1) {
+            //found existing or for dept
+            buildQuery.WHERE.AND[index] = objArray; //exists so replace
+        } else {
+            buildQuery.WHERE.AND.push(objArray); //create new OR array
+        }
+    }
 
     $("#datasetAdd").click(function () {
         var id = $("#datasetId").val();
@@ -83,15 +178,40 @@ $(function () {
             .append('<p>' + JSON.stringify(buildQuery["ORDER"]) + '</p>');
     }
 
-    function query(queryJson) {
+    function query(queryJson, skip) {
         try {
             $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
                 if (data["render"] === "TABLE") {
-                    generateTable(data["result"]);
-                    populateSections(data["result"]);
-                    populateInstructors(data["result"]);
-                    populateTitles(data["result"]);
-                    populateSize(data["result"]);
+                    if (skip) {
+                        generateTable(data["result"]);
+                    }
+                    if (skip != "dept"){
+                        var deptScrollable = $("#departments-scrollable");
+                        var prevDeptVal = deptScrollable.val();
+                        populateDepartments(data["result"]);
+                        deptScrollable.selectpicker("val", prevDeptVal);
+                    }
+                    if (skip != "id") {
+                        var idScrollable = $("#sections-scrollable");
+                        var prevIdVal = idScrollable.val();
+                        populateSections(data["result"]);
+                        idScrollable.selectpicker("val", prevIdVal);
+                    }
+                    if (skip != "instructor") {
+                        var instructorScrollable = $("#instructors-scrollable");
+                        var prevInstructorVal = instructorScrollable.val();
+                        populateInstructors(data["result"]);
+                        instructorScrollable.selectpicker("val", prevInstructorVal);
+                    }
+                    if (skip != "title") {
+                        var titleScrollable = $("#titles-scrollable");
+                        var prevTitleVal = titleScrollable.val();
+                        populateTitles(data["result"]);
+                        titleScrollable.selectpicker("val", prevTitleVal);
+                    }
+                    if (skip != "size") {
+                        populateSize(data["result"]);
+                    }
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
@@ -101,24 +221,30 @@ $(function () {
         }
     }
 
-    function queryFirst(queryJson) {
-        try {
-            $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
-                if (data["render"] === "TABLE") {
-                    generateTable(data["result"]);
-                    populateDepartments(data["result"]);
-                    populateSections(data["result"]);
-                    populateInstructors(data["result"]);
-                    populateTitles(data["result"]);
-                    populateSize(data["result"]);
-                }
-            }}).fail(function (e) {
-                spawnHttpErrorModal(e)
-            });
-        } catch (err) {
-            spawnErrorModal("Query Error", err);
-        }
-    }
+    // function queryFirst(queryJson) {
+    //     try {
+    //         $.ajax("/query", {
+    //             type: "POST",
+    //             data: queryJson,
+    //             contentType: "application/json",
+    //             dataType: "json",
+    //             success: function (data) {
+    //                 if (data["render"] === "TABLE") {
+    //                     // generateTable(data["result"]);
+    //                     populateDepartments(data["result"]);
+    //                     populateSections(data["result"]);
+    //                     populateInstructors(data["result"]);
+    //                     populateTitles(data["result"]);
+    //                     populateSize(data["result"]);
+    //                 }
+    //             }
+    //         }).fail(function (e) {
+    //             spawnHttpErrorModal(e)
+    //         });
+    //     } catch (err) {
+    //         spawnErrorModal("Query Error", err);
+    //     }
+    // }
 
     function populateDepartments(data) {
         var departmentsScrollable = $("#departments-scrollable");
@@ -141,9 +267,14 @@ $(function () {
                 if (!instructorArray.includes(instructor) && instructor != "" && instructor != "tba") {
                     instructorArray.push(instructor);
                     instructorsScrollable.append('<option>' + instructor + '</option>');
+
                 }
             }
         }
+        // instructorArray.sort();
+        // for (var k = 0; k < instructorArray.length; k++) {
+        //     instructorsScrollable.append('<option>' + instructorArray[k] + '</option>');
+        // }
         instructorsScrollable.selectpicker('refresh');
     }
 
@@ -178,11 +309,15 @@ $(function () {
         selector.empty();
         for (var i = 0; i < data.length; i++) {
             var temp = data[i][key];
-            if (!tempArray.includes(temp)) {
+            if (!tempArray.includes(temp) && temp != "") {
                 tempArray.push(temp);
                 selector.append('<option>' + temp + '</option>');
             }
         }
+        // tempArray.sort();
+        // for (var j = 0; j < tempArray.length; j++) {
+        //     selector.append('<option>' + tempArray[j] + '</option>');
+        // }
         selector.selectpicker('refresh');
     }
 

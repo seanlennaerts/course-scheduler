@@ -112,3 +112,8 @@ body {
 .filter {
   padding-top: 10px;
 }
+
+.remove {
+  color: #d3d3d3;
+  display: none;
+}
