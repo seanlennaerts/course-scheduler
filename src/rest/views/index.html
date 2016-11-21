@@ -21,6 +21,7 @@
 	<!-- Custom styles for this template -->
 	<link href="./public/main.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/css/bootstrap-select.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/css/bootstrap-slider.min.css">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -59,22 +60,47 @@
 				<div class="checkbox">
 					<label><input type="checkbox" id="groupAll">Group by course</label>
 				</div>
-				<div id="departments">
+				<div class="filter" id="departments">
 					<label for="departments-scrollable">Department</label>
-					<select class="selectpicker form-control" data-live-search="true" id="departments-scrollable">
-
-					</select>
+					<select class="selectpicker form-control" data-live-search="true" data-container="body"
+                            data-dropup-auto="false" id="departments-scrollable"></select>
 				</div>
+                <div class="filter" id="sections">
+                    <label for="sections-scrollable">Section</label>
+                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" id="sections-scrollable"></select>
+                </div>
+                <div class="filter" id="instructors">
+                    <label for="instructors-scrollable">Instructor</label>
+                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" id="instructors-scrollable"></select>
+                </div>
+                <div class="filter" id="titles">
+                    <label for="titles-scrollable">Title</label>
+                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
+                            data-dropup-auto="false" data-actions-box="true" id="titles-scrollable"></select>
+                </div>
+                <div class="filter" id="size">
+                    <label for="size-range">Size</label>
+                    <div class="slider">
+                        <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
+                               data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
+                    </div>
+                </div>
 			</div>
 			<div class="well">
-				<label>Debugging Box</label>
 				<div id="debug">
+                    <label>WHERE</label>
+                    <div id="debug-where"></div>
+                    <label>ORDER</label>
+                    <div id="debug-order"></div>
+                    <label>Other debugging</label>
+                    <div id="debug-other"></div>
 				</div>
 			</div>
 		</div>
 		<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
-			<div class="table-responsive" id="render">
-			</div>
+			<div class="table-responsive" id="render"></div>
 		</div>
 	</div>
 </div>
@@ -105,6 +131,7 @@
 <script src="./public/d3.min.js"></script>
 <script src="./public/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/bootstrap-slider.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>

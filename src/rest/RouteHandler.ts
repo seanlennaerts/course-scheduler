@@ -7,6 +7,7 @@ import fs = require('fs');
 import {QueryRequest} from "../controller/QueryController";
 import Log from '../Util';
 import InsightFacade from "../controller/InsightFacade";
+import {InsightResponse} from "../controller/IInsightFacade";
 
 export default class RouteHandler {
 
@@ -55,7 +56,7 @@ export default class RouteHandler {
     public static postQuery(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         let query: QueryRequest = req.params;
-        RouteHandler.insightFacade.performQuery(query).then(function(result){
+        RouteHandler.insightFacade.performQuery(query).then(function(result: InsightResponse){
             res.json(result.code, result.body);
         }).catch (function(error) {
             res.json(error.code, error.body);
