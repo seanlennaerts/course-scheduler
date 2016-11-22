@@ -6,6 +6,13 @@ $(function () {
                         "AS":"TABLE"
                     };
     var prevQueryNoGroup = {};
+    var filtersUsed = {
+        "dept": false,
+        "id": false,
+        "instructor": false,
+        "title": false,
+        "size": false
+    };
 
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
@@ -24,15 +31,21 @@ $(function () {
             $("#instructors-scrollable")
                 .prop("disabled", true)
                 .selectpicker('refresh');
-            query(JSON.stringify(buildQuery), "instructor");
             updateDebugQuery();
+            var prev = filtersUsed.instructor;
+            filtersUsed.instructor = true; //weird hack
+            query(JSON.stringify(buildQuery));
+            filtersUsed.instructor = prev;
         } else {
             buildQuery = prevQueryNoGroup;
             prevQueryNoGroup = {};
             $("#instructors-scrollable")
                 .prop("disabled", false)
                 .selectpicker('refresh');
-            query(JSON.stringify(buildQuery), "instructor");
+            var prev2 = filtersUsed.instructor;
+            filtersUsed.instructor = true; //weird hack
+            query(JSON.stringify(buildQuery));
+            filtersUsed.instructor = prev2;
         }
     });
 
@@ -42,61 +55,81 @@ $(function () {
 
     $(document).on("change", "#departments-scrollable", function() {
         var departmentsClear = $("#departments-bc");
-        departmentsClear.show();
         var dept = $(this).val();
         if (dept) {
+            departmentsClear.show();
             handleDropDowns("dept", dept);
-            query(JSON.stringify(buildQuery), "dept");
-        } else {
-            departmentsClear.hide();
-            buildQuery.WHERE = {};
+            filtersUsed.dept = false; //weird hack so that it doesn't update dept temporarilly
             query(JSON.stringify(buildQuery));
+            filtersUsed.dept = true;
         }
+        // else {
+        //     departmentsClear.hide();
+        //     buildQuery.WHERE = {};
+        //     filtersUsed.dept = false;
+        //     query(JSON.stringify(buildQuery));
+        //     filtersUsed.dept = true;
+        // }
         updateDebugQuery();
     });
 
     $(document).on("change", "#sections-scrollable", function() {
         var sectionsClear = $("#sections-bc");
-        sectionsClear.show();
         var id = $(this).val();
         if (id) {
+            sectionsClear.show();
             handleDropDowns("id", id);
-            query(JSON.stringify(buildQuery), "id");
-        } else {
-            sectionsClear.hide();
-            buildQuery.WHERE = {};
+            filtersUsed.id = false;
             query(JSON.stringify(buildQuery));
+            filtersUsed.id = true;
         }
+        // else {
+        //     sectionsClear.hide();
+        //     buildQuery.WHERE = {};
+        //     filtersUsed.id = false;
+        //     query(JSON.stringify(buildQuery));
+        //     filtersUsed.id = true;
+        // }
         updateDebugQuery();
     });
 
     $(document).on("change", "#instructors-scrollable", function() {
         var instructorsClear = $("#instructors-bc");
-        instructorsClear.show();
         var instructor = $(this).val();
         if (instructor) {
+            instructorsClear.show();
             handleDropDowns("instructor", instructor);
-            query(JSON.stringify(buildQuery), "instructor");
-        } else {
-            instructorsClear.hide();
-            buildQuery.WHERE = {};
+            filtersUsed.instructor = false;
             query(JSON.stringify(buildQuery));
+            filtersUsed.instructor = true;
         }
+        // else {
+        //     instructorsClear.hide();
+        //     buildQuery.WHERE = {};
+        //     filtersUsed.instructor = false;
+        //     query(JSON.stringify(buildQuery));
+        //     filtersUsed.instructor = true;
+        // }
         updateDebugQuery();
     });
 
     $(document).on("change", "#titles-scrollable", function() {
         var titlesClear = $("#titles-bc");
-        titlesClear.show();
         var title = $(this).val();
         if (title) {
+            titlesClear.show();
             handleDropDowns("title", title);
-            query(JSON.stringify(buildQuery), "title");
-        } else {
-            titlesClear.hide();
-            buildQuery.WHERE = {};
+            filtersUsed.title = false;
             query(JSON.stringify(buildQuery));
+            filtersUsed.title = true;
         }
+        // else {
+        //     titlesClear.hide();
+        //     buildQuery.WHERE = {};
+        //     filtersUsed.title = false;
+        //     query(JSON.stringify(buildQuery));
+        //     filtersUsed.title = true;
+        // }
         updateDebugQuery();
     });
 
@@ -110,6 +143,46 @@ $(function () {
             }
         }
         return index;
+    }
+
+    $("#departments-bc").click(function () {
+        $(this).hide();
+        clear("dept", $(this));
+        $("#departments-scrollable").selectpicker("deselectAll");
+    });
+
+    $("#sections-bc").click(function () {
+        $(this).hide();
+        clear("id", $(this));
+        $("#sections-scrollable").selectpicker("deselectAll");
+
+    });
+
+    $("#instructors-bc").click(function () {
+        $(this).hide();
+        clear("instructor", $(this));
+        $("#instructors-scrollable").selectpicker("deselectAll");
+    });
+
+    $("#titles-bc").click(function () {
+        $(this).hide();
+        clear("title", $(this));
+        $("#titles-scrollable").selectpicker("deselectAll");
+    });
+
+    function clear(key, filter) {
+        var index = getORArray(key);
+        buildQuery.WHERE.AND = buildQuery.WHERE.AND.filter(function (andArray) {
+            // alert("check:" + Object.keys(andArray.OR[0].IS)[0].split("_")[1] + ", equal to:" + key);
+            return Object.keys(andArray.OR[0].IS)[0].split("_")[1] != key;
+        });
+        if (buildQuery.WHERE.AND.length === 0) {
+            buildQuery.WHERE = {}
+        }
+        filtersUsed[key] = false;
+        updateDebugQuery();
+        query(JSON.stringify(buildQuery));
+
     }
 
     function handleDropDowns(key, array) {
@@ -176,40 +249,44 @@ $(function () {
         $("#debug-order")
             .empty()
             .append('<p>' + JSON.stringify(buildQuery["ORDER"]) + '</p>');
+        $("#debug-other")
+            .empty()
+            .append('<p>' + JSON.stringify(filtersUsed) + '</p>');
     }
 
-    function query(queryJson, skip) {
+    function query(queryJson) {
         try {
             $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
                 if (data["render"] === "TABLE") {
-                    if (skip) {
+                    // alert(JSON.stringify(filtersUsed));
+                    if (filtersUsed.dept || filtersUsed.id || filtersUsed.instructor || filtersUsed.title || filtersUsed.size) {
                         generateTable(data["result"]);
                     }
-                    if (skip != "dept"){
+                    if (!filtersUsed.dept){
                         var deptScrollable = $("#departments-scrollable");
                         var prevDeptVal = deptScrollable.val();
                         populateDepartments(data["result"]);
                         deptScrollable.selectpicker("val", prevDeptVal);
                     }
-                    if (skip != "id") {
+                    if (!filtersUsed.id) {
                         var idScrollable = $("#sections-scrollable");
                         var prevIdVal = idScrollable.val();
                         populateSections(data["result"]);
                         idScrollable.selectpicker("val", prevIdVal);
                     }
-                    if (skip != "instructor") {
+                    if (!filtersUsed.instructor) {
                         var instructorScrollable = $("#instructors-scrollable");
                         var prevInstructorVal = instructorScrollable.val();
                         populateInstructors(data["result"]);
                         instructorScrollable.selectpicker("val", prevInstructorVal);
                     }
-                    if (skip != "title") {
+                    if (!filtersUsed.title) {
                         var titleScrollable = $("#titles-scrollable");
                         var prevTitleVal = titleScrollable.val();
                         populateTitles(data["result"]);
                         titleScrollable.selectpicker("val", prevTitleVal);
                     }
-                    if (skip != "size") {
+                    if (!filtersUsed.size) {
                         populateSize(data["result"]);
                     }
                 }
@@ -220,31 +297,6 @@ $(function () {
             spawnErrorModal("Query Error", err);
         }
     }
-
-    // function queryFirst(queryJson) {
-    //     try {
-    //         $.ajax("/query", {
-    //             type: "POST",
-    //             data: queryJson,
-    //             contentType: "application/json",
-    //             dataType: "json",
-    //             success: function (data) {
-    //                 if (data["render"] === "TABLE") {
-    //                     // generateTable(data["result"]);
-    //                     populateDepartments(data["result"]);
-    //                     populateSections(data["result"]);
-    //                     populateInstructors(data["result"]);
-    //                     populateTitles(data["result"]);
-    //                     populateSize(data["result"]);
-    //                 }
-    //             }
-    //         }).fail(function (e) {
-    //             spawnHttpErrorModal(e)
-    //         });
-    //     } catch (err) {
-    //         spawnErrorModal("Query Error", err);
-    //     }
-    // }
 
     function populateDepartments(data) {
         var departmentsScrollable = $("#departments-scrollable");
