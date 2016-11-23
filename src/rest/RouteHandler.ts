@@ -8,6 +8,7 @@ import {QueryRequest, QueryResponse} from "../controller/QueryController";
 import Log from '../Util';
 import InsightFacade from "../controller/InsightFacade";
 import {InsightResponse} from "../controller/IInsightFacade";
+import {Route} from "restify";
 
 export default class RouteHandler {
 
@@ -15,15 +16,20 @@ export default class RouteHandler {
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RoutHandler::getHomepage(..)');
-        fs.readFile('./src/rest/views/index.html', 'utf8', function (err: Error, file: Buffer) {
-            if (err) {
-                res.send(500);
-                Log.error(JSON.stringify(err));
+        var content = new Buffer(fs.readFileSync('./full-datasets/courses.zip')).toString('base64');
+        RouteHandler.insightFacade.addDataset("courses", content).then(function (result) {
+            fs.readFile('./src/rest/views/index.html', 'utf8', function (err: Error, file: Buffer) {
+                if (err) {
+                    res.send(500);
+                    Log.error(JSON.stringify(err));
+                    return next();
+                }
+                res.write(file);
+                res.end();
                 return next();
-            }
-            res.write(file);
-            res.end();
-            return next();
+            });
+        }).catch (function(error) {
+            //
         });
     }
 
