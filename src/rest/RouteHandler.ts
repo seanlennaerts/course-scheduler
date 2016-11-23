@@ -33,10 +33,10 @@ export default class RouteHandler {
         });
     }
 
-    public static getSchedulizer(req: restify.Request, res: restify.Response, next: restify.Next) {
+    public static getRoomExplorer(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
-        try{
-        fs.readFile('./src/rest/views/Schedulizer.html', 'utf8', function (err: Error, file: Buffer) {
+        //    try{
+        fs.readFile('./src/rest/views/roomExplorer.html', 'utf8', function (err: Error, file: Buffer) {
             if (err) {
                 res.send(500);
                 Log.error(JSON.stringify(err));
@@ -45,10 +45,26 @@ export default class RouteHandler {
             res.write(file);
             res.end();
             return next();
-        });}
-        catch(err) {
-            Log.info("Failed to get Schedulizer")
-        }
+        });
+    }
+
+    public static getSchedulizer(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
+    //    try{
+        fs.readFile('./src/rest/views/schedulizer.html', 'utf8', function (err: Error, file: Buffer) {
+            if (err) {
+                res.send(500);
+                Log.error(JSON.stringify(err));
+                return next();
+            }
+            res.write(file);
+            res.end();
+            return next();
+        });
+    //}
+      //  catch(err) {
+      //      Log.info("Failed to get Schedulizer")
+      //  }
     }
 
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {

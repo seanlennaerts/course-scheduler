@@ -22,6 +22,7 @@ $(function () {
         updateDebugQuery();
     });
 
+
     $("#groupAll").click(function () {
         if($(this).is(":checked")) {
             var currentWhere = JSON.stringify(buildQuery.WHERE);
