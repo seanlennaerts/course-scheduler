@@ -56,44 +56,36 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 sidebar">
             <div class="well">
-                <div class="checkbox">
-                    <label><input type="checkbox" id="groupAll">Group by course</label>
-                </div>
-                <div class="filter" id="departments">
-                    <label for="departments-scrollable">Department</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="departments-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="departments-scrollable"></select>
-
-                </div>
-                <div class="filter" id="sections">
-                    <label for="sections-scrollable">Section</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="sections-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="sections-scrollable"></select>
-                </div>
-                <div class="filter" id="instructors">
-                    <label for="instructors-scrollable">Instructor</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="instructors-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="instructors-scrollable"></select>
-                </div>
-                <div class="filter" id="titles">
-                    <label for="titles-scrollable">Title</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="titles-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="titles-scrollable"></select>
-                </div>
-                <div class="filter" id="size">
-                    <label for="size-range">Size</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
-                    <div class="slider">
-                        <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
-                               data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
+                <div class="panel-group">
+                    <div class="panel panel-success">
+                        <div class="panel-heading" id="inputCourse">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" id="newCourse">Add New Course!</button>
+                            </div>
+                            <div class="form-group">
+                                <label for="dept">Department:</label>
+                                <input type="text" class="form-control" id="dept">
+                                <label for="courseNum">Course Number:</label>
+                                <input type="text" class="form-control" id="courseNum">
+                            </div>
+                            </br>
+                        </div>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <div class="form-group">
+                                <label for="buildingCode">Building Code:</label>
+                                <input type="text" class="form-control" id="buildingCode">
+                            </div>
+                            <div class="form-group">
+                                <label for="distance">Distance From Specified Building:</label>
+                                <input type="text" class="form-control" id="distance">
+                            </div>
+                            </br>
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-primary" id="newRoom">Add New Room!</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
