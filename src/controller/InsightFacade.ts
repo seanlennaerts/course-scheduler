@@ -11,6 +11,7 @@ import {QueryRequest} from "./QueryController";
 import DatasetController from "./DatasetController";
 import {Datasets} from "./DatasetController";
 import Log from "../Util";
+import {QueryResponse} from "./QueryController";
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -62,7 +63,7 @@ export default class InsightFacade implements IInsightFacade {
 
             switch (isValid) {
                 case 200:
-                    let result = controller.query(query);
+                    let result: QueryResponse = controller.query(query);
                     fulfill({code: 200, body: result});
                     Log.info("Lenght of result array after performing query: " + result.result.length);
                     break;

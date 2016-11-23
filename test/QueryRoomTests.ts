@@ -23,19 +23,19 @@ describe("QueryReturns", function () {
     afterEach(function () {
     });
 
-    it("Check room max", function () {
-        let query: QueryRequest = {
-            "GET": ["rooms_shortname", "numRooms"],
-            "WHERE": {},
-            "GROUP": [ "rooms_shortname" ],
-            "APPLY": [ {"numRooms": {"MAX": "rooms_seats"}} ],
-            "AS": "TABLE"
-        };
-        return facade.performQuery(query).then(function (response: InsightResponse) {
-            let table: QueryResponse = <QueryResponse>response.body;
-            let result: {}[] = table.result;
-
-            Log.test("GT:\n" + JSON.stringify(result));
-        });
-    });
+    // it("Check room max", function () {
+    //     let query: QueryRequest = {
+    //         "GET": ["rooms_shortname", "numRooms"],
+    //         "WHERE": {},
+    //         "GROUP": [ "rooms_shortname" ],
+    //         "APPLY": [ {"numRooms": {"MAX": "rooms_seats"}} ],
+    //         "AS": "TABLE"
+    //     };
+    //     return facade.performQuery(query).then(function (response: InsightResponse) {
+    //         let table: QueryResponse = <QueryResponse>response.body;
+    //         let result: {}[] = table.result;
+    //
+    //         Log.test("GT:\n" + JSON.stringify(result));
+    //     });
+    // });
 });

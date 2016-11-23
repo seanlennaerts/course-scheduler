@@ -16,6 +16,7 @@ $(function () {
 
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
+
         $("#size-range").slider({});
         query(JSON.stringify(buildQuery));
         updateDebugQuery();

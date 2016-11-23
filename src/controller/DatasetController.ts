@@ -142,13 +142,15 @@ export default class DatasetController {
                     var fail: number = root.result[i].Fail;
                     var audit: number = root.result[i].Audit;
                     var uuid: number = root.result[i].id;
-                    var year: number = root.result[i].Year;
                     var section: string = root.result[i].Section;
-
-                    if (section != "overall") {
-                        var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year, pass + fail);
-                        that.processedData.push(newSection);
+                    var year: number = 0;
+                    if (section === "overall") {
+                        year = 1990;
+                    } else {
+                        year = root.result[i].Year;
                     }
+                    var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year, pass + fail);
+                    that.processedData.push(newSection);
                 } //end for loop
             }).then(function() {
                 fulfill(true);

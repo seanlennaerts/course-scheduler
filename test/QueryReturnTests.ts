@@ -495,4 +495,56 @@ describe("QueryReturns", function () {
         };
         return facade.performQuery(query);
     });
+
+    it("Check one AND", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id"],
+            "WHERE": {"AND":[{"OR":[{"IS": {"courses_dept": "cpsc"}}]}]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response:InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "cpsc",
+                "courses_id": "110"
+            },
+                {
+                    "courses_dept": "cpsc",
+                    "courses_id": "110"
+                },
+                {
+                    "courses_dept": "cpsc",
+                    "courses_id": "110"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        })
+    });
+
+    it("Check one OR", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept", "courses_id"],
+            "WHERE": {"OR":[{"IS": {"courses_dept": "cpsc"}}]},
+            "AS":"TABLE"
+        };
+        return facade.performQuery(query).then(function (response:InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "cpsc",
+                "courses_id": "110"
+            },
+                {
+                    "courses_dept": "cpsc",
+                    "courses_id": "110"
+                },
+                {
+                    "courses_dept": "cpsc",
+                    "courses_id": "110"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        })
+    });
 });

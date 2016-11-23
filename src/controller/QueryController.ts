@@ -568,24 +568,30 @@ export default class QueryController {
         }
         Log.info("... back to handleAND - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
         var filteredResult: any[] = [];
-        for (var course of this.tempResults[this.tempResultsIndex][0]) {
-            var id = course.getUniqueId();
-            var exists: boolean = false;
-            for (var i = 1; i < this.tempResults[this.tempResultsIndex].length; i++) {
-                exists = false;
-                for (var checkCourse of this.tempResults[this.tempResultsIndex][i]) {
-                    if (checkCourse.getUniqueId() === id) {
-                        //found. no use checking other courses in this list
-                        exists = true;
-                        break; //go to next course array in tempResults
+        if (this.tempResults[this.tempResultsIndex].length > 1) {
+            for (var course of this.tempResults[this.tempResultsIndex][0]) {
+                var id = course.getUniqueId();
+                var exists: boolean = false;
+                for (var i = 1; i < this.tempResults[this.tempResultsIndex].length; i++) {
+                    exists = false;
+                    for (var checkCourse of this.tempResults[this.tempResultsIndex][i]) {
+                        if (checkCourse.getUniqueId() === id) {
+                            //found. no use checking other courses in this list
+                            exists = true;
+                            break; //go to next course array in tempResults
+                        }
+                        //else: not found. continue looking in this array
                     }
-                    //else: not found. continue looking in this array
+                    if (!exists) {
+                        break; //doesn't exist in one course[] no use checking others
+                    }
                 }
-                if (!exists) {
-                    break; //doesn't exist in one course[] no use checking others
+                if (exists) {
+                    filteredResult.push(course);
                 }
             }
-            if (exists) {
+        } else {
+            for (var course of this.tempResults[this.tempResultsIndex][0]) {
                 filteredResult.push(course);
             }
         }
