@@ -28,7 +28,7 @@ export interface GeoResponse {
 export default class DatasetController {
 
     private processedData: any[]  = [];
-    private datasets: Datasets = {};
+    public datasets: Datasets = {};
     private validIDs: string[] = ["courses", "rooms"];
 
     constructor() {
@@ -74,7 +74,7 @@ export default class DatasetController {
             var pass: number = json[i]._pass;
             var fail: number = json[i]._fail;
             var audit: number = json[i]._audit;
-            var uniqueId: number = json[i]._setionId;
+            var uniqueId: number = json[i]._sectionId;
             var year: number = json[i]._year;
             var size: number = json[i]._size;
 
