@@ -59,33 +59,33 @@
                 <div class="panel-group">
                     <div class="panel panel-success">
                         <div class="panel-heading" id="inputCourse">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-primary" id="newCourse">Add New Course!</button>
-                            </div>
+                            <button type="button" class="btn btn-default btn-sm" id="newCourse">
+                                <span class="glyphicon glyphicon-plus"></span> Add New Course
+                            </button>
+                            </br>
                             <div class="form-group">
                                 <label for="dept">Department:</label>
                                 <input type="text" class="form-control" id="dept">
                                 <label for="courseNum">Course Number:</label>
                                 <input type="text" class="form-control" id="courseNum">
                             </div>
-                            </br>
                         </div>
                     </div>
                     <div class="panel panel-success">
-                        <div class="panel-heading">
+                        <div class="panel-heading filter" id="inputRoom">
+                            <button type="button" class="btn btn-default btn-sm" id="newRoom">
+                                <span class="glyphicon glyphicon-plus"></span> Add New Course
+                            </button>
                             <div class="form-group">
                                 <label for="buildingCode">Building Code:</label>
                                 <input type="text" class="form-control" id="buildingCode">
-                            </div>
-                            <div class="form-group">
-                                <label for="distance">Distance From Specified Building:</label>
+                                <label for="distance">Distance From Specified Building (meters):</label>
                                 <input type="text" class="form-control" id="distance">
                             </div>
-                            </br>
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-primary" id="newRoom">Add New Room!</button>
-                            </div>
                         </div>
+                    </div>
+                    <div class="btn-group filter">
+                        <button type="button" class="btn btn-primary" id="submitInput">Submit</button>
                     </div>
                 </div>
             </div>
