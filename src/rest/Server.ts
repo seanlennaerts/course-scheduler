@@ -62,6 +62,12 @@ export default class Server {
                 // curl -is  http://localhost:4321/
                 that.rest.get('/', RouteHandler.getHomepage);
 
+                // Loads roomExplorer page
+                that.rest.get('/roomExplorer', RouteHandler.getRoomExplorer);
+
+                // Loads schedulizer page
+                that.rest.get('/schedulizer', RouteHandler.getSchedulizer);
+
                 // Sends a dataset. Is idempotent and can create or update a dataset id.
                 // curl localhost:4321/dataset/test --upload-file FNAME.zip
                 that.rest.put('/dataset/:id', RouteHandler.putDataset);

@@ -33,6 +33,40 @@ export default class RouteHandler {
         });
     }
 
+    public static getRoomExplorer(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
+        //    try{
+        fs.readFile('./src/rest/views/roomExplorer.html', 'utf8', function (err: Error, file: Buffer) {
+            if (err) {
+                res.send(500);
+                Log.error(JSON.stringify(err));
+                return next();
+            }
+            res.write(file);
+            res.end();
+            return next();
+        });
+    }
+
+    public static getSchedulizer(req: restify.Request, res: restify.Response, next: restify.Next) {
+        Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
+    //    try{
+        fs.readFile('./src/rest/views/schedulizer.html', 'utf8', function (err: Error, file: Buffer) {
+            if (err) {
+                res.send(500);
+                Log.error(JSON.stringify(err));
+                return next();
+            }
+            res.write(file);
+            res.end();
+            return next();
+        });
+    //}
+      //  catch(err) {
+      //      Log.info("Failed to get Schedulizer")
+      //  }
+    }
+
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         var id: string = req.params.id;

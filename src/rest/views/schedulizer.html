@@ -31,7 +31,6 @@
 </head>
 
 <body>
-
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -41,13 +40,13 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">Sean and Ana's SUPA DUPA Cool Website</a>
+            <a class="navbar-brand">Sean and Ana's SUPA DUPA Cool Website</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-                <li><a href="#">Course Explorer</a></li>
-                <li><a href="#">Room Explorer</a></li>
-                <li><a href="#">Schedulizer</a></li>
+                <li><a href="/">Course Explorer</a></li>
+                <li><a href="roomExplorer">Room Explorer</a></li>
+                <li class="active"><a href="schedulizer">Schedulizer</a></li>
             </ul>
         </div>
     </div>
@@ -57,44 +56,36 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 sidebar">
             <div class="well">
-                <div class="checkbox">
-                    <label><input type="checkbox" id="groupAll">Group by course</label>
-                </div>
-                <div class="filter" id="departments">
-                    <label for="departments-scrollable">Department</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="departments-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="departments-scrollable"></select>
-
-                </div>
-                <div class="filter" id="sections">
-                    <label for="sections-scrollable">Section</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="sections-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="sections-scrollable"></select>
-                </div>
-                <div class="filter" id="instructors">
-                    <label for="instructors-scrollable">Instructor</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="instructors-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="instructors-scrollable"></select>
-                </div>
-                <div class="filter" id="titles">
-                    <label for="titles-scrollable">Title</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="titles-bc"></span>
-                    <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
-                            data-dropup-auto="false" data-actions-box="true" title="Select"
-                            id="titles-scrollable"></select>
-                </div>
-                <div class="filter" id="size">
-                    <label for="size-range">Size</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
-                    <div class="slider">
-                        <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
-                               data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
+                <div class="panel-group">
+                    <div class="panel panel-success">
+                        <div class="panel-heading" id="inputCourse">
+                            <button type="button" class="btn btn-default btn-sm" id="newCourse">
+                                <span class="glyphicon glyphicon-plus"></span> Add New Course
+                            </button>
+                            </br>
+                            <div class="form-group">
+                                <label for="dept">Department:</label>
+                                <input type="text" class="form-control" id="dept">
+                                <label for="courseNum">Course Number:</label>
+                                <input type="text" class="form-control" id="courseNum">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading filter" id="inputRoom">
+                            <button type="button" class="btn btn-default btn-sm" id="newRoom">
+                                <span class="glyphicon glyphicon-plus"></span> Add New Course
+                            </button>
+                            <div class="form-group">
+                                <label for="buildingCode">Building Code:</label>
+                                <input type="text" class="form-control" id="buildingCode">
+                                <label for="distance">Distance From Specified Building (meters):</label>
+                                <input type="text" class="form-control" id="distance">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btn-group filter">
+                        <button type="button" class="btn btn-primary" id="submitInput">Submit</button>
                     </div>
                 </div>
             </div>
@@ -137,7 +128,7 @@
 <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
 <script src="./public/bootstrap.min.js"></script>
 <script src="./public/d3.min.js"></script>
-<script src="./public/main.js"></script>
+<script src="./public/schedulizer.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/bootstrap-slider.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
