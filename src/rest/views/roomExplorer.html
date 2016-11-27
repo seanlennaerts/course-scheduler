@@ -59,12 +59,6 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 sidebar">
             <div class="well">
-                <div class="filter">
-                    <label>Sort Order</label>
-                    <div>
-                        <input type="checkbox" id="order">
-                    </div>
-                </div>
                 <div class="filter" id="building">
                     <label for="buildings-scrollable">Building</label>
                     <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="buildings-bc"></span>
@@ -130,7 +124,13 @@
             </div>
         </div>
         <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
-            <div class="table-responsive" id="render">
+            <div class="row">
+                <div class="sortOrder"><input type="checkbox" id="order"></div>
+            </div>
+            <div class="row">
+                <div class="table-responsive" id="render">
+                    <!--table goes here-->
+                </div>
             </div>
         </div>
     </div>
