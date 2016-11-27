@@ -23,6 +23,7 @@
 	<link href="./public/main.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/css/bootstrap-slider.min.css">
+	<link href="./public/bootstrap-switch.min.css" rel="stylesheet">
 
 	<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
 	<!--[if lt IE 9]>
@@ -58,8 +59,17 @@
 	<div class="row">
 		<div class="col-sm-4 col-md-3 sidebar">
 			<div class="well">
-				<div class="checkbox">
-					<label><input type="checkbox" id="groupAll">Group by course</label>
+				<div class="filter">
+					<label>Group by Course</label>
+					<div>
+						<input type="checkbox" id="groupAll">
+					</div>
+				</div>
+				<div class="filter">
+					<label>Sort Order</label>
+					<div>
+						<input type="checkbox" id="order">
+					</div>
 				</div>
 				<div class="filter" id="departments">
 					<label for="departments-scrollable">Department</label>
@@ -67,7 +77,6 @@
 					<select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
                             data-dropup-auto="false" title="Select"
 							id="departments-scrollable"></select>
-
 				</div>
                 <div class="filter" id="sections">
                     <label for="sections-scrollable">Section</label>
@@ -91,13 +100,16 @@
 							id="titles-scrollable"></select>
                 </div>
                 <div class="filter" id="size">
+					<div>
 					<label for="size-range">Size</label>
 					<span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
+					</div>
 					<div class="slider">
                         <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
                                data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
                     </div>
                 </div>
+
 			</div>
 			<div class="well">
 				<div id="debug">
@@ -144,6 +156,7 @@
 <script src="./public/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/bootstrap-slider.min.js"></script>
+<script src="./public/bootstrap-switch.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>

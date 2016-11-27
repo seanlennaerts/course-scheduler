@@ -117,3 +117,7 @@ body {
   color: #d3d3d3;
   display: none;
 }
+
+.selected {
+  background: url("./sort.gif") no-repeat 100%;
+}

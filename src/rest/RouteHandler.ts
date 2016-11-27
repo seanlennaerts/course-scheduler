@@ -9,6 +9,7 @@ import Log from '../Util';
 import InsightFacade from "../controller/InsightFacade";
 import {InsightResponse} from "../controller/IInsightFacade";
 import {Route} from "restify";
+import Course from "../model/Course";
 
 export default class RouteHandler {
 
@@ -16,26 +17,36 @@ export default class RouteHandler {
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RoutHandler::getHomepage(..)');
-        var content = new Buffer(fs.readFileSync('./full-datasets/courses.zip')).toString('base64');
-        RouteHandler.insightFacade.addDataset("courses", content).then(function (result) {
-            fs.readFile('./src/rest/views/index.html', 'utf8', function (err: Error, file: Buffer) {
-                if (err) {
-                    res.send(500);
-                    Log.error(JSON.stringify(err));
-                    return next();
-                }
-                res.write(file);
-                res.end();
+        // var content = new Buffer(fs.readFileSync('./full-datasets/courses.zip')).toString('base64');
+        // RouteHandler.insightFacade.addDataset("courses", content).then(function (result) {
+        //     fs.readFile('./src/rest/views/courseExplorer.html', 'utf8', function (err: Error, file: Buffer) {
+        //         if (err) {
+        //             res.send(500);
+        //             Log.error(JSON.stringify(err));
+        //             return next();
+        //         }
+        //         res.write(file);
+        //         res.end();
+        //         return next();
+        //     });
+        // }).catch (function(error) {
+        //     //
+        // });
+
+        fs.readFile('./src/rest/views/courseExplorer.html', 'utf8', function (err: Error, file: Buffer) {
+            if (err) {
+                res.send(500);
+                Log.error(JSON.stringify(err));
                 return next();
-            });
-        }).catch (function(error) {
-            //
+            }
+            res.write(file);
+            res.end();
+            return next();
         });
     }
 
     public static getRoomExplorer(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
-        //    try{
         fs.readFile('./src/rest/views/roomExplorer.html', 'utf8', function (err: Error, file: Buffer) {
             if (err) {
                 res.send(500);
@@ -50,7 +61,6 @@ export default class RouteHandler {
 
     public static getSchedulizer(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::getScheduler(..) - params: ' + JSON.stringify(req.params));
-    //    try{
         fs.readFile('./src/rest/views/schedulizer.html', 'utf8', function (err: Error, file: Buffer) {
             if (err) {
                 res.send(500);
@@ -61,10 +71,6 @@ export default class RouteHandler {
             res.end();
             return next();
         });
-    //}
-      //  catch(err) {
-      //      Log.info("Failed to get Schedulizer")
-      //  }
     }
 
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
@@ -97,9 +103,6 @@ export default class RouteHandler {
         Log.trace('RouteHandler::postQuery(..) - params: ' + JSON.stringify(req.params));
         let query: QueryRequest = req.params;
         RouteHandler.insightFacade.performQuery(query).then(function(result: InsightResponse){
-            var resultArray = (<QueryResponse>result.body)["result"].filter(function (objRow) {
-                return (<any>objRow)["year"] > 1990;
-            });
             res.json(result.code, result.body);
         }).catch (function(error) {
             res.json(error.code, error.body);

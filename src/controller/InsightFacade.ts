@@ -12,6 +12,7 @@ import DatasetController from "./DatasetController";
 import {Datasets} from "./DatasetController";
 import Log from "../Util";
 import {QueryResponse} from "./QueryController";
+import Course from "../model/Course";
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -64,8 +65,8 @@ export default class InsightFacade implements IInsightFacade {
             switch (isValid) {
                 case 200:
                     let result: QueryResponse = controller.query(query);
-                    fulfill({code: 200, body: result});
                     Log.info("Lenght of result array after performing query: " + result.result.length);
+                    fulfill({code: 200, body: result});
                     break;
                 case 424:
                     reject({code: 424, body: {missing: controller.returnWrongIDs()}});

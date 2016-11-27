@@ -1,5 +1,4 @@
 $(function () {
-    var getAllQueryDebug = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size", "courses_pass", "courses_fail"],"WHERE":{"GT": {"courses_avg": 90}},"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"};
     var buildQuery = {"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size","courses_pass","courses_fail"],
                         "WHERE":{},
                         "ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},
@@ -12,18 +11,21 @@ $(function () {
         "title": false,
         "size": false
     };
+    var grouped = false;
 
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
 
         $("#size-range").slider({});
+        $("#groupAll").bootstrapSwitch("size", "mini");
+        $("#order").bootstrapSwitch("size", "mini").bootstrapSwitch("state", true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
         query(JSON.stringify(buildQuery));
         updateDebugQuery();
     });
 
-
-    $("#groupAll").click(function () {
-        if($(this).is(":checked")) {
+    $("#groupAll").on("switchChange.bootstrapSwitch", function (event, state) {
+        if(state) {
+            grouped = true;
             var currentWhere = JSON.stringify(buildQuery.WHERE);
             var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize","coursePass","courseFail"],"WHERE":' + currentWhere +',"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"MAX":"courses_size"}},{"coursePass":{"MAX":"courses_pass"}},{"courseFail":{"MAX":"courses_fail"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
             buildQuery = JSON.parse(groupAllQuery);
@@ -36,9 +38,10 @@ $(function () {
             query(JSON.stringify(buildQuery));
             filtersUsed.instructor = prev;
         } else {
+            grouped = false;
             var groupWhere = JSON.stringify(buildQuery.WHERE);
             var noGroupQuery = '{"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size","courses_pass","courses_fail"],"WHERE":' + groupWhere + ',"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
-            buildQuery = noGroupQuery;
+            buildQuery = JSON.parse(noGroupQuery);
             $("#instructors-scrollable")
                 .prop("disabled", false)
                 .selectpicker('refresh');
@@ -47,10 +50,6 @@ $(function () {
             query(JSON.stringify(buildQuery));
             filtersUsed.instructor = prev2;
         }
-    });
-
-    $(document).on("click", "#render > table > thead > tr > th", function() {
-        //$(this).html() //captures value of header clicked
     });
 
     $(document).on("change", "#departments-scrollable", function() {
@@ -72,7 +71,6 @@ $(function () {
     $(document).on("change", "#sections-scrollable", function() {
         var sectionsClear = $("#sections-bc");
         var id = $(this).val();
-        // alert("sections val:" + JSON.stringify(id) + ", lenght: " + id.length);
         if (id) {
             sectionsClear.show();
             handleDropDowns("id", id);
@@ -118,13 +116,37 @@ $(function () {
         updateDebugQuery();
     });
 
+    $("#size-range").on("slideStop", function (slideEvt) {
+        var values = slideEvt.value;
+        var exists = false;
+        if (!buildQuery.WHERE.AND) {
+            buildQuery.WHERE = {"AND": []};
+        }
+        for (var i=0; i < buildQuery.WHERE.AND.length; i++) {
+            if (Object.keys(buildQuery.WHERE.AND[i])[0] === "AND") {
+                buildQuery.WHERE.AND[i].AND[0].GT.courses_size = values[0];
+                buildQuery.WHERE.AND[i].AND[1].LT.courses_size = values[1];
+                exists = true;
+            }
+        }
+        if (!exists) {
+            buildQuery.WHERE.AND.push({"AND":[{"GT": {"courses_size": values[0]}},{"LT": {"courses_size": values[1]}}]})
+        }
+        filtersUsed.size = false;
+        query(JSON.stringify(buildQuery));
+        filtersUsed.size = true;
+        updateDebugQuery();
+    });
+
     function getORArray(key) {
         var index = -1;
         var andArray = buildQuery.WHERE.AND;
         for (var i=0; i < andArray.length; i++) {
-            var sampleORArray = andArray[i].OR[0].IS; //all ors in an AND have the same key so only need to check one
-            if (Object.keys(sampleORArray)[0].split("_")[1] === key) {
-                index = i;
+            if (andArray[i].OR) {
+                var sampleORArray = andArray[i].OR[0].IS; //all ors in an AND have the same key so only need to check one
+                if (Object.keys(sampleORArray)[0].split("_")[1] === key) {
+                    index = i;
+                }
             }
         }
         return index;
@@ -159,7 +181,9 @@ $(function () {
         var index = getORArray(key);
         buildQuery.WHERE.AND = buildQuery.WHERE.AND.filter(function (andArray) {
             // alert("check:" + Object.keys(andArray.OR[0].IS)[0].split("_")[1] + ", equal to:" + key);
-            return Object.keys(andArray.OR[0].IS)[0].split("_")[1] != key;
+            if (andArray.OR) {
+                return Object.keys(andArray.OR[0].IS)[0].split("_")[1] != key;
+            }
         });
         if (buildQuery.WHERE.AND.length === 0) {
             buildQuery.WHERE = {}
@@ -273,9 +297,12 @@ $(function () {
         try {
             $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
                 if (data["render"] === "TABLE") {
-                    // disableAllFilters()
                     if (filtersUsed.dept || filtersUsed.id || filtersUsed.instructor || filtersUsed.title || filtersUsed.size) {
                         generateTable(data["result"]);
+                    } else {
+                        $("#render")
+                            .empty()
+                            .append('<div class="alert alert-info" role="alert">Too many items to display. Please narrow your results on the left.</div>');
                     }
                     if (!filtersUsed.dept){
                         var deptScrollable = $("#departments-scrollable");
@@ -289,12 +316,6 @@ $(function () {
                         populateSections(data["result"]);
                         idScrollable.selectpicker("val", prevIdVal);
                     }
-                    if (!filtersUsed.instructor) {
-                        var instructorScrollable = $("#instructors-scrollable");
-                        var prevInstructorVal = instructorScrollable.val();
-                        populateInstructors(data["result"]);
-                        instructorScrollable.selectpicker("val", prevInstructorVal);
-                    }
                     if (!filtersUsed.title) {
                         var titleScrollable = $("#titles-scrollable");
                         var prevTitleVal = titleScrollable.val();
@@ -302,9 +323,18 @@ $(function () {
                         titleScrollable.selectpicker("val", prevTitleVal);
                     }
                     if (!filtersUsed.size) {
-                        populateSize(data["result"]);
+                        if (!grouped) {
+                            populateSize(data["result"]);
+                        } else {
+                            populateSizeGrouped(data["result"]);
+                        }
                     }
-                    // enableAllFilters()
+                    if (!filtersUsed.instructor && !grouped) {
+                        var instructorScrollable = $("#instructors-scrollable");
+                        var prevInstructorVal = instructorScrollable.val();
+                        populateInstructors(data["result"]);
+                        instructorScrollable.selectpicker("val", prevInstructorVal);
+                    }
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
@@ -365,6 +395,27 @@ $(function () {
             }
         }
         sizeSlider.slider({
+            "min": min - 1,
+            "max": max + 1,
+            "value": [min - 1, max + 1]
+        });
+        sizeSlider.slider("refresh");
+    }
+
+    function populateSizeGrouped(data) {
+        var sizeSlider = $("#size-range");
+        var min = data[0]["courseSize"];
+        var max = data[0]["courseSize"];
+        for (var i = 0; i < data.length; i++) {
+            var size = data[i]["courseSize"];
+            if (size < min) {
+                min = size;
+            }
+            if (size > max) {
+                max = size;
+            }
+        }
+        sizeSlider.slider({
             "min": min,
             "max": max,
             "value": [min, max]
@@ -403,15 +454,22 @@ $(function () {
         var container = d3.select("#render");
         container.html("");
         container.selectAll("*").remove();
-        var table = container.append("table").attr("class", "table table-hover");
+        var table = container.append("table").attr("class", "table table-hover table-condensed");
 
         table.append("thead").append("tr")
             .selectAll("th")
             .data(columns).enter()
             .append("th")
             .attr("class", function (d) {
-                return d["cl"]
+                try{
+                    if (orderExists(d["head"])) {
+                        return "selected";
+                    }
+                } catch(err){
+                    //
+                }
             })
+            .attr("style", "padding-right: 20px")
             .text(function (d) {
                 return d["head"]
             });
@@ -439,6 +497,51 @@ $(function () {
                 return d["cl"]
             });
     }
+
+    //ORDER
+    $(document).on("click", "#render > table > thead > tr > th", function() {
+        //$(this).html() //captures value of header clicked
+        var key = $(this).html();
+        if (!buildQuery.ORDER){
+            var direction = "DOWN";
+            if ($("#order").bootstrapSwitch("state")) {
+                direction = "UP";
+            }
+            buildQuery["ORDER"] = {"dir": direction, "keys": []};
+        }
+        if (!orderExists(key)) {
+            buildQuery.ORDER.keys.push(key);
+            updateDebugQuery();
+            query(JSON.stringify(buildQuery));
+        } else {
+            buildQuery.ORDER.keys = buildQuery.ORDER.keys.filter(function (k) {
+                return k != key;
+            });
+            updateDebugQuery();
+            if (buildQuery.ORDER.keys.length > 0) {
+                query(JSON.stringify(buildQuery));
+            } else {
+                delete buildQuery.ORDER;
+                query(JSON.stringify(buildQuery));
+            }
+        }
+    });
+
+    function orderExists(key) {
+        return buildQuery.ORDER.keys.includes(key);
+    }
+
+    $("#order").on("switchChange.bootstrapSwitch", function (event, state) {
+        if(state) {
+            buildQuery.ORDER.dir = "UP";
+            updateDebugQuery();
+            query(JSON.stringify(buildQuery));
+        } else {
+            buildQuery.ORDER.dir = "DOWN";
+            updateDebugQuery();
+            query(JSON.stringify(buildQuery));
+        }
+    });
 
     function spawnHttpErrorModal(e) {
         $("#errorModal .modal-title").html(e.status);

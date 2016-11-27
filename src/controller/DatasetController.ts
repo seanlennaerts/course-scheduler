@@ -37,17 +37,17 @@ export default class DatasetController {
 
     private getPersisted(id: string) {
         var file: string = fs.readFileSync("./data/" + id + ".json", "utf8");
-        this.datasets[id] = [];
         if (id === "courses") {
             this.parseAgain(JSON.parse(file));
         } else {
             this.parseAgainHTML(JSON.parse(file));
         }
         this.datasets[id] = this.processedData;
+        this.processedData = [];
     }
 
     public getDatasets(): Datasets {
-        if (Object.keys(this.datasets).length === this.validIDs.length) {
+        if (Object.keys(this.datasets).length === this.validIDs.length && this.datasets["courses"].length > 0 && this.datasets["rooms"].length > 0) {
             Log.info("getDatasets(): already exists so returning existing datasets");
             return this.datasets;
         }
@@ -64,7 +64,7 @@ export default class DatasetController {
     }
 
     private parseAgain(json: any) {
-        this.processedData = [];
+        Log.info("getDatasets(): Parse again COURSE");
         for (var i = 0; i < json.length; i++) {
             var dept: string = json[i]._dept;
             var id: string = json[i]._id;
@@ -74,7 +74,7 @@ export default class DatasetController {
             var pass: number = json[i]._pass;
             var fail: number = json[i]._fail;
             var audit: number = json[i]._audit;
-            var uniqueId: number = json[i]._sectionId;
+            var uniqueId: number = json[i]._uuid;
             var year: number = json[i]._year;
             var size: number = json[i]._size;
 
@@ -86,7 +86,7 @@ export default class DatasetController {
     }
 
     private parseAgainHTML(json: any) {
-        this.processedData = [];
+        Log.info("getDatasets(): Parse again ROOM");
         for (var i = 0; i < json.length; i++) {
             var fullname: string = json[i]._fullname;
             var shortname: string = json[i]._shortname;
@@ -132,6 +132,9 @@ export default class DatasetController {
                     reject(new Error("Invalid archive"));
                 }
                 for (var i = 0; i < root.result.length; i++) {
+                    if (root.result[i].Section === "overall") {
+                        break;
+                    }
                     var dept: string = root.result[i].Subject;
                     var id: string = root.result[i].Course;
                     var avg: number = root.result[i].Avg;
@@ -142,13 +145,8 @@ export default class DatasetController {
                     var fail: number = root.result[i].Fail;
                     var audit: number = root.result[i].Audit;
                     var uuid: number = root.result[i].id;
-                    var section: string = root.result[i].Section;
-                    var year: number = 0;
-                    if (section === "overall") {
-                        year = 1990;
-                    } else {
-                        year = root.result[i].Year;
-                    }
+                    var year: number = root.result[i].Year;
+
                     var newSection = new Course (uuid, dept, id, title, avg, instructorArray, pass, fail, audit, year, pass + fail);
                     that.processedData.push(newSection);
                 } //end for loop
