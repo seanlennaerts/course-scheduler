@@ -8,6 +8,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="author" content="">
     <!--<link rel="icon" href="./public/favicon.ico">-->
 
     <title>Sean and Ana's SUPA DUPA Cool Website</title>
@@ -22,6 +23,7 @@
     <link href="./public/main.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/css/bootstrap-select.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/css/bootstrap-slider.min.css">
+    <link href="./public/bootstrap-switch.min.css" rel="stylesheet">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
@@ -31,6 +33,7 @@
 </head>
 
 <body>
+
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
@@ -56,46 +59,66 @@
     <div class="row">
         <div class="col-sm-4 col-md-3 sidebar">
             <div class="well">
-                <div class="checkbox">
-                    <label><input type="checkbox" id="groupAll">Group by course</label>
+                <div class="filter">
+                    <label>Sort Order</label>
+                    <div>
+                        <input type="checkbox" id="order">
+                    </div>
                 </div>
-                <div class="filter" id="departments">
-                    <label for="departments-scrollable">Department</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="departments-bc"></span>
+                <div class="filter" id="building">
+                    <label for="buildings-scrollable">Building</label>
+                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="buildings-bc"></span>
                     <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
                             data-dropup-auto="false" title="Select"
-                            id="departments-scrollable"></select>
-
+                            id="buildings-scrollable"></select>
                 </div>
-                <div class="filter" id="sections">
-                    <label for="sections-scrollable">Section</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="sections-bc"></span>
+                <div class="filter" id="number">
+                    <label for="numbers-scrollable">Number</label>
+                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="numbers-bc"></span>
                     <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
                             data-dropup-auto="false" title="Select"
-                            id="sections-scrollable"></select>
+                            id="numbers-scrollable"></select>
                 </div>
-                <div class="filter" id="instructors">
-                    <label for="instructors-scrollable">Instructor</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="instructors-bc"></span>
+                <div class="filter" id="type">
+                    <label for="types-scrollable">Type</label>
+                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="types-bc"></span>
                     <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
                             data-dropup-auto="false" title="Select"
-                            id="instructors-scrollable"></select>
+                            id="types-scrollable"></select>
                 </div>
-                <div class="filter" id="titles">
-                    <label for="titles-scrollable">Title</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="titles-bc"></span>
+                <div class="filter" id="furniture">
+                    <label for="furnitures-scrollable">Furniture</label>
+                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="furnitures-bc"></span>
                     <select class="selectpicker form-control" multiple data-live-search="true" data-container="body"
                             data-dropup-auto="false" title="Select"
-                            id="titles-scrollable"></select>
+                            id="furnitures-scrollable"></select>
                 </div>
                 <div class="filter" id="size">
-                    <label for="size-range">Size</label>
-                    <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
+                    <div>
+                        <label for="size-range">Seats</label>
+                        <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="size-bc"></span>
+                    </div>
                     <div class="slider">
                         <input id="size-range" type="text" class="span2" value="" data-slider-min="0"
                                data-slider-max="100" data-slider-step="1" data-slider-value="[0,100]"/>
                     </div>
                 </div>
+                <div class="filter" id="distance">
+                    <div>
+                        <label for="distance-scrollable">Range</label>
+                        <span class="glyphicon glyphicon-remove-sign remove" aria-hidden="true" id="distance-bc"></span>
+                    </div>
+                    <div class="dropDownSmall">
+                        <select class="selectpicker form-control" data-live-search="true" data-container="body"
+                                data-dropup-auto="false" title="From"
+                                id="distance-scrollable"></select>
+                    </div>
+                    <div class="sliderSmall">
+                        <input id="distance-range" type="text" class="span2" value="" data-slider-min="0"
+                               data-slider-max="1500" data-slider-step="1" data-slider-value="0" data-slider-enabled="false"/>
+                    </div>
+                </div>
+
             </div>
             <div class="well">
                 <div id="debug">
@@ -103,8 +126,6 @@
                     <div id="debug-where"></div>
                     <label>ORDER</label>
                     <div id="debug-order"></div>
-                    <label>Other</label>
-                    <div id="debug-other"></div>
                 </div>
             </div>
         </div>
@@ -142,6 +163,7 @@
 <script src="./public/roomExplorer.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/bootstrap-slider.min.js"></script>
+<script src="./public/bootstrap-switch.min.js"></script>
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>

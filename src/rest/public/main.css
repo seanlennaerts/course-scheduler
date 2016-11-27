@@ -105,9 +105,6 @@ body {
 }
 
 /*extras*/
-.slider {
-  padding-left: 10px;
-}
 
 .filter {
   padding-top: 10px;
@@ -118,6 +115,24 @@ body {
   display: none;
 }
 
-.selected {
+.selectedOrder {
   background: url("./sort.gif") no-repeat 100%;
+}
+
+.slider {
+  width: 100% !important;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.dropDownSmall {
+  width: 50% !important;
+  float: left;
+  padding-bottom: 10px;
+}
+
+.sliderSmall {
+  width: 100% !important;
+  padding-left: 10px;
+  padding-right: 10px;
 }
