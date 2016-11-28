@@ -110,10 +110,10 @@ describe("schedulizerTests", function(){
         let sorted = schedulizer.sortDescendingSize(rooms, "room");
         let expanded : roomSchedule[] = schedulizer.createRoomWithSchedules(sorted);
         let expectedResult = [
-            {seats: 250, roomName: "DMP_101", schedule: [""], quality: [0,0]},
-            {seats: 250, roomName: "EOSC_3012", schedule: [""], quality: [0,0]},
-            {seats: 200, roomName: "EOSC_1101", schedule: [""], quality: [0,0]},
-            {seats: 100, roomName: "DMP_103", schedule: [""], quality: [0,0]}
+            {seats: 250, roomName: "DMP_101", schedule: [""], quality: [0,0,0]},
+            {seats: 250, roomName: "EOSC_3012", schedule: [""], quality: [0,0,0]},
+            {seats: 200, roomName: "EOSC_1101", schedule: [""], quality: [0,0,0]},
+            {seats: 100, roomName: "DMP_103", schedule: [""], quality: [0,0,0]}
         ];
         expect(expanded).to.deep.equal(expectedResult);
     });
@@ -161,12 +161,9 @@ describe("schedulizerTests", function(){
     it("has to schedule after hours", function(){
         let schedulizer: Schedulizer = new Schedulizer();
         let res = schedulizer.scheduleCourses(courses3, rooms2);
+        let lengthCourses = schedulizer.createCourseSections(courses3).length;
 
+        //expect(lengthCourses).to.equal(29);
         expect(res).to.deep.equal(0)
     });
-
-
-
-
-
 });
