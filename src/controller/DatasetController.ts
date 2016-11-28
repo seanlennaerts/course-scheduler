@@ -129,7 +129,7 @@ export default class DatasetController {
             file.async("string").then(function (contents: string) {
                 var root = JSON.parse(contents);
                 if (!root.result) {
-                    reject(new Error("Invalid archive"));
+                    reject(new   Error("Invalid archive"));
                 }
                 for (var i = 0; i < root.result.length; i++) {
                     if (root.result[i].Section === "overall") {
