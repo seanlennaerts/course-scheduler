@@ -14,10 +14,13 @@ import Log from "../Util";
 import {QueryResponse} from "./QueryController";
 import Course from "../model/Course";
 import {DistanceRequest, default as DistanceController, DistanceResponse} from "./DistanceController";
+import HandleInputForSchedulizer from "./HandleInputForSchedulizer";
+import {result, default as Schedulizer} from "./SchedulizerController";
 
 export default class InsightFacade implements IInsightFacade {
 
     private static datasetController: DatasetController = new DatasetController;
+    private static schedulizerController: HandleInputForSchedulizer = new HandleInputForSchedulizer;
     // private static queryController: QueryController = null;
 
     constructor() {
@@ -91,16 +94,28 @@ export default class InsightFacade implements IInsightFacade {
         })
     }
 
-    public addSchedulizerInput(input): Promise<InsightResponse>{
+    public addSchedulizerInput(id: string, input: any): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject) {
-            // let controller = InsightFacade.datasetController;
-            // controller.process(id, content).then(function (result: number) {
-            //     Log.trace('InsightFacade::addDataset(..) - processed');
-            //     fulfill({code: result, body: {}});
-            // }).catch(function (error: Error) {
-            //     Log.trace('InsightFacade::addDataset(..) - ERROR: ' + error.message);
-            //     reject({code: 400, body: {error: error.message}});
-            // });
+            try {
+                let controller = new HandleInputForSchedulizer();
+                controller.addInput(id, input);
+                fulfill({code: 200, body:{}});
+            } catch (err) {
+                reject({code: 400, body: {error: "Something went wrong"}});
+            }
+        })
+    }
+
+    public schedulize(): Promise<InsightResponse>{
+        return new Promise(function(fulfill, reject) {
+            try {
+                var inputs: {} = InsightFacade.schedulizerController.getInputs();
+                let controller: Schedulizer = new Schedulizer();
+                let result: result = controller.scheduleCourses((<any>inputs)["course"], (<any>inputs)["room"]);
+                fulfill({code: 200, body:{result}});
+            } catch (err) {
+                reject({code: 400, body: {error: "Something went wrong"}});
+            }
         })
     }
 }

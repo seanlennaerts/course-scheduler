@@ -108,11 +108,22 @@ export default class RouteHandler {
     public static postSchedulizerInput(req: restify.Request, res: restify.Response, next: restify.Next) {
         var id: string = req.params.id;
         let input: DistanceRequest = req.params;
-        // RouteHandler.insightFacade.checkDistance(input).then(function(result: InsightResponse){
-        //     res.json(result.code, result.body);
-        // }).catch (function(error) {
-        //     res.json(error.code, error.body);
-        // });
+        RouteHandler.insightFacade.addSchedulizerInput(id, input).then(function(result: InsightResponse){
+            res.json(result.code, result.body);
+        }).catch (function(error) {
+            res.json(error.code, error.body);
+        });
+        return next();
+    }
+
+    public static postSchedulize(req: restify.Request, res: restify.Response, next: restify.Next) {
+        var id: string = req.params.id;
+        let input: DistanceRequest = req.params;
+        RouteHandler.insightFacade.schedulize().then(function(result: InsightResponse){
+            res.json(result.code, result.body);
+        }).catch (function(error) {
+            res.json(error.code, error.body);
+        });
         return next();
     }
 
