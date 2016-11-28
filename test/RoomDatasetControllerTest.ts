@@ -73,4 +73,15 @@ describe("Room Dataset Controller", function () {
             expect.fail('Should not happen');
         });
     });
+
+    //added so distance has a dataset to work with
+    it("Should be able to add a add a new dataset (204)", function () {
+        var that = this;
+        Log.trace("Starting test: " + that.test.title);
+        return facade.addDataset('rooms', zipFileContents).then(function (response: InsightResponse) {
+            expect(response.code).to.equal(204);
+        }).catch(function (response: InsightResponse) {
+            expect.fail('Should not happen');
+        });
+    });
 });

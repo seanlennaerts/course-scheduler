@@ -13,6 +13,7 @@ import {Datasets} from "./DatasetController";
 import Log from "../Util";
 import {QueryResponse} from "./QueryController";
 import Course from "../model/Course";
+import {DistanceRequest, default as DistanceController, DistanceResponse} from "./DistanceController";
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -75,5 +76,18 @@ export default class InsightFacade implements IInsightFacade {
                     reject({code: 400, body: {error: "Invalid query"}});
             }
         });
+    }
+
+    public checkDistance(query: DistanceRequest): Promise<InsightResponse>{
+        return new Promise(function(fulfill, reject) {
+            try {
+                let datasets: Datasets = InsightFacade.datasetController.getDatasets();
+                let controller = new DistanceController(datasets);
+                let result: DistanceResponse = controller.getBuildingsInRange(query);
+                fulfill({code: 200, body: result});
+            } catch (err) {
+                reject({code: 400, body: {error: "Something went wrong"}});
+            }
+        })
     }
 }

@@ -10,6 +10,7 @@ import InsightFacade from "../controller/InsightFacade";
 import {InsightResponse} from "../controller/IInsightFacade";
 import {Route} from "restify";
 import Course from "../model/Course";
+import {DistanceRequest} from "../controller/DistanceController";
 
 export default class RouteHandler {
 
@@ -109,6 +110,17 @@ export default class RouteHandler {
         });
         return next();
     }
+
+    public static postDistance(req: restify.Request, res: restify.Response, next: restify.Next) {
+        let query: DistanceRequest = req.params;
+        RouteHandler.insightFacade.checkDistance(query).then(function(result: InsightResponse){
+            res.json(result.code, result.body);
+        }).catch (function(error) {
+            res.json(error.code, error.body);
+        });
+        return next();
+    }
+
 
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){

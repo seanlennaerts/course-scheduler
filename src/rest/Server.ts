@@ -77,6 +77,8 @@ export default class Server {
                 // curl -is -X POST -d '{ "key": "value" }' http://localhost:4321/query
                 that.rest.post('/query', restify.bodyParser(), RouteHandler.postQuery);
 
+                that.rest.post('/distance', restify.bodyParser(), RouteHandler.postDistance);
+
                 //Deletes a dataset based in id -S
                 that.rest.del('/dataset/:id', RouteHandler.deleteDataset);
 
