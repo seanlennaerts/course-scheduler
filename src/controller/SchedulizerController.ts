@@ -23,7 +23,7 @@ export interface roomSchedule {
     seats: number;
     roomName: string;
     schedule: string[];
-    quality?: number[];   //quality[0] = # of classes outside 9 -5 pm block, quality[1] = # of courses scheduled, quality[2] = quality number
+    quality: number[];   //quality[0] = # of classes outside 9 -5 pm block, quality[1] = # of courses scheduled, quality[2] = quality number
 }
 
 export interface result{
@@ -53,21 +53,20 @@ export default class Schedulizer {
         this.numberOfCourses = 0;
     }
 
-    private dynamicSortThree(field: string, reverse: boolean){
+    private dynamicSort(field: string, reverse: boolean){
         var key = function (x: any) {return x[field]};
 
         return function (a: any, b: any) {
-            var result: number = 0;
+            var something: number = 0;
             var A = key(a), B = key(b);
             if (A === B) {
-                result = a.index - b.index;
+                something = 0;
             } else if (A < B) {
-                result = -1;
+                something = -1;
             } else {
-                result = 1;
+                something = 1;
             }
-            result = result * [-1,1][+!!reverse];
-            return result;
+            return something * [-1,1][+!!reverse];
             //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
         }
     }
@@ -76,26 +75,11 @@ export default class Schedulizer {
         switch (identifier) {
             case "course":
                 var courseArray: courseItem[] = array;
-                for (var j = 0; j < courseArray.length; j++){
-                    courseArray[j]["index"] = j;
-                }
-                courseArray.sort(this.dynamicSortThree("size", false))
-
-                for (var object of courseArray) {
-                    delete object["index"];
-                }
-
+                courseArray.sort(this.dynamicSort("size", false))
                 return courseArray;
             case "room":
                 var roomArray: roomItem[] = array;
-                for (var k = 0; k < roomArray.length; k++){
-                    roomArray[k]["index"] = k;
-                }
-                roomArray.sort(this.dynamicSortThree("seats", false));
-
-                for (var o of roomArray) {
-                    delete o["index"];
-                }
+                roomArray.sort(this.dynamicSort("seats", false));
                 return roomArray;
             default:
                 Log.info("wrong identifier in parameter")
@@ -120,7 +104,7 @@ export default class Schedulizer {
     public createRoomWithSchedules(rooms: roomItem[]): roomSchedule[] {
         Log.info("Length of input array: " + rooms.length);
         for (var i = 0; i < rooms.length; i++) {
-            var roomwithSchedule: roomSchedule = {roomName: rooms[i].shortname + "_" + rooms[i].number, seats: rooms[i].seats, quality: [0,0], schedule: [""]};
+            var roomwithSchedule: roomSchedule = {roomName: rooms[i].shortname + "_" + rooms[i].number, seats: rooms[i].seats, quality: [0,0,0], schedule: [""]};
             this.roomsWithSchedules.push(roomwithSchedule);
         }
         return this.roomsWithSchedules;
@@ -139,11 +123,15 @@ export default class Schedulizer {
 
     public calculateQuality(roomSchedule: roomSchedule[]): roomSchedule[] {
         for (var i = 0; i < roomSchedule.length; i++) {
-            if (roomSchedule[i].quality[0] === 0 && roomSchedule[i].quality[1] === 0) {
+            if (roomSchedule[i].quality[0] === 0 && roomSchedule[i].quality[1] === 0){
+                roomSchedule[i].quality[2] = 0;
+            }
+            else if (roomSchedule[i].quality[0] === 0) {
                 roomSchedule[i].quality[2] = 1;
             } else {
                 roomSchedule[i].quality[2] = roomSchedule[i].quality[0] / roomSchedule[i].quality[1];
             }
+            Log.info("calculating Quality for: " + JSON.stringify(roomSchedule[i].roomName) + "is: " + roomSchedule[i].quality[2]);
         }
         return roomSchedule;
     }
@@ -164,36 +152,36 @@ export default class Schedulizer {
                 Log.info("Course to schedule: " + JSON.stringify(sortedCourseSections[all]));
                 var courseName: string = sortedCourseSections[all].dept + "_" +  sortedCourseSections[all].id;
                 roomsAndSchedules[i].schedule[j] = courseName;
+                roomsAndSchedules[i].quality[1]++;
                 this.numberOfCourses--;
             }
-            // if (courses.length > ((i + 1) * 15)) {     // go into next room if courses to schedule exceeds this room's 15 empty blocks
-            //     Log.info("scheduleCourses:: Going to the next room to keep scheduling clases");
-            //     break;
-            // }
             Log.info("scheduleCourses:: Going to the next room to keep scheduling classes");
         }
 
         //start scheduling courses past 9 - 5pm block
         if (sortedCourseSections.length > roomsAndSchedules.length * 15) {
-            for (var i = 0; i < roomsAndSchedules.length || i < (sortedCourseSections.length / 7); i, all++) {
-                for (var j = 15; j < 22 && this.numberOfCourses > 0; j++) {
-                    roomsAndSchedules[i].schedule[j] = sortedCourseSections[all].dept + sortedCourseSections[all].id;
-                    roomsAndSchedules[i].quality[0]++;
+            Log.info("Starting to schedule after hours");
+            for (var n = 0; n < roomsAndSchedules.length && this.numberOfCourses > 0; n++) {
+                for (var p = 15; p < 22 && this.numberOfCourses > 0; p++, all++) {
+                    Log.info("Course to schedule after hours: " + JSON.stringify(sortedCourseSections[all]));
+                    roomsAndSchedules[n].schedule[p] = sortedCourseSections[all].dept + "_" + sortedCourseSections[all].id;
+                    roomsAndSchedules[n].quality[1]++;
+                    roomsAndSchedules[n].quality[0]++;
                     this.numberOfCourses--;
-                }
-                if (courses.length > ((i + 1) * 7)) {    // go into next room if courses to schedule exceeds this room's 7 after-hours blocks
-                    break;
                 }
             }
             // Courses to be scheduled do not fit number of rooms
             if (sortedCourseSections.length > roomsAndSchedules.length * 22) {
-                for (all; all < sortedCourseSections.length; all++)
+                for (all; all < sortedCourseSections.length; all++) {
+                    Log.info("Course that doesn't fit in specified room: " + JSON.stringify(sortedCourseSections[all]));
                     this.cannotSchedule.push(sortedCourseSections[all]);
+                }
             }
         }
-        this.withQuality = this.calculateQuality(roomsAndSchedules);
-
-        return {scheduled: this.withQuality, unscheduled: this.cannotSchedule};
+        for (var m = 0; m < roomsAndSchedules.length; m++) {
+            this.calculateQuality(roomsAndSchedules);
+        }
+        return {scheduled: roomsAndSchedules, unscheduled: this.cannotSchedule};
     }
 
     //for sean
