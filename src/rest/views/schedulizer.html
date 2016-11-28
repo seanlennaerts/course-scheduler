@@ -53,54 +53,11 @@
 </nav>
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-4 col-md-3 sidebar">
-            <div class="well">
-                <div class="panel-group">
-                    <div class="panel panel-success">
-                        <div class="panel-heading" id="inputCourse">
-                            <button type="button" class="btn btn-default btn-sm" id="newCourse">
-                                <span class="glyphicon glyphicon-plus"></span> Add New Course
-                            </button>
-                            </br>
-                            <div class="form-group">
-                                <label for="dept">Department:</label>
-                                <input type="text" class="form-control" id="dept">
-                                <label for="courseNum">Course Number:</label>
-                                <input type="text" class="form-control" id="courseNum">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="panel panel-success">
-                        <div class="panel-heading filter" id="inputRoom">
-                            <button type="button" class="btn btn-default btn-sm" id="newRoom">
-                                <span class="glyphicon glyphicon-plus"></span> Add New Course
-                            </button>
-                            <div class="form-group">
-                                <label for="buildingCode">Building Code:</label>
-                                <input type="text" class="form-control" id="buildingCode">
-                                <label for="distance">Distance From Specified Building (meters):</label>
-                                <input type="text" class="form-control" id="distance">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="btn-group filter">
-                        <button type="button" class="btn btn-primary" id="submitInput">Submit</button>
-                    </div>
-                </div>
-            </div>
-            <div class="well">
-                <div id="debug">
-                    <label>WHERE</label>
-                    <div id="debug-where"></div>
-                    <label>ORDER</label>
-                    <div id="debug-order"></div>
-                </div>
-            </div>
-        </div>
-        <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
-            <div class="table-responsive" id="render"></div>
-        </div>
+    <div id="coursesInputTable">
+        <!--table goes here-->
+    </div>
+    <div id="roomsInputTable">
+        <!--table goes here-->
     </div>
 </div>
 

@@ -462,6 +462,18 @@ $(function () {
         $("#scrollableTable").hide();
     });
 
+    $("#selectSchedulize").click(function () {
+        try {
+            $.ajax("/input", {type:"POST", data: JSON.stringify({id: "course", data: courseSelected}), contentType: "application/json", dataType: "json", success: function(data) {
+                alert("done");
+            }}).fail(function (e) {
+                spawnHttpErrorModal(e)
+            });
+        } catch (err) {
+            spawnErrorModal("Query Error", err);
+        }
+    });
+
     //ORDER
     $(document).on("click", "#render > table > thead > tr > th", function() {
         //$(this).html() //captures value of header clicked

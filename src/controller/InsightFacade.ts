@@ -20,7 +20,7 @@ import {result, default as Schedulizer} from "./SchedulizerController";
 export default class InsightFacade implements IInsightFacade {
 
     private static datasetController: DatasetController = new DatasetController;
-    private static schedulizerController: HandleInputForSchedulizer = new HandleInputForSchedulizer;
+    private static handleInputForSchedulizer: HandleInputForSchedulizer = new HandleInputForSchedulizer;
     // private static queryController: QueryController = null;
 
     constructor() {
@@ -97,9 +97,23 @@ export default class InsightFacade implements IInsightFacade {
     public addSchedulizerInput(id: string, input: any): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject) {
             try {
-                let controller = new HandleInputForSchedulizer();
-                controller.addInput(id, input);
+                if (id === "course") {
+                    Log.info("calling addSectionsNum()")
+                    input = InsightFacade.datasetController.addSectionsNum(input)
+                }
+                InsightFacade.handleInputForSchedulizer.addInput(id, input);
                 fulfill({code: 200, body:{}});
+            } catch (err) {
+                reject({code: 400, body: {error: "Something went wrong"}});
+            }
+        })
+    }
+
+    public getSchedulizerInput(): Promise<InsightResponse>{
+        return new Promise(function(fulfill, reject) {
+            try {
+                let result = InsightFacade.handleInputForSchedulizer.getInputs();
+                fulfill({code: 200, body:{result}});
             } catch (err) {
                 reject({code: 400, body: {error: "Something went wrong"}});
             }
@@ -109,7 +123,7 @@ export default class InsightFacade implements IInsightFacade {
     public schedulize(): Promise<InsightResponse>{
         return new Promise(function(fulfill, reject) {
             try {
-                var inputs: {} = InsightFacade.schedulizerController.getInputs();
+                var inputs: {} = InsightFacade.handleInputForSchedulizer.getInputs();
                 let controller: Schedulizer = new Schedulizer();
                 let result: result = controller.scheduleCourses((<any>inputs)["course"], (<any>inputs)["room"]);
                 fulfill({code: 200, body:{result}});

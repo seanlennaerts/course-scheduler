@@ -106,8 +106,9 @@ export default class RouteHandler {
     }
 
     public static postSchedulizerInput(req: restify.Request, res: restify.Response, next: restify.Next) {
-        var id: string = req.params.id;
-        let input: DistanceRequest = req.params;
+        var id: string = req.body.id;
+        Log.info("reqbody: " + JSON.stringify(req.body.data) + ", id from req.params.id: " + id);
+        let input: any[] = req.body.data;
         RouteHandler.insightFacade.addSchedulizerInput(id, input).then(function(result: InsightResponse){
             res.json(result.code, result.body);
         }).catch (function(error) {
@@ -116,9 +117,16 @@ export default class RouteHandler {
         return next();
     }
 
+    public static postSchedulizerGetInput(req: restify.Request, res: restify.Response, next: restify.Next) {
+        RouteHandler.insightFacade.getSchedulizerInput().then(function(result: InsightResponse){
+            res.json(result.code, result.body);
+        }).catch (function(error) {
+            res.json(error.code, error.body);
+        });
+        return next();
+    }
+
     public static postSchedulize(req: restify.Request, res: restify.Response, next: restify.Next) {
-        var id: string = req.params.id;
-        let input: DistanceRequest = req.params;
         RouteHandler.insightFacade.schedulize().then(function(result: InsightResponse){
             res.json(result.code, result.body);
         }).catch (function(error) {

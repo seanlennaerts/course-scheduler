@@ -79,9 +79,11 @@ export default class Server {
 
                 that.rest.post('/distance', restify.bodyParser(), RouteHandler.postDistance);
 
-                that.rest.post('/input/:id', RouteHandler.postSchedulizerInput);
+                that.rest.post('/input', restify.bodyParser(), RouteHandler.postSchedulizerInput);
 
-                that.rest.post('/schedulize', RouteHandler.postSchedulize);
+                that.rest.post('/retrieve', restify.bodyParser(), RouteHandler.postSchedulizerGetInput);
+
+                that.rest.post('/schedulize', restify.bodyParser(), RouteHandler.postSchedulize);
 
                 //Deletes a dataset based in id -S
                 that.rest.del('/dataset/:id', RouteHandler.deleteDataset);

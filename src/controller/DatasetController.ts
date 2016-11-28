@@ -8,6 +8,7 @@ import JSZip = require('jszip');
 import Course from "../model/Course";
 import {ASTNode} from "parse5";
 import Room from "../model/Room";
+import {courseItem} from "./SchedulizerController";
 var fs = require('fs');
 var parse5 = require('parse5');
 var http = require('http');
@@ -44,6 +45,26 @@ export default class DatasetController {
         }
         this.datasets[id] = this.processedData;
         this.processedData = [];
+    }
+
+    public addSectionsNum(input: courseItem[]): courseItem[] {
+        Log.info("starting addSectionsNum");
+        for (var row of input) {
+            var key: string = row.dept + row.id;
+            var count: number = 0;
+            for (var course of this.datasets["courses"]) {
+                if (course.getField("dept") + course.getField("id") == key && course.getField("year") == 2014) {
+                    count++;
+                }
+            }
+            count = Math.ceil(count / 3);
+            if (count === 0) {
+                row["sectionsNum"] = 1;
+            } else {
+                row["sectionsNum"] = count;
+            }
+        }
+        return input;
     }
 
     public getDatasets(): Datasets {
