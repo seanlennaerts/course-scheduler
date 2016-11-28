@@ -5,8 +5,12 @@ coverage/
 typings/
 src/*.js
 src/*.map
-src/**/*.js
-src/**/*.map
+src/controller/*.js
+src/controller/*.map
+src/model/*.js
+src/model/*.map
+src/rest/*.js
+src/rest/*.map
 test/*.js
 test/*.map
 npm-debug.log
