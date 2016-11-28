@@ -19,6 +19,7 @@ export default class Room {
     private _type: string;
     private _furniture: string;
     private _href: string;
+//    private schedule: string[]; // array[0] contains schedule for M/W/F, array[1] schedule for T/Thurs
 
     constructor(fullname: string, shortname: string, number: string, name: string,
                 address: string, lat: number, lon: number, seats: number, type: string,
