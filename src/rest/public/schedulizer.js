@@ -15,6 +15,19 @@ $(function () {
         }
     });
 
+    $("#makeSchedule").click(function () {
+        try {
+            $.ajax("/schedulize", {type:"POST", dataType: "json", success: function(data) {
+                // alert(JSON.stringify(data));
+                $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>")
+            }}).fail(function (e) {
+                spawnHttpErrorModal(e)
+            });
+        } catch (err) {
+            spawnErrorModal("Query Error", err);
+        }
+    });
+
     function generateTable(data, id, tableClass) {
         var columns = [];
         Object.keys(data[0]).forEach(function (title) {
