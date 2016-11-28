@@ -8,6 +8,7 @@ export interface courseItem {
     id : string;
     size: number;
     sectionsNum: number;
+    index?: number;
 
 }
 
@@ -15,6 +16,7 @@ export interface roomItem {
     seats: number;
     shortname: string;
     number: string;
+    index?: number;
 }
 
 export interface roomSchedule {
@@ -38,30 +40,34 @@ export default class Schedulizer {
     //for sean
 
     //
-    private withQuality: roomSchedule[] = [];
-    private cannotSchedule: courseItem[] = [];
-    private roomsWithSchedules: roomSchedule[] = [];
-    private numberOfCourses = 0;
+    private withQuality: roomSchedule[];
+    private cannotSchedule: courseItem[];
+    private roomsWithSchedules: roomSchedule[];
+    private numberOfCourses: number;
+
     constructor(){
         Log.trace("schedulizer::init()");
+        this.withQuality = [];
+        this.cannotSchedule = [];
+        this.roomsWithSchedules = [];
+        this.numberOfCourses = 0;
     }
 
-    public dynamicSort(field: string, reverse: boolean) {   // true = ascending
-        var key = function (x: any) {
-            return x[field]
-        };
+    private dynamicSortThree(field: string, reverse: boolean){
+        var key = function (x: any) {return x[field]};
 
         return function (a: any, b: any) {
-            var something: number = 0;
+            var result: number = 0;
             var A = key(a), B = key(b);
             if (A === B) {
-                something = 0;
+                result = a.index - b.index;
             } else if (A < B) {
-                something = -1;
+                result = -1;
             } else {
-                something = 1;
+                result = 1;
             }
-            return something * [-1, 1][+!!reverse];
+            result = result * [-1,1][+!!reverse];
+            return result;
             //return ( (A < B) ? -1 : ((A > B) ? 1 : 0) ) * [-1,1][+!!reverse];
         }
     }
@@ -70,11 +76,26 @@ export default class Schedulizer {
         switch (identifier) {
             case "course":
                 var courseArray: courseItem[] = array;
-                courseArray.sort(this.dynamicSort("size", false));
+                for (var j = 0; j < courseArray.length; j++){
+                    courseArray[j]["index"] = j;
+                }
+                courseArray.sort(this.dynamicSortThree("size", false))
+
+                for (var object of courseArray) {
+                    delete object["index"];
+                }
+
                 return courseArray;
             case "room":
                 var roomArray: roomItem[] = array;
-                roomArray.sort(this.dynamicSort("seats", false));
+                for (var k = 0; k < roomArray.length; k++){
+                    roomArray[k]["index"] = k;
+                }
+                roomArray.sort(this.dynamicSortThree("seats", false));
+
+                for (var o of roomArray) {
+                    delete o["index"];
+                }
                 return roomArray;
             default:
                 Log.info("wrong identifier in parameter")
@@ -127,7 +148,7 @@ export default class Schedulizer {
         return roomSchedule;
     }
 
-    public scheduleCourses(courses: courseItem[], rooms: roomItem[]) {
+    public scheduleCourses(courses: courseItem[], rooms: roomItem[]): result {
         var unsortedCourses: courseItem [] = this.createCourseSections(courses);
         var allSortedCourseSections: courseItem[] = this.sortDescendingSize(unsortedCourses, "course");
         var allRooms: roomItem[] = this.sortDescendingSize(<any>rooms, "room");
@@ -138,16 +159,18 @@ export default class Schedulizer {
         this.numberOfCourses = sortedCourseSections.length;
 
         Log.info("scheduleCourses:: will begin to schedule")
-        for (var i = 0; i < roomsAndSchedules.length && i < (sortedCourseSections.length / 15); i++) {
-            for (var j = 0; j < 15 && this.numberOfCourses > 0; j++,all++) {
+        for (var i = 0; i < roomsAndSchedules.length && this.numberOfCourses > 0; i++) {
+            for (var j = 0; j < 15 && this.numberOfCourses > 0; j++, all++) {
                 Log.info("Course to schedule: " + JSON.stringify(sortedCourseSections[all]));
                 var courseName: string = sortedCourseSections[all].dept + "_" +  sortedCourseSections[all].id;
                 roomsAndSchedules[i].schedule[j] = courseName;
                 this.numberOfCourses--;
             }
-            if (courses.length > ((i + 1) * 15)) {     // go into next room if courses to schedule exceeds this room's 15 empty blocks
-                break;
-            }
+            // if (courses.length > ((i + 1) * 15)) {     // go into next room if courses to schedule exceeds this room's 15 empty blocks
+            //     Log.info("scheduleCourses:: Going to the next room to keep scheduling clases");
+            //     break;
+            // }
+            Log.info("scheduleCourses:: Going to the next room to keep scheduling classes");
         }
 
         //start scheduling courses past 9 - 5pm block
@@ -168,7 +191,6 @@ export default class Schedulizer {
                     this.cannotSchedule.push(sortedCourseSections[all]);
             }
         }
-        this.numberOfCourses = 0;
         this.withQuality = this.calculateQuality(roomsAndSchedules);
 
         return {scheduled: this.withQuality, unscheduled: this.cannotSchedule};

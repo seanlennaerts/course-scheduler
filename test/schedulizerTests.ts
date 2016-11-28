@@ -26,16 +26,22 @@ describe("schedulizerTests", function(){
     let  PHYS310: courseItem = {dept: "PHYS", id: "310", size: 180, sectionsNum: 1};
     let  PHYS313: courseItem = {dept: "PHYS", id: "313", size: 180, sectionsNum: 1};
     let  PHYS320: courseItem = {dept: "PHYS", id: "320", size: 80, sectionsNum: 2};
-    let  PHY444: courseItem = {dept: "PHYS", id: "444", size: 300, sectionsNum: 1};
+    let  PHYS444: courseItem = {dept: "PHYS", id: "444", size: 300, sectionsNum: 1};
     let  PHYS666: courseItem = {dept: "PHYS", id: "666", size: 300, sectionsNum: 1};
     let  PHYS999: courseItem = {dept: "PHYS", id: "999", size: 300, sectionsNum: 1};
 
+
+
     let courses1: courseItem[] = [];
     let courses2: courseItem[] = [];
+    let course3: courseItem[] = [];
 
     courses1.push(CPSC110, CPSC210, CPSC213, CPSC221, CPSC310, CPSC313, CPSC320, CPSC666);
     courses2.push(CPSC110, CPSC210, CPSC213, CPSC221, CPSC310, CPSC313, CPSC320, CPSC666,
-        CPSC999, PHYS110, PHYS210, PHYS213, PHYS221, PHYS310, PHYS313, PHYS320, PHY444,
+        CPSC999, PHYS110, PHYS210, PHYS213, PHYS221, PHYS310, PHYS313, PHYS320, PHYS444,
+        PHYS666, PHYS999);
+    courses2.push(CPSC110, CPSC210, CPSC213, CPSC221, CPSC310, CPSC313, CPSC320, CPSC666,
+        CPSC999, PHYS110, PHYS210, PHYS213, PHYS221, PHYS310, PHYS313, PHYS320, PHYS444,
         PHYS666, PHYS999);
 
     let DMP101: roomItem = {seats: 250, shortname: "DMP", number: "101"};
@@ -43,8 +49,9 @@ describe("schedulizerTests", function(){
     let EOSC1101: roomItem = {seats: 200, shortname: "EOSC", number: "1101"};
     let E0SC3012: roomItem = {seats: 250, shortname: "EOSC", number: "3012"};
     let rooms: roomItem[] = []
+    let rooms2: roomItem[] = [];
     rooms.push(DMP101, DMP103, EOSC1101, E0SC3012);
-
+    rooms2.push(DMP101);
 
 
     beforeEach(function () {
@@ -74,6 +81,14 @@ describe("schedulizerTests", function(){
         expect(sorted).to.deep.equal(expectedResult);
     });
 
+    it("sort different courses correctly by seats", function () {
+
+        let schedulizer: Schedulizer = new Schedulizer();
+        let sorted = schedulizer.sortDescendingSize(courses2, "course");
+        expect(sorted).to.deep.equal(0);
+
+    });
+
     it("sort rooms correctly by size", function (){
         let schedulizer: Schedulizer = new Schedulizer();
         let sorted = schedulizer.sortDescendingSize(rooms, "room");
@@ -96,7 +111,7 @@ describe("schedulizerTests", function(){
             {seats: 200, roomName: "EOSC_1101", schedule: [""], quality: [0,0]},
             {seats: 100, roomName: "DMP_103", schedule: [""], quality: [0,0]}
         ];
-        expect(expanded).to.deep.equal(expectedResult);
+        expect(expanded).to.deep.equal(0);
     });
 
     it("schedules 10 courses", function () {
@@ -113,7 +128,7 @@ describe("schedulizerTests", function(){
             unscheduled: [{dept: "CPSC", id: "666", size: 300, sectionsNum: 1}]
         };
 
-        expect(res).to.deep.equal(expectedResult);
+        expect(res).to.deep.equal(0);
     });
 
     it("schedules properly 23 courses", function () {
@@ -136,7 +151,13 @@ describe("schedulizerTests", function(){
             ]
         };
 
-        expect(res).to.deep.equal(expectedResult);
+        expect(res).to.deep.equal(0);
+    });
+
+    it("has to schedule after hours", function(){
+        let schedulizer: Schedulizer = new Schedulizer();
+        let res = schedulizer.scheduleCourses(course3, rooms2);
+        expect(res).to.deep.equal(0)
     });
 
 
