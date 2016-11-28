@@ -90,4 +90,17 @@ export default class InsightFacade implements IInsightFacade {
             }
         })
     }
+
+    public addSchedulizerInput(input): Promise<InsightResponse>{
+        return new Promise(function(fulfill, reject) {
+            // let controller = InsightFacade.datasetController;
+            // controller.process(id, content).then(function (result: number) {
+            //     Log.trace('InsightFacade::addDataset(..) - processed');
+            //     fulfill({code: result, body: {}});
+            // }).catch(function (error: Error) {
+            //     Log.trace('InsightFacade::addDataset(..) - ERROR: ' + error.message);
+            //     reject({code: 400, body: {error: error.message}});
+            // });
+        })
+    }
 }

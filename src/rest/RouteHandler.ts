@@ -18,22 +18,6 @@ export default class RouteHandler {
 
     public static getHomepage(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RoutHandler::getHomepage(..)');
-        // var content = new Buffer(fs.readFileSync('./full-datasets/courses.zip')).toString('base64');
-        // RouteHandler.insightFacade.addDataset("courses", content).then(function (result) {
-        //     fs.readFile('./src/rest/views/courseExplorer.html', 'utf8', function (err: Error, file: Buffer) {
-        //         if (err) {
-        //             res.send(500);
-        //             Log.error(JSON.stringify(err));
-        //             return next();
-        //         }
-        //         res.write(file);
-        //         res.end();
-        //         return next();
-        //     });
-        // }).catch (function(error) {
-        //     //
-        // });
-
         fs.readFile('./src/rest/views/courseExplorer.html', 'utf8', function (err: Error, file: Buffer) {
             if (err) {
                 res.send(500);
@@ -121,6 +105,16 @@ export default class RouteHandler {
         return next();
     }
 
+    public static postSchedulizerInput(req: restify.Request, res: restify.Response, next: restify.Next) {
+        var id: string = req.params.id;
+        let input: DistanceRequest = req.params;
+        // RouteHandler.insightFacade.checkDistance(input).then(function(result: InsightResponse){
+        //     res.json(result.code, result.body);
+        // }).catch (function(error) {
+        //     res.json(error.code, error.body);
+        // });
+        return next();
+    }
 
     public static deleteDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         RouteHandler.insightFacade.removeDataset(req.params.id).then(function(result){

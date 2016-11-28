@@ -11,19 +11,22 @@ $(function () {
         "title": false,
         "size": false
     };
+    var courseSelected = [];
+    var grouped = false;
 
     $(document).ready(function() {
         // "IS": {"courses_dept": "cpsc"} for debugging
 
         $("#size-range").slider({});
-        $("#groupAll").bootstrapSwitch("size", "mini");
-        $("#order").bootstrapSwitch("size", "mini").bootstrapSwitch("state", true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
+        $("#groupAll").bootstrapSwitch("size", "small");
+        $("#order").bootstrapSwitch("size", "small").bootstrapSwitch('state', true, true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
         query(JSON.stringify(buildQuery));
         updateDebugQuery();
     });
 
     $("#groupAll").on("switchChange.bootstrapSwitch", function (event, state) {
         if(state) {
+            grouped = true;
             var currentWhere = JSON.stringify(buildQuery.WHERE);
             var groupAllQuery = '{"GET":["courses_dept","courses_id","courses_title","courseAverage","courseSize","coursePass","courseFail"],"WHERE":' + currentWhere +',"GROUP":["courses_dept","courses_id","courses_title"],"APPLY":[{"courseAverage":{"AVG":"courses_avg"}},{"courseSize":{"MAX":"courses_size"}},{"coursePass":{"MAX":"courses_pass"}},{"courseFail":{"MAX":"courses_fail"}}],"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
             buildQuery = JSON.parse(groupAllQuery);
@@ -36,6 +39,7 @@ $(function () {
             query(JSON.stringify(buildQuery));
             filtersUsed.instructor = prev;
         } else {
+            grouped = false;
             var groupWhere = JSON.stringify(buildQuery.WHERE);
             var noGroupQuery = '{"GET":["courses_dept","courses_id","courses_title","courses_avg","courses_instructor","courses_size","courses_pass","courses_fail"],"WHERE":' + groupWhere + ',"ORDER":{"dir":"UP","keys":["courses_dept","courses_id"]},"AS":"TABLE"}';
             buildQuery = JSON.parse(noGroupQuery);
@@ -224,8 +228,14 @@ $(function () {
             $.ajax("/query", {type:"POST", data: queryJson, contentType: "application/json", dataType: "json", success: function(data) {
                 if (data["render"] === "TABLE") {
                     if (filtersUsed.dept || filtersUsed.id || filtersUsed.instructor || filtersUsed.title || filtersUsed.size) {
-                        generateTable(data["result"]);
+                        generateTable(data["result"], "#render", "table table-hover table-condensed");
+                        if (grouped) {
+                            $("#selectAll").show();
+                        } else {
+                            $("#selectAll").hide();
+                        }
                     } else {
+                        $("#selectAll").hide();
                         $("#render")
                             .empty()
                             .append('<div class="alert alert-info" role="alert">Too many items to display. Please narrow your results on the left.</div>');
@@ -249,13 +259,13 @@ $(function () {
                         titleScrollable.selectpicker("val", prevTitleVal);
                     }
                     if (!filtersUsed.size) {
-                        if ($("#order").bootstrapSwitch("state")) {
+                        if (!grouped) {
                             populateSize(data["result"]);
                         } else {
                             populateSizeGrouped(data["result"]);
                         }
                     }
-                    if (!filtersUsed.instructor && $("#order").bootstrapSwitch("state")) {
+                    if (!filtersUsed.instructor && !grouped) {
                         var instructorScrollable = $("#instructors-scrollable");
                         var prevInstructorVal = instructorScrollable.val();
                         populateInstructors(data["result"]);
@@ -366,21 +376,21 @@ $(function () {
         selector.selectpicker('refresh');
     }
 
-    function generateTable(data) {
+    function generateTable(data, id, tableClass) {
         var columns = [];
         Object.keys(data[0]).forEach(function (title) {
             columns.push({
                 head: title, //.split("_")[1]
-                cl: "title",
+                cl: title,
                 html: function (d) {
                     return d[title]
                 }
             });
         });
-        var container = d3.select("#render");
+        var container = d3.select(id);
         container.html("");
         container.selectAll("*").remove();
-        var table = container.append("table").attr("class", "table table-hover table-condensed");
+        var table = container.append("table").attr("class", tableClass);
 
         table.append("thead").append("tr")
             .selectAll("th")
@@ -423,6 +433,34 @@ $(function () {
                 return d["cl"]
             });
     }
+
+    //input for schedulizer
+    // #render > table > tbody > tr:nth-child(1) > td.rooms_shortname
+    $("#selectAll").click(function (){
+        $("#render > table > tbody > tr").each(function () {
+            var obj = {dept: $(this).find(".courses_dept").html(), id: $(this).find(".courses_id").html(), size: $(this).find(".courseSize").html()};
+            var exists = false;
+            for (var i=0; i < courseSelected.length; i++) {
+                if (JSON.stringify(courseSelected[i]) === JSON.stringify(obj)) {
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                courseSelected.push(obj);
+            }
+            generateTable(courseSelected, "#courseInput", "table table-bordered table-condensed");
+            $("#selectClear").show();
+            $("#selectSchedulize").show();
+        });
+        $("#scrollableTable").show();
+    });
+
+    $("#selectClear").click(function () {
+        courseSelected = [];
+        $("#selectClear").hide();
+        $("#selectSchedulize").hide();
+        $("#scrollableTable").hide();
+    });
 
     //ORDER
     $(document).on("click", "#render > table > thead > tr > th", function() {

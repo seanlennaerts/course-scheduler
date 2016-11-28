@@ -13,11 +13,12 @@ $(function () {
         "location": false
     };
     var distanceFilter = [];
+    var roomsSelected = [];
 
     $(document).ready(function() {
         $("#size-range").slider({});
         $("#distance-range").slider({});
-        $("#order").bootstrapSwitch("size", "mini").bootstrapSwitch("state", true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
+        $("#order").bootstrapSwitch("size", "small").bootstrapSwitch("state", true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
         query(JSON.stringify(buildQuery));
         updateDebugQuery();
     });
@@ -236,7 +237,7 @@ $(function () {
                             return distanceFilter.includes(obj["rooms_shortname"]);
                         })
                     }
-                    generateTable(data["result"]);
+                    generateTable(data["result"], "#render", "table table-hover table-condensed");
 
                     if (!filtersUsed.shortname){
                         var buildingScrollable = $("#buildings-scrollable");
@@ -336,21 +337,21 @@ $(function () {
         selector.selectpicker('refresh');
     }
 
-    function generateTable(data) {
+    function generateTable(data, id, tableClass) {
         var columns = [];
         Object.keys(data[0]).forEach(function (title) {
             columns.push({
                 head: title, //.split("_")[1]
-                cl: "title",
+                cl: title,
                 html: function (d) {
                     return d[title]
                 }
             });
         });
-        var container = d3.select("#render");
+        var container = d3.select(id);
         container.html("");
         container.selectAll("*").remove();
-        var table = container.append("table").attr("class", "table table-hover table-condensed");
+        var table = container.append("table").attr("class", tableClass);
 
         table.append("thead").append("tr")
             .selectAll("th")
@@ -393,6 +394,34 @@ $(function () {
                 return d["cl"]
             });
     }
+
+    //input for schedulizer
+    // #render > table > tbody > tr:nth-child(1) > td.rooms_shortname
+    $("#selectAll").click(function (){
+        $("#render > table > tbody > tr").each(function () {
+            var obj = {shortname: $(this).find(".rooms_shortname").html(), number: $(this).find(".rooms_number").html(), seats: $(this).find(".rooms_seats").html()};
+            var exists = false;
+            for (var i=0; i < roomsSelected.length; i++) {
+                if (JSON.stringify(roomsSelected[i]) === JSON.stringify(obj)) {
+                    exists = true;
+                }
+            }
+            if (!exists) {
+                roomsSelected.push(obj);
+            }
+            generateTable(roomsSelected, "#roomInput", "table table-bordered table-condensed");
+            $("#selectClear").show();
+            $("#selectSchedulize").show();
+        });
+        $("#scrollableTable").show();
+    });
+
+    $("#selectClear").click(function () {
+        roomsSelected = [];
+        $("#selectClear").hide();
+        $("#selectSchedulize").hide();
+        $("#scrollableTable").hide();
+    });
 
     //ORDER
     $(document).on("click", "#render > table > thead > tr > th", function() {

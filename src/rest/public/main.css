@@ -140,3 +140,13 @@ body {
 .sortOrder {
   float: right;
 }
+
+.scrollableTable {
+  height: 250px;
+  overflow: scroll;
+  display: none;
+}
+
+.hideButton {
+  display: none;
+}
