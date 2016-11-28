@@ -1,9 +1,12 @@
 /**
  * Created by AnaCris on noviembre/27/16.
  */
-import {courseItem, roomItem, roomSchedule, result} from "../src/controller/schedulizer";
-import Schedulizer from "../src/controller/schedulizer";
+import Schedulizer from "../src/controller/SchedulizerController";
 import {expect} from 'chai';
+import {courseItem} from "../src/controller/SchedulizerController";
+import {roomItem} from "../src/controller/SchedulizerController";
+import {roomSchedule} from "../src/controller/SchedulizerController";
+import {result} from "../src/controller/SchedulizerController";
 
 describe("schedulizerTests", function(){
     let  CPSC110: courseItem = {dept: "CPSC", id: "110", size: 150, sectionsNum: 2};
