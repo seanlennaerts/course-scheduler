@@ -1,8 +1,8 @@
 /**
  * Created by AnaCris on noviembre/27/16.
  */
-import {courseItem, roomItem, roomSchedule, result} from "../src/rest/public/schedulizer";
-import Schedulizer from "../src/rest/public/schedulizer";
+import {courseItem, roomItem, roomSchedule, result} from "../src/controller/schedulizer";
+import Schedulizer from "../src/controller/schedulizer";
 import {expect} from 'chai';
 
 describe("schedulizerTests", function(){

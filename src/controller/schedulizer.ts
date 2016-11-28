@@ -1,4 +1,4 @@
-import Log from "../../Util";
+import Log from "../Util";
 /**
  * Created by AnaCris on noviembre/25/16.
  */
