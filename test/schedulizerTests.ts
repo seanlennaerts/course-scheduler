@@ -52,9 +52,11 @@ describe("schedulizerTests", function(){
     let DMP103: roomItem = {seats: 100, shortname: "DMP", number: "103"};
     let EOSC1101: roomItem = {seats: 200, shortname: "EOSC", number: "1101"};
     let E0SC3012: roomItem = {seats: 250, shortname: "EOSC", number: "3012"};
+    let BUCH101: roomItem = {seats: 30, shortname: "BUCH", number: "101"};
+    let GEOG200: roomItem = {seats: 80, shortname: "GEOG", number: "200"};
     let rooms: roomItem[] = []
     let rooms2: roomItem[] = [];
-    rooms.push(DMP101, DMP103, EOSC1101, E0SC3012);
+    rooms.push(DMP101, DMP103, EOSC1101, E0SC3012, BUCH101, GEOG200);
     rooms2.push(DMP101);
 
 
@@ -115,7 +117,7 @@ describe("schedulizerTests", function(){
             {seats: 200, roomName: "EOSC_1101", schedule: [""], quality: [0,0,0]},
             {seats: 100, roomName: "DMP_103", schedule: [""], quality: [0,0,0]}
         ];
-        expect(expanded).to.deep.equal(expectedResult);
+        expect(expanded).to.deep.equal(0);
     });
 
     it("schedules 10 courses", function () {
