@@ -18,15 +18,19 @@ $(function () {
     $("#makeSchedule").click(function () {
         try {
             $.ajax("/schedulize", {type:"POST", dataType: "json", success: function(data) {
-                $('.mycal').easycal({
+                var numberOfRooms = data["result"]["scheduled"].length;
+                for (var i=0; i < numberOfRooms; i++) {
+                    $("#calendar").append('<div><label>' + data["result"]["scheduled"][i]["roomName"].split("_")[0] + " " + data["result"]["scheduled"][i]["roomName"].split("_")[1] + '</label><div id="mycal' + i + '"></div>');
+                    $("#mycal" + i).easycal({
+                        columnDateFormat : 'dddd',
+                        minTime : '08:00:00',
+                        maxTime : (data["result"]["scheduled"][i]["schedule"].length < 16 ? '17:00:00' : '21:30:00'),
+                        slotDuration : 30,
+                        startDate : '31-10-2015',
+                        events : (data["result"]["scheduled"][i]["schedule"][0] === "" ? [] : getEvents(data["result"]["scheduled"][i]["schedule"]))
+                    });
+                }
 
-                    minTime : '09:00:00',
-                    maxTime : '21:00:00',
-                    slotDuration : 30,
-                    startDate : '31-10-2015',
-                    events : getEvents()
-
-                });
 
                 $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>")
             }}).fail(function (e) {
@@ -37,41 +41,45 @@ $(function () {
         }
     });
 
-    function getEvents(){
-        return [
-            {
-                id : 'E01',
-                title : 'Meeting with BA',
-                start : '27-10-2015 10:30:00',
-                end : '27-10-2015 11:00:00',
-                backgroundColor: '#443322',
-                textColor : '#FFF'
-            },
-            {
-                id : 'E01',
-                title : 'Lunch',
-                start : '27-10-2015 12:30:00',
-                end : '27-10-2015 13:00:00',
-                backgroundColor: '#12CA6B',
-                textColor : '#FFF'
-            },
-            {
-                id : 'E02',
-                title : 'Customer Appointment',
-                start : '29-10-2015 09:00:00',
-                end : '29-10-2015 09:30:00',
-                backgroundColor: '#34BB22',
-                textColor : '#FFF'
-            },
-            {
-                id : 'E03',
-                title : 'Buddy Time',
-                start : '30-10-2015 11:00:00',
-                end : '30-10-2015 12:30:00',
-                backgroundColor: '#AA3322',
-                textColor : '#FFF'
+    function getEvents(scheduled){
+        var adder = 0;
+        var adderOdd = 0;
+        var temp = [];
+        for (var j=0; j < scheduled.length; j++) {
+            if (j <= 8 || (j >= 15 && j <= 18)) {
+                //monday wednesday friday
+                for (var mwf = 26; mwf < 31; mwf+=2) {
+                    var mwfblock = {
+                        id: j,
+                        title: scheduled[j].split("_")[0].toUpperCase() + " " + scheduled[j].split("_")[1],
+                        start: mwf + "-10-2015 " + (j <= 8 ? 8 + j : 2 + j) + ":00:00",
+                        end: mwf + "-10-2015 " + (j <= 8 ? 9 + j : 3 + j) + ":00:00",
+                        backgroundColor: "#DFF0D8",
+                        textColor: "#000"
+                    };
+                    temp.push(mwfblock);
+                }
+            } else {
+                //tuesday thursday
+                for (var tth = 27; tth < 30; tth+=2) {
+                    var tthblock = {
+                        id: j,
+                        title: scheduled[j].split("_")[0].toUpperCase() + " " + scheduled[j].split("_")[1],
+                        start: tth + "-10-2015 " + (j <= 14 ? j - 1 + adder : j - 5 + adder) + (j % 2 === 0 ? ":30:00" : ":00:00"),
+                        end: tth + "-10-2015 " + (j <= 14 ? j + adderOdd : j - 4 + adderOdd) + (j % 2 === 0 ? ":00:00" : ":30:00"),
+                        backgroundColor: "#DFF0D8",
+                        textColor: "#000"
+                    };
+                    temp.push(tthblock);
+                }
+                if (j % 2 === 0) {
+                    adder += 1;
+                } else {
+                    adderOdd += 1
+                }
             }
-        ];
+        }
+        return temp;
     }
 
     function generateTable(data, id, tableClass) {
@@ -131,19 +139,6 @@ $(function () {
                 return d["cl"]
             });
     }
-
-
-    $("#selectSchedulize").click(function () {
-        try {
-            $.ajax("/input/room", {type:"POST", data: JSON.stringify(roomsSelected), contentType: "application/json", dataType: "json", success: function(data) {
-                alert("done");
-            }}).fail(function (e) {
-                spawnHttpErrorModal(e)
-            });
-        } catch (err) {
-            spawnErrorModal("Query Error", err);
-        }
-    });
 
     function spawnHttpErrorModal(e) {
         $("#errorModal .modal-title").html(e.status);

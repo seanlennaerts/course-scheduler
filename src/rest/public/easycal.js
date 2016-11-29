@@ -307,7 +307,7 @@
 			date.isoWeekday(1);
 
 			var html = '<table border="0" cellspacing="0" cellpadding="0" class="ec-head-table"><tbody><tr>';
-			for(var i = 0 ; i < 8 ; i++){
+			for(var i = 0 ; i < 6 ; i++){
 				var cellContent = '';
 				if(i !== 0){
 					cellContent = date.format(this.options.columnDateFormat);
@@ -332,7 +332,7 @@
 
 			var cellContent = null, timeTag = null, colDate = null;
 
-			for(var i = 0 ; i < 8 ; i++){
+			for(var i = 0 ; i < 6 ; i++){
 				if(i===0){
 					html += '<td>';
 				}else{
