@@ -9,7 +9,6 @@ export interface courseItem {
     size: number;
     sectionsNum: number;
     index?: number;
-
 }
 
 export interface roomItem {
@@ -33,7 +32,6 @@ export interface result{
 
 export default class Schedulizer {
 
-    private withQuality: roomSchedule[];
     private cannotSchedule: courseItem[];
     private roomsWithSchedules: roomSchedule[];
     private coursesToSchedule: number;
@@ -41,7 +39,6 @@ export default class Schedulizer {
 
     constructor(){
         Log.trace("schedulizer::init()");
-        this.withQuality = [];
         this.cannotSchedule = [];
         this.roomsWithSchedules = [];
         this.coursesToSchedule = 0;
@@ -71,24 +68,24 @@ export default class Schedulizer {
             case "course":
                 var courseArray: courseItem[] = array;
                 courseArray = courseArray.sort(this.dynamicSort("size", false));
-                Log.info("This is how the course array got sorted cambio?:")
-                for(var course of courseArray){
-                    Log.info(JSON.stringify(course));
-                }
+               //Log.info("This is how the course array got sorted cambio?:")
+                // for(var course of courseArray){
+                //     Log.info(JSON.stringify(course));
+                // }
 
                 return courseArray;
             case "room":
                 var roomArray: roomItem[] = array;
                 roomArray = roomArray.sort(this.dynamicSort("seats", false));
-                var max: number = 0;
-                for (var room of roomArray){
-                    Log.info("This is room size: " + room.seats + " of current room: "+ JSON.stringify(room));
-                    if (room.seats > max){
-                        max = room.seats;
-                    }
-                }
-                Log.info("Max number of seats is: " + max);
-                this.maxNumSeats = max;
+                //var max: number = 0;
+                // for (var room of roomArray){
+                //     Log.info("This is room size: " + room.seats + " of current room: "+ JSON.stringify(room));
+                //     if (room.seats > max){
+                //         max = room.seats;
+                //     }
+                // }
+                // Log.info("Max number of seats is: " + max);
+                // this.maxNumSeats = max;
                 return roomArray;
             default:
                 Log.info("wrong identifier in parameter")
@@ -101,7 +98,7 @@ export default class Schedulizer {
         Log.info("Length of course array is: " + coursesInput.length);
         for (var i = 0; i < coursesInput.length; i++) {
             var sections: number = coursesInput[i].sectionsNum;
-            Log.info("Sections for course " + coursesInput[i].dept + coursesInput[i].id + " is: " + sections)
+            //Log.info("Sections for course " + coursesInput[i].dept + coursesInput[i].id + " is: " + sections)
             for (var j = 0; j < sections; j++) {
                 Log.info("pushing: " + JSON.stringify(coursesInput[i]));
                 expandedCourses.push(coursesInput[i]);
@@ -126,7 +123,7 @@ export default class Schedulizer {
                 Log.info("This course is larger than maxNumSeats: " + JSON.stringify(course))
                 this.cannotSchedule.push(course);
             } else {
-                Log.info("This course can be scheduled: " + JSON.stringify(course))
+                //Log.info("This course can be scheduled: " + JSON.stringify(course))
                 noBiggerClasses.push(course)
             }
         }
@@ -143,17 +140,18 @@ export default class Schedulizer {
             } else {
                 roomSchedule[i].quality[2] = roomSchedule[i].quality[0] / roomSchedule[i].quality[1];
             }
-            Log.info("calculating Quality for: " + JSON.stringify(roomSchedule[i].roomName) + "is: " + roomSchedule[i].quality[2]);
+            //Log.info("calculating Quality for: " + JSON.stringify(roomSchedule[i].roomName) + "is: " + roomSchedule[i].quality[2]);
         }
         return roomSchedule;
     }
 
     public scheduleCourses(courses: courseItem[], rooms: roomItem[]): result {
-        // sort rooms, create their schedules, and get max seats;
+        // sort rooms, get max seats, and create their schedules
         var allRooms: roomItem[] = this.sortDescendingSize(<any>rooms, "room");
-        //this.maxNumSeats = allRooms[0].seats;
+        this.maxNumSeats = allRooms[0].seats;
         var roomsAndSchedules: roomSchedule[] = this.createRoomWithSchedules(allRooms);
 
+        // create extra courses for those with multiple sections, weed out those courses with more students than capacity of biggest room, sort
         var allCourses: courseItem [] = this.createCourseSections(courses);
         var allCoursesThatFit: courseItem[] = this.filterLargerClasses(allCourses);
         var sortedCourseSections: courseItem[] = this.sortDescendingSize(allCoursesThatFit, "course");
@@ -169,7 +167,7 @@ export default class Schedulizer {
                 roomsAndSchedules[i].quality[1]++;
                 this.coursesToSchedule--;
             }
-            Log.info("scheduleCourses:: Going to the next room to keep scheduling classes");9
+            Log.info("scheduleCourses:: Going to the next room to keep scheduling classes");
         }
 
         //start scheduling courses past 9 - 5pm block
