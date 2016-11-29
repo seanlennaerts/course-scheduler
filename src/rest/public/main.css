@@ -118,6 +118,12 @@ body {
 .okay {
   color: #5CB85C;
   display: none;
+  padding-top: 3px;
+}
+
+.buttonFloatRight {
+  float: right;
+  margin-left: 10px;
 }
 
 .selectedOrder {

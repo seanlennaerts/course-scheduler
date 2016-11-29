@@ -117,16 +117,16 @@
 		<div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
 			<div class="row">
 				<div class="panel panel-success" id="scrollableTable" style="display: none">
-					<div class="panel-heading">Selection
-						<button class="btn btn-default btn-xs" type="submit" id="selectClear" style="display: none; float: right">Clear Selected</button>
+					<div class="panel-heading">Selected
+						<button class="btn btn-default btn-xs buttonFloatRight" type="submit" id="selectClear">Clear</button>
+						<button class="btn btn-success btn-xs buttonFloatRight" type="submit" id="selectSchedulize">Add to Schedule</button>
+						<span class="glyphicon glyphicon-ok-sign okay buttonFloatRight" aria-hidden="true" id="success"></span>
 					</div>
 					<div class="fixed-body" id="courseInput"></div>
 				</div>
 			</div>
 			<div class="row">
 				<button class="btn btn-default btn-sm" type="submit" id="selectAll" style="display: none">Select</button>
-				<button class="btn btn-success btn-sm" type="submit" id="selectSchedulize" style="display: none">Add to Schedule</button>
-				<span class="glyphicon glyphicon-ok-sign okay" aria-hidden="true" id="success"></span>
 				<div class="sortOrder"><input type="checkbox" id="order"></div>
 			</div>
 			<div class="row">
