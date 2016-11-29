@@ -438,7 +438,7 @@ $(function () {
     // #render > table > tbody > tr:nth-child(1) > td.rooms_shortname
     $("#selectAll").click(function (){
         $("#render > table > tbody > tr").each(function () {
-            var obj = {dept: $(this).find(".courses_dept").html(), id: $(this).find(".courses_id").html(), size: $(this).find(".courseSize").html()};
+            var obj = {dept: $(this).find(".courses_dept").html(), id: $(this).find(".courses_id").html(), size: +($(this).find(".courseSize").html())};
             var exists = false;
             for (var i=0; i < courseSelected.length; i++) {
                 if (JSON.stringify(courseSelected[i]) === JSON.stringify(obj)) {

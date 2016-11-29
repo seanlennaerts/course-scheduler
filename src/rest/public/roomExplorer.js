@@ -399,7 +399,7 @@ $(function () {
     // #render > table > tbody > tr:nth-child(1) > td.rooms_shortname
     $("#selectAll").click(function (){
         $("#render > table > tbody > tr").each(function () {
-            var obj = {shortname: $(this).find(".rooms_shortname").html(), number: $(this).find(".rooms_number").html(), seats: $(this).find(".rooms_seats").html()};
+            var obj = {shortname: $(this).find(".rooms_shortname").html(), number: $(this).find(".rooms_number").html(), seats: +($(this).find(".rooms_seats").html())};
             var exists = false;
             for (var i=0; i < roomsSelected.length; i++) {
                 if (JSON.stringify(roomsSelected[i]) === JSON.stringify(obj)) {
