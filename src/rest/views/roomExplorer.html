@@ -125,16 +125,17 @@
         </div>
         <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
             <div class="row">
-                <div class="scrollableTable" id="scrollableTable">
-                    <div class="table-responsive" id="roomInput">
-                        <!--table goes here-->
+                <div class="panel panel-success" id="scrollableTable" style="display: none">
+                    <div class="panel-heading">Selection
+                        <button class="btn btn-default btn-xs" type="submit" id="selectClear" style="display: none; float: right">Clear Selected</button>
                     </div>
+                    <div class="fixed-body" id="roomInput"></div>
                 </div>
             </div>
             <div class="row">
                 <button class="btn btn-default btn-sm" type="submit" id="selectAll">Select</button>
-                <button class="btn btn-default btn-sm" type="submit" id="selectClear" style="display: none">Clear Selected</button>
-                <button class="btn btn-success btn-sm" type="submit" id="selectSchedulize" style="display: none">Apply</button>
+                <button class="btn btn-success btn-sm" type="submit" id="selectSchedulize" style="display: none">Add to Schedule</button>
+                <span class="glyphicon glyphicon-ok-sign okay" aria-hidden="true" id="success"></span>
                 <div class="sortOrder"><input type="checkbox" id="order"></div>
             </div>
             <div class="row">

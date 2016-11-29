@@ -115,7 +115,7 @@ export default class InsightFacade implements IInsightFacade {
                 let result = InsightFacade.handleInputForSchedulizer.getInputs();
                 fulfill({code: 200, body:{result}});
             } catch (err) {
-                reject({code: 400, body: {error: "Something went wrong"}});
+                reject({code: 424, body: {error: "Please go back and select Courses and Rooms to schedule"}});
             }
         })
     }
@@ -128,7 +128,7 @@ export default class InsightFacade implements IInsightFacade {
                 let result: result = controller.scheduleCourses((<any>inputs)["course"], (<any>inputs)["room"]);
                 fulfill({code: 200, body:{result}});
             } catch (err) {
-                reject({code: 400, body: {error: "Something went wrong"}});
+                reject({code: 424, body: {error: "Please go back and select Courses and Rooms to schedule"}});
             }
         })
     }

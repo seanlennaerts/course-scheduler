@@ -447,9 +447,11 @@ $(function () {
             if (!exists) {
                 courseSelected.push(obj);
             }
-            generateTable(courseSelected, "#courseInput", "table table-bordered table-condensed");
+            generateTable(courseSelected, "#courseInput", "table");
+            $("#courseInput").find("table").css("margin-bottom", "0px");
             $("#selectClear").show();
             $("#selectSchedulize").show();
+            $(".okay").hide();
         });
         $("#scrollableTable").show();
     });
@@ -458,13 +460,14 @@ $(function () {
         courseSelected = [];
         $("#selectClear").hide();
         $("#selectSchedulize").hide();
+        $(".okay").hide();
         $("#scrollableTable").hide();
     });
 
     $("#selectSchedulize").click(function () {
         try {
             $.ajax("/input", {type:"POST", data: JSON.stringify({id: "course", data: courseSelected}), contentType: "application/json", dataType: "json", success: function(data) {
-                //
+                $(".okay").fadeIn('fast').delay(1000).fadeOut('fast');
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
             });

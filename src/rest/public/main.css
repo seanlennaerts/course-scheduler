@@ -115,6 +115,11 @@ body {
   display: none;
 }
 
+.okay {
+  color: #5CB85C;
+  display: none;
+}
+
 .selectedOrder {
   background: url("./sort.gif") no-repeat 100%;
 }
@@ -141,12 +146,11 @@ body {
   float: right;
 }
 
-.scrollableTable {
-  height: 250px;
-  overflow: scroll;
+.hideButton {
   display: none;
 }
 
-.hideButton {
-  display: none;
+.fixed-body{
+  max-height: 250px;
+  overflow-y: scroll;
 }

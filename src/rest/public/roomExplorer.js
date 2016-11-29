@@ -408,9 +408,12 @@ $(function () {
             if (!exists) {
                 roomsSelected.push(obj);
             }
-            generateTable(roomsSelected, "#roomInput", "table table-bordered table-condensed");
+            generateTable(roomsSelected, "#roomInput", "table");
+            // $("#roomInput").children().unwrap();
+            $("#roomInput").find("table").css("margin-bottom", "0px");
             $("#selectClear").show();
             $("#selectSchedulize").show();
+            $(".okay").hide();
         });
         $("#scrollableTable").show();
     });
@@ -419,13 +422,14 @@ $(function () {
         roomsSelected = [];
         $("#selectClear").hide();
         $("#selectSchedulize").hide();
+        $(".okay").hide();
         $("#scrollableTable").hide();
     });
 
     $("#selectSchedulize").click(function () {
         try {
             $.ajax("/input", {type:"POST", data: JSON.stringify({id: "room", data: roomsSelected}), contentType: "application/json", dataType: "json", success: function(data) {
-                //
+                $(".okay").fadeIn('fast').delay(1000).fadeOut('fast');
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
             });
