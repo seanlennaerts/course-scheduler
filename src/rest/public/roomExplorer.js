@@ -186,7 +186,6 @@ $(function () {
     function clear(key) {
         var index = getORArray(key);
         buildQuery.WHERE.AND = buildQuery.WHERE.AND.filter(function (andArray) {
-            // alert("check:" + Object.keys(andArray.OR[0].IS)[0].split("_")[1] + ", equal to:" + key);
             if (andArray.OR) {
                 return Object.keys(andArray.OR[0].IS)[0].split("_")[1] != key;
             }
@@ -426,7 +425,7 @@ $(function () {
     $("#selectSchedulize").click(function () {
         try {
             $.ajax("/input", {type:"POST", data: JSON.stringify({id: "room", data: roomsSelected}), contentType: "application/json", dataType: "json", success: function(data) {
-                alert("done");
+                //
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
             });
