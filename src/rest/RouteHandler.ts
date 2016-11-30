@@ -109,9 +109,10 @@ export default class RouteHandler {
     public static postLocations(req: restify.Request, res: restify.Response, next: restify.Next){
         Log.trace('RoutHandler::postLocations(..)');
         let buildings: string[] = req.body;
+        Log.info("Building array is: " + JSON.stringify(buildings));
         RouteHandler.insightFacade.returnLatLons(buildings).then(function(result: InsightResponse){
             res.json(result.code, result.body);
-        }).catch(function(error){
+        }).catch (function(error) {
             res.json(error.code, error.body);
         });
         return next();
