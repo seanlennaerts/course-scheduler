@@ -87,6 +87,11 @@ export default class Schedulizer {
                 // Log.info("Max number of seats is: " + max);
                 // this.maxNumSeats = max;
                 return roomArray;
+            case "result":
+                Log.info("will sort by courseName")
+                var scheduleArray: roomSchedule[] = array;
+                scheduleArray = scheduleArray.sort(this.dynamicSort("roomName", true));
+                return scheduleArray;
             default:
                 Log.info("wrong identifier in parameter")
         }
@@ -132,13 +137,14 @@ export default class Schedulizer {
 
     public calculateQuality(roomSchedule: roomSchedule[]): roomSchedule[] {
         for (var i = 0; i < roomSchedule.length; i++) {
-            if (roomSchedule[i].quality[0] === 0 && roomSchedule[i].quality[1] === 0){
+            if (!(roomSchedule[i].quality[0] === 0)) {
+                roomSchedule[i].quality[2] = (7 - roomSchedule[i].quality[0]) / 7;
+            }
+            else if (roomSchedule[i].quality[0] === 0 && roomSchedule[i].quality[1] === 0){
                 roomSchedule[i].quality[2] = 0;
             }
             else if (roomSchedule[i].quality[0] === 0) {
                 roomSchedule[i].quality[2] = 1;
-            } else {
-                roomSchedule[i].quality[2] = roomSchedule[i].quality[0] / roomSchedule[i].quality[1];
             }
             //Log.info("calculating Quality for: " + JSON.stringify(roomSchedule[i].roomName) + "is: " + roomSchedule[i].quality[2]);
         }
@@ -193,6 +199,9 @@ export default class Schedulizer {
         for (var m = 0; m < roomsAndSchedules.length; m++) {
             this.calculateQuality(roomsAndSchedules);
         }
-        return {scheduled: roomsAndSchedules, unscheduled: this.cannotSchedule};
+        //sort results by room name
+
+        var sortedSchedules: roomSchedule[] = this.sortDescendingSize(roomsAndSchedules, "result");
+        return {scheduled: sortedSchedules, unscheduled: this.cannotSchedule};
     }
 }
