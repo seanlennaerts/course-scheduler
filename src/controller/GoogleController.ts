@@ -2,8 +2,6 @@
  * Created by AnaCris on noviembre/29/16.
  */
 import Log from "../Util";
-import DatasetController from "./DatasetController";
-import {Datasets} from "./DatasetController";
 import Room from "../model/Room";
 
 export interface buildingLocation{
@@ -25,7 +23,7 @@ export default class GoogleController {
         let buildings: buildingLocation[] = [];
         let namesSoFar: string[] = [];
         Log.info("GoogleController: returnLatLons(...)");
-         for (var i = 0; i < this.datasets.length; i++) {
+        for (var i = 0; i < this.datasets.length; i++) {
             for(var j = 0; j < names.length; j++){
                 if (<string>this.datasets[i].getField("shortname") === names[j]) {
                     namesSoFar.push(names[j]);
@@ -34,8 +32,8 @@ export default class GoogleController {
                         lat: <number>b.getField("lat"),
                         lon: <number>b.getField("lon"),
                         name: <string>b.getField("shortname")};
-                    Log.info("This is the room that will get pushed: " + JSON.stringify(building));
                     if (!(namesSoFar.includes(names[j]))){
+                        Log.info("This is the room that will get pushed: " + JSON.stringify(building));
                         buildings.push(building);
                     }
                 }
