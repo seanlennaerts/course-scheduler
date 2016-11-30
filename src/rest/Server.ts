@@ -79,6 +79,8 @@ export default class Server {
 
                 that.rest.post('/distance', restify.bodyParser(), RouteHandler.postDistance);
 
+                that.rest.post('/location', restify.bodyParser(), RouteHandler.postLocations);
+
                 that.rest.post('/input', restify.bodyParser(), RouteHandler.postSchedulizerInput);
 
                 that.rest.post('/retrieve', restify.bodyParser(), RouteHandler.postSchedulizerGetInput);
