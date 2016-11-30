@@ -2,11 +2,14 @@
  * Created by Sean on 11/28/16.
  */
 $(function () {
+    var active = false;
     $(document).ready(function() {
         try {
             $.ajax("/retrieve", {type:"POST", dataType: "json", success: function(data) {
-                generateTable(data["result"]["course"], "#coursesInputTable", "table table-bordered table-condensed");
-                generateTable(data["result"]["room"], "#roomsInputTable", "table table-bordered table-condensed");
+                generateTable(data["result"]["course"], "#coursesInputTable", "table");
+                $("#coursesInputTable").find("table").css("margin-bottom", "0px");
+                generateTable(data["result"]["room"], "#roomsInputTable", "table");
+                $("#roomsInputTable").find("table").css("margin-bottom", "0px");
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
             });
@@ -16,28 +19,36 @@ $(function () {
     });
 
     $("#makeSchedule").click(function () {
-        try {
-            $.ajax("/schedulize", {type:"POST", dataType: "json", success: function(data) {
-                var numberOfRooms = data["result"]["scheduled"].length;
-                for (var i=0; i < numberOfRooms; i++) {
-                    $("#calendar").append('<div><label>' + data["result"]["scheduled"][i]["roomName"].split("_")[0] + " " + data["result"]["scheduled"][i]["roomName"].split("_")[1] + '</label><div id="mycal' + i + '"></div>');
-                    $("#mycal" + i).easycal({
-                        columnDateFormat : 'dddd',
-                        minTime : '08:00:00',
-                        maxTime : (data["result"]["scheduled"][i]["schedule"].length < 16 ? '17:00:00' : '21:30:00'),
-                        slotDuration : 30,
-                        startDate : '31-10-2015',
-                        events : (data["result"]["scheduled"][i]["schedule"][0] === "" ? [] : getEvents(data["result"]["scheduled"][i]["schedule"]))
-                    });
-                }
-
-
-                $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>")
-            }}).fail(function (e) {
-                spawnHttpErrorModal(e)
-            });
-        } catch (err) {
-            spawnErrorModal("Query Error", err);
+        if (!active){
+            try {
+                $.ajax("/schedulize", {type:"POST", dataType: "json", success: function(data) {
+                    var numberOfRooms = data["result"]["scheduled"].length;
+                    for (var i=0; i < numberOfRooms; i++) {
+                        var roomName = data["result"]["scheduled"][i]["roomName"].split("_")[0] + " " + data["result"]["scheduled"][i]["roomName"].split("_")[1];
+                        var roomSize = "Seats: " + data["result"]["scheduled"][i]["seats"];
+                        var roomQuality = ", Quality: " + (data["result"]["scheduled"][i]["quality"][2] * 100) + "%";
+                        $("#calendar")
+                            .append('<div><h4>' + roomName + '</h4>' + roomSize + roomQuality + '<div class="calendarList" id="mycal' + i + '"></div>');
+                        $("#mycal" + i).easycal({
+                            columnDateFormat : 'dddd',
+                            minTime : '08:00:00',
+                            maxTime : (data["result"]["scheduled"][i]["schedule"].length < 16 ? '17:00:00' : '21:30:00'),
+                            slotDuration : 30,
+                            startDate : '31-10-2015',
+                            events : (data["result"]["scheduled"][i]["schedule"][0] === "" ? [] : getEvents(data["result"]["scheduled"][i]["schedule"]))
+                        });
+                    }
+                    generateTable(data["result"]["unscheduled"],"#notScheduled","table");
+                    $("#notScheduled").find("table").css("margin-bottom", "0px");
+                    $("#scrollableTable").show();
+                    $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>")
+                    active = true;
+                }}).fail(function (e) {
+                    spawnHttpErrorModal(e)
+                });
+            } catch (err) {
+                spawnErrorModal("Query Error", err);
+            }
         }
     });
 

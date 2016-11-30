@@ -52,16 +52,56 @@
 </nav>
 
 <div class="container-fluid">
-    <button class="btn btn-default btn-sm" type="submit" id="makeSchedule">Schedulize</button>
-    <div id="calendar"></div>
-    <div id="scheduleResult">
-        <!--table goes here-->
-    </div>
-    <div id="coursesInputTable">
-        <!--table goes here-->
-    </div>
-    <div id="roomsInputTable">
-        <!--table goes here-->
+    <div class="row">
+        <div class="col-sm-4 col-md-3 sidebar">
+            <div class="well">
+                <button class="btn btn-success btn-lg btn-block" type="submit" id="makeSchedule">Schedulize</button>
+            </div>
+            <div class="well">
+                <label for="scheduleResult">Debug Result</label>
+                <div id="scheduleResult" style="overflow: scroll">
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
+            <row>
+                <div class="panel panel-danger" id="scrollableTable" style="display: none">
+                    <div class="panel-heading">Not scheduled</div>
+                    <div class="fixed-body" id="notScheduled"></div>
+                </div>
+            </row>
+            <row>
+                <div id="calendar"></div>
+            </row>
+            <row>
+                <div class="panel-group" id="inputAccordion">
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <p class="panel-title">
+                                <a data-toggle="collapse" data-parent="#inputAccordion" href="#collapse1">Course Input</a>
+                            </p>
+                        </div>
+                        <div id="collapse1" class="panel-collapse collapse">
+                            <div class="panel-body" id="coursesInputTable" style="padding: 0">
+                                <!--put table here-->
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <p class="panel-title">
+                                <a data-toggle="collapse" data-parent="#inputAccordion" href="#collapse2">Room Input</a>
+                            </p>
+                        </div>
+                        <div id="collapse2" class="panel-collapse collapse">
+                            <div class="panel-body" id="roomsInputTable" style="padding: 0">
+                                <!--put table here-->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </row>
+        </div>
     </div>
 </div>
 

@@ -160,3 +160,7 @@ body {
   max-height: 250px;
   overflow-y: scroll;
 }
+
+.calendarList {
+  padding-bottom: 20px;
+}
