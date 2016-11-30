@@ -125,6 +125,13 @@
         </div>
         <div class="col-sm-8 col-sm-offset-4 col-md-9 col-md-offset-3 main">
             <div class="row">
+                <div class="googleMapContainer">
+                    <div class="googleMap" id="map">
+                    <!--map goes here-->
+                </div>
+                </div>
+            </div>
+            <div class="row">
                 <div class="panel panel-success" id="scrollableTable" style="display: none">
                     <div class="panel-heading">Selected
                         <button class="btn btn-default btn-xs buttonFloatRight" type="submit" id="selectClear">Clear</button>
@@ -173,9 +180,14 @@
 <script src="./public/bootstrap.min.js"></script>
 <script src="./public/d3.min.js"></script>
 <script src="./public/roomExplorer.js"></script>
+<script src="./public/roomMap.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.0/js/bootstrap-select.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/9.4.1/bootstrap-slider.min.js"></script>
 <script src="./public/bootstrap-switch.min.js"></script>
+<script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDyK-_zqfEaYv3TwoCPc6CJw-_I14sCVII&callback=initMap">
+</script>
+
 <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
 <!--<script src="../../assets/js/ie10-viewport-bug-workaround.js"></script>-->
 </body>

@@ -408,13 +408,13 @@ $(function () {
             if (!exists) {
                 roomsSelected.push(obj);
             }
-            generateTable(roomsSelected, "#roomInput", "table");
-            // $("#roomInput").children().unwrap();
-            $("#roomInput").find("table").css("margin-bottom", "0px");
-            $("#selectClear").show();
-            $("#selectSchedulize").show();
-            $(".okay").hide();
         });
+        generateTable(roomsSelected, "#roomInput", "table");
+        // $("#roomInput").children().unwrap();
+        $("#roomInput").find("table").css("margin-bottom", "0px");
+        $("#selectClear").show();
+        $("#selectSchedulize").show();
+        $(".okay").hide();
         $("#scrollableTable").show();
     });
 
