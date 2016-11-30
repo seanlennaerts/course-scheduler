@@ -58,6 +58,7 @@ export default class RouteHandler {
         });
     }
 
+
     public static  putDataset(req: restify.Request, res: restify.Response, next: restify.Next) {
         Log.trace('RouteHandler::postDataset(..) - params: ' + JSON.stringify(req.params));
         var id: string = req.params.id;
@@ -105,6 +106,17 @@ export default class RouteHandler {
         return next();
     }
 
+    public static postLocations(req: restify.Request, res: restify.Response, next: restify.Next){
+        Log.trace('RoutHandler::postLocations(..)');
+        let buildings: string[] = req.body;
+        RouteHandler.insightFacade.returnLatLons(buildings).then(function(result: InsightResponse){
+            res.json(result.code, result.body);
+        }).catch(function(error){
+            res.json(error.code, error.body);
+        });
+        return next();
+    }
+
     public static postSchedulizerInput(req: restify.Request, res: restify.Response, next: restify.Next) {
         var id: string = req.body.id;
         Log.info("reqbody: " + JSON.stringify(req.body.data) + ", id from req.params.id: " + id);
@@ -145,4 +157,5 @@ export default class RouteHandler {
         //catch res.send(403)
         return next();
     }
+
 }
