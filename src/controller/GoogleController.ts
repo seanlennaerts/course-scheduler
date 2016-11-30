@@ -23,17 +23,19 @@ export default class GoogleController {
 
     public returnLatLons(names: string[]): buildingLocation[] {
         let buildings: buildingLocation[] = [];
-        Log.info("GoogleController: returnLatLons(...)")
+        let namesSoFar: string[] = [];
+        Log.info("GoogleController: returnLatLons(...)");
          for (var i = 0; i < this.datasets.length; i++) {
             for(var j = 0; j < names.length; j++){
                 if (<string>this.datasets[i].getField("shortname") === names[j]) {
+                    namesSoFar.push(names[j]);
                     var b: Room = this.datasets[i];
                     var building: buildingLocation = {
                         lat: <number>b.getField("lat"),
                         lon: <number>b.getField("lon"),
                         name: <string>b.getField("shortname")};
                     Log.info("This is the room that will get pushed: " + JSON.stringify(building));
-                    if (!(buildings.includes(building))){
+                    if (!(namesSoFar.includes(names[j]))){
                         buildings.push(building);
                     }
                 }
