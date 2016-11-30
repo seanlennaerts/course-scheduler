@@ -211,7 +211,7 @@ export default class QueryController {
                         Log.info("isValidOrderObject:: this is the key being tried: " + o);
                         if (whichDeliverable === "d2"){
                             if (GROUPandAPPLYkeys.indexOf(o) === -1){
-                                // Log.info("isValidOrderObject :: ORDER key is not in GROUPorAPPLY keys");
+                                 Log.info("isValidOrderObject :: ORDER key: " + o + " is not in GROUPorAPPLY keys");
                                 return 400;
                             }
                         }

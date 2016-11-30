@@ -1065,4 +1065,20 @@ describe("QueryController", function () {
 
         expect(isValid).to.equal(200);
     });
+
+    it("Valid query - accepts Instructors as key", function () {
+        let query: QueryRequest = {
+            "GET" : ["courses_dept", "instructors"],
+            "WHERE" : {"AND": [{"EQ": {"courses_instructor" : "gregor*"}},{"IS": {"courses_dept": "c*"}}]},
+            "GROUP" : [ "courses_dept"],
+            "APPLY" : [ {"instructors": {"COUNT": "courses_instructor"}}],
+            "ORDER" : { "dir": "UP", "keys": ["courses_instructor", "instructors"]},
+            "AS":"TABLE"
+        };
+        let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
 });
