@@ -32,8 +32,10 @@ export default class GoogleController {
                         lat: <number>b.getField("lat"),
                         lon: <number>b.getField("lon"),
                         name: <string>b.getField("shortname")};
-                    Log.info("This is the room that will get pushed: " + JSON.stringify(buildings));
-                    buildings.push(building);
+                    Log.info("This is the room that will get pushed: " + JSON.stringify(building));
+                    if (!(buildings.includes(building))){
+                        buildings.push(building);
+                    }
                 }
             }
         }
