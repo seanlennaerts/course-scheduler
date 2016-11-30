@@ -27,7 +27,7 @@ $(function () {
                         var roomName = data["result"]["scheduled"][i]["roomName"].split("_")[0] + " " + data["result"]["scheduled"][i]["roomName"].split("_")[1];
                         var roomSize = "Seats: " + data["result"]["scheduled"][i]["seats"];
                         var quality = Number((data["result"]["scheduled"][i]["quality"][2] * 100).toFixed(2));
-                        var roomQuality = (quality !=0 ? ", Quality: " + quality + "%"  : "");
+                        var roomQuality = ", Quality: " + quality + "%";
                         $("#calendar")
                             .append('<div><h4>' + roomName + '</h4>' + roomSize + roomQuality + '<div class="calendarList" id="mycal' + i + '"></div>');
                         $("#mycal" + i).easycal({
