@@ -41,10 +41,10 @@ function parseShortnames() {
                 addMarker(location);
             }
         }}).fail(function (e) {
-            spawnHttpErrorModal(e)
+            //
         });
     } catch (err) {
-        spawnErrorModal("Query Error", err);
+        //
     }
 }
 
