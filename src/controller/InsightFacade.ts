@@ -16,6 +16,8 @@ import Course from "../model/Course";
 import {DistanceRequest, default as DistanceController, DistanceResponse} from "./DistanceController";
 import HandleInputForSchedulizer from "./HandleInputForSchedulizer";
 import {result, default as Schedulizer} from "./SchedulizerController";
+import GoogleController from "./GoogleController";
+import {buildingLocation} from "./GoogleController";
 
 export default class InsightFacade implements IInsightFacade {
 
@@ -129,6 +131,19 @@ export default class InsightFacade implements IInsightFacade {
                 fulfill({code: 200, body:{result}});
             } catch (err) {
                 reject({code: 424, body: {error: "Please go back and select Courses and Rooms to schedule"}});
+            }
+        })
+    }
+
+    public returnLatLons(): Promise<InsightResponse>{
+        return new Promise(function (fulfill, reject) {
+            try {
+                let datasets: Datasets = InsightFacade.datasetController.getDatasets();
+                let controller: GoogleController = new GoogleController(datasets["room"]);
+                let result: buildingLocation[] = controller.returnLatLons(["",""]);
+                fulfill({code: 200, body: {result}});
+            } catch (err) {
+                reject({code: 404, body:{error: "Oh no! Something went wrong when fetching latlons of buildings" }});
             }
         })
     }
