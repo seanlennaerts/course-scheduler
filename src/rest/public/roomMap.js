@@ -18,28 +18,27 @@ function initMap() {
     // });
 }
 
-function parseShortnames() {
+function parseShortnames(data) {
     var temp =[];
-    $("#render > table > tbody > tr").each(function () {
+    for (var j=0; j < data.length; j++) {
         var exists = false;
         for (var i=0; i < temp.length; i++) {
-            if (temp[i] === $(this).find(".rooms_shortname").html()) {
+            if (temp[i] === data[j]["rooms_shortname"]) {
                 exists = true;
             }
-
         }
         if (!exists) {
-            temp.push($(this).find(".rooms_shortname").html());
+            temp.push(data[j]["rooms_shortname"]);
         }
-    });
-    alert(JSON.stringify(temp));
+    }
     try {
         $.ajax("/location", {type:"POST", data: JSON.stringify(temp), contentType: "application/json", dataType: "json", success: function(data) {
-            alert(JSON.stringify(data));
-            for (var i=0; i < data.length; i++) {
-                var location = {lat: data[i]["lat"], lng: data[i]["lon"]};
-                var name = data[i]["name"];
-                addMarker(location, name);
+            clearMarkers();
+            var infowindow = new google.maps.InfoWindow();
+            for (var i=0; i < data["result"].length; i++) {
+                var location = {lat: data["result"][i]["lat"], lng: data["result"][i]["lon"]};
+                var name = data["result"][i]["name"];
+                addMarker(location, name, infowindow);
             }
         }}).fail(function (e) {
             //
@@ -49,12 +48,27 @@ function parseShortnames() {
     }
 }
 
-function addMarker(location, name) {
+function clearMarkers() {
+    for (var i=0; i < markers.length; i++) {
+        markers[i].setMap(null);
+    }
+    markers = [];
+}
+
+function addMarker(location, name, infowindow) {
     var marker = new google.maps.Marker({
         position: location,
         title: name,
         map: map
     });
+    makeInfoWindowEvent(map, infowindow, name, marker);
     markers.push(marker);
+}
+
+function makeInfoWindowEvent(map, infowindow, contentString, marker) {
+    google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(contentString);
+        infowindow.open(map, marker);
+    });
 }
 

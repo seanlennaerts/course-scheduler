@@ -24,19 +24,18 @@ export default class GoogleController {
     public returnLatLons(names: string[]): buildingLocation[] {
         let buildings: buildingLocation[] = [];
         let namesSoFar: string[] = [];
-        Log.info("GoogleController: returnLatLons(...)");
-         for (var i = 0; i < this.datasets.length; i++) {
-            for(var j = 0; j < names.length; j++){
-                if (<string>this.datasets[i].getField("shortname") === names[j]) {
-                    namesSoFar.push(names[j]);
-                    var b: Room = this.datasets[i];
-                    var building: buildingLocation = {
-                        lat: <number>b.getField("lat"),
-                        lon: <number>b.getField("lon"),
-                        name: <string>b.getField("shortname")};
-                    Log.info("This is the room that will get pushed: " + JSON.stringify(building));
-                    if (!(namesSoFar.includes(names[j]))){
+        // Log.info("GoogleController: returnLatLons(...)");
+        for (var name of names) {
+            for (var room of this.datasets) {
+                if (room.getField("shortname") === name) {
+                    if (!(namesSoFar.includes(name))){
+                        var building: buildingLocation = {
+                            lat: <number>room.getField("lat"),
+                            lon: <number>room.getField("lon"),
+                            name: <string>room.getField("shortname")};
+                        // Log.info("This is the room that will get pushed: " + JSON.stringify(building));
                         buildings.push(building);
+                        namesSoFar.push(name);
                     }
                 }
             }

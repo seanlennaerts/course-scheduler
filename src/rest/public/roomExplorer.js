@@ -269,7 +269,7 @@ $(function () {
                         populateDistance(data["result"]);
                         filtersUsed.location = true;
                     }
-                    parseShortnames();
+                    parseShortnames(data["result"]);
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
