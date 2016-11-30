@@ -138,12 +138,13 @@ export default class InsightFacade implements IInsightFacade {
     public returnLatLons(rooms: string[]): Promise<InsightResponse>{
         return new Promise(function (fulfill, reject) {
             try {
+                Log.info("InsightFacade: returnLatLons :: init(..)")
                 let datasets: Datasets = InsightFacade.datasetController.getDatasets();
                 let controller: GoogleController = new GoogleController(datasets["rooms"]);
                 let result: buildingLocation[] = controller.returnLatLons(rooms);
                 fulfill({code: 200, body: {result}});
             } catch (err) {
-                reject({code: 404, body:{error: "Oh no! Something went wrong when fetching latlons of buildings" }});
+                reject({code: 404, body: {error: "Oh no! Something went wrong when fetching latlons of buildings" }});
             }
         })
     }
