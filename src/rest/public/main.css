@@ -157,10 +157,19 @@ body {
 }
 
 .fixed-body{
-  max-height: 250px;
+  max-height: 207px;
   overflow-y: scroll;
 }
 
 .calendarList {
+  padding-bottom: 20px;
+}
+
+.googleMap {
+  height: 250px;
+  width: 100%;
+}
+
+.googleMapContainer {
   padding-bottom: 20px;
 }

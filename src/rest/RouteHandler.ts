@@ -109,7 +109,6 @@ export default class RouteHandler {
     public static postLocations(req: restify.Request, res: restify.Response, next: restify.Next){
         Log.trace('RoutHandler::postLocations(..)');
         let buildings: string[] = req.body;
-        Log.info("Building array is: " + JSON.stringify(buildings));
         RouteHandler.insightFacade.returnLatLons(buildings).then(function(result: InsightResponse){
             res.json(result.code, result.body);
         }).catch (function(error) {
@@ -120,7 +119,6 @@ export default class RouteHandler {
 
     public static postSchedulizerInput(req: restify.Request, res: restify.Response, next: restify.Next) {
         var id: string = req.body.id;
-        Log.info("reqbody: " + JSON.stringify(req.body.data) + ", id from req.params.id: " + id);
         let input: any[] = req.body.data;
         RouteHandler.insightFacade.addSchedulizerInput(id, input).then(function(result: InsightResponse){
             res.json(result.code, result.body);

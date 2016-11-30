@@ -270,6 +270,7 @@ $(function () {
                         populateInstructors(data["result"]);
                         instructorScrollable.selectpicker("val", prevInstructorVal);
                     }
+                    parseShortnames();
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
@@ -447,12 +448,12 @@ $(function () {
             if (!exists) {
                 courseSelected.push(obj);
             }
-            generateTable(courseSelected, "#courseInput", "table");
-            $("#courseInput").find("table").css("margin-bottom", "0px");
-            $("#selectClear").show();
-            $("#selectSchedulize").show();
-            $(".okay").hide();
         });
+        generateTable(courseSelected, "#courseInput", "table");
+        $("#courseInput").find("table").css("margin-bottom", "0px");
+        $("#selectClear").show();
+        $("#selectSchedulize").show();
+        $(".okay").hide();
         $("#scrollableTable").show();
     });
 

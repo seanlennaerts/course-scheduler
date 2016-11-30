@@ -18,7 +18,7 @@ $(function () {
     $(document).ready(function() {
         $("#size-range").slider({});
         $("#distance-range").slider({});
-        $("#order").bootstrapSwitch("size", "small").bootstrapSwitch("state", true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
+        $("#order").bootstrapSwitch("size", "small").bootstrapSwitch("state", true, true).bootstrapSwitch("onText", "UP").bootstrapSwitch("offText", "DOWN");
         query(JSON.stringify(buildQuery));
         updateDebugQuery();
     });
@@ -269,6 +269,7 @@ $(function () {
                         populateDistance(data["result"]);
                         filtersUsed.location = true;
                     }
+                    parseShortnames(data["result"]);
                 }
             }}).fail(function (e) {
                 spawnHttpErrorModal(e)
@@ -408,13 +409,14 @@ $(function () {
             if (!exists) {
                 roomsSelected.push(obj);
             }
-            generateTable(roomsSelected, "#roomInput", "table");
-            // $("#roomInput").children().unwrap();
-            $("#roomInput").find("table").css("margin-bottom", "0px");
-            $("#selectClear").show();
-            $("#selectSchedulize").show();
-            $(".okay").hide();
         });
+        generateTable(roomsSelected, "#roomInput", "table");
+        // $("#roomInput").children().unwrap();
+        $("#roomInput").find("table").css("margin-bottom", "0px");
+        $("#selectClear").show();
+        $("#selectSchedulize").show();
+        $(".okay").hide();
+        $("#mapContainer").hide();
         $("#scrollableTable").show();
     });
 
@@ -424,6 +426,7 @@ $(function () {
         $("#selectSchedulize").hide();
         $(".okay").hide();
         $("#scrollableTable").hide();
+        $("#mapContainer").show();
     });
 
     $("#selectSchedulize").click(function () {
