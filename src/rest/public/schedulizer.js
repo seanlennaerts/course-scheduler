@@ -26,7 +26,8 @@ $(function () {
                     for (var i=0; i < numberOfRooms; i++) {
                         var roomName = data["result"]["scheduled"][i]["roomName"].split("_")[0] + " " + data["result"]["scheduled"][i]["roomName"].split("_")[1];
                         var roomSize = "Seats: " + data["result"]["scheduled"][i]["seats"];
-                        var roomQuality = ", Quality: " + (data["result"]["scheduled"][i]["quality"][2] * 100) + "%";
+                        var quality = Number((data["result"]["scheduled"][i]["quality"][2] * 100).toFixed(2));
+                        var roomQuality = ", Quality: " + (quality != 0 ? quality + "%"  : "N/A");
                         $("#calendar")
                             .append('<div><h4>' + roomName + '</h4>' + roomSize + roomQuality + '<div class="calendarList" id="mycal' + i + '"></div>');
                         $("#mycal" + i).easycal({
@@ -38,10 +39,12 @@ $(function () {
                             events : (data["result"]["scheduled"][i]["schedule"][0] === "" ? [] : getEvents(data["result"]["scheduled"][i]["schedule"]))
                         });
                     }
-                    generateTable(data["result"]["unscheduled"],"#notScheduled","table");
-                    $("#notScheduled").find("table").css("margin-bottom", "0px");
-                    $("#scrollableTable").show();
-                    $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>")
+                    if (data["result"]["unscheduled"].length > 0) {
+                        generateTable(data["result"]["unscheduled"],"#notScheduled","table");
+                        $("#notScheduled").find("table").css("margin-bottom", "0px");
+                        $("#scrollableTable").show();
+                    }
+                    $("#scheduleResult").append("<p>" + JSON.stringify(data) + "</p>");
                     active = true;
                 }}).fail(function (e) {
                     spawnHttpErrorModal(e)
