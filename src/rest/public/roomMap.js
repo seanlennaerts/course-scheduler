@@ -38,7 +38,8 @@ function parseShortnames() {
             alert(JSON.stringify(data));
             for (var i=0; i < data.length; i++) {
                 var location = {lat: data[i]["lat"], lng: data[i]["lon"]};
-                addMarker(location);
+                var name = data[i]["name"];
+                addMarker(location, name);
             }
         }}).fail(function (e) {
             //
@@ -48,9 +49,10 @@ function parseShortnames() {
     }
 }
 
-function addMarker(location) {
+function addMarker(location, name) {
     var marker = new google.maps.Marker({
         position: location,
+        title: name,
         map: map
     });
     markers.push(marker);
