@@ -23,6 +23,21 @@ describe("QueryReturns", function () {
     afterEach(function () {
     });
 
+    it("Check Instructor", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_instructor"],
+            "WHERE": {},
+            "ORDER": "courses_instructor",
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+
+            expect(result).to.deep.equal([{}]);
+        });
+    });
+
     it("Check GT", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept"],

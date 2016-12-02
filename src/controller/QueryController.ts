@@ -1102,6 +1102,21 @@ export default class QueryController {
             }
         }
 
+        for (var r of finalTable) {
+            if (Object.keys(r).includes("courses_instructor")) {
+                var instructors: string[] = (<any>r)["courses_instructor"];
+                var stringInstructor: string = "";
+                for (var i=0; i < instructors.length; i++) {
+                    if (i === 0) {
+                        stringInstructor = instructors[i];
+                    } else {
+                        stringInstructor = stringInstructor + "; " + instructors[i];
+                    }
+                }
+                (<any>r)["courses_instructor"] = stringInstructor;
+            }
+        }
+
 
         Log.info("FINISHED QUERY SUCCESFULLY! :D");
 
