@@ -194,4 +194,20 @@ describe("QueryReturnBigData", function () {
             // expect(result).to.deep.equal(expectedResult);
         });
     });
+
+    it("Four NOT with Big dataset", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"NOT": {"NOT": {"NOT": {"GT": {"courses_avg": 90}}}}}},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{}];
+
+            // expect(result).to.deep.equal(expectedResult);
+            expect(result.length).to.equal(2171);
+        });
+    });
 });

@@ -632,31 +632,37 @@ export default class QueryController {
 
 
     private handleNOT (obj: {}) {
-        Log.info("START handleNOT(" + JSON.stringify(obj) + ")");
-        this.tempResults[++this.tempResultsIndex] = [];
-        Log.info("Adding tempResuts array, now size = " + this.tempResults.length);
-        this.nextObjectOrArray(obj);
-        Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
+        if (!(<any>obj)["NOT"]) {
+            Log.info("ONLY ONE NOT!!!!!!!!!!!")
+            Log.info("START handleNOT(" + JSON.stringify(obj) + ")");
+            this.tempResults[++this.tempResultsIndex] = [];
+            Log.info("Adding tempResuts array, now size = " + this.tempResults.length);
+            this.nextObjectOrArray(obj);
+            Log.info("... back to handleNOT - tempResults size = " + this.tempResults[this.tempResultsIndex].length);
 
-        var tempMaster: any[] = this.datasets[this.queryID];
-        var filteredResult: any[] = [];
-        for (var c1 of tempMaster) {
-            var exists: boolean = false;
-            for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
-                if (c1.getUniqueId() === c2.getUniqueId()) {
-                    exists = true;
-                    break; //I ADDED THIS RECENTLY. IF NOT IS NOT WORKING REMOVE break
-                    //Log.info("Removing class: " +  JSON.stringify(c1));
+            var tempMaster: any[] = this.datasets[this.queryID];
+            var filteredResult: any[] = [];
+            for (var c1 of tempMaster) {
+                var exists: boolean = false;
+                for (var c2 of this.tempResults[this.tempResultsIndex][0]) {
+                    if (c1.getUniqueId() === c2.getUniqueId()) {
+                        exists = true;
+                        break; //I ADDED THIS RECENTLY. IF NOT IS NOT WORKING REMOVE break
+                        //Log.info("Removing class: " +  JSON.stringify(c1));
+                    }
+                }
+                if (!exists) {
+                    //Log.info("Keeping class: " + JSON.stringify(c1));
+                    filteredResult.push(c1);
                 }
             }
-            if (!exists) {
-                //Log.info("Keeping class: " + JSON.stringify(c1));
-                filteredResult.push(c1);
-            }
+            //this.tempResults = [];
+            this.tempResults[--this.tempResultsIndex].push(filteredResult);
+            Log.info("END handleNOT");
+        } else {
+            Log.info("MORE THAN ONE NOT!!!!!!!!!!!")
+            this.nextObjectOrArray((<any>obj)[Object.keys(obj)[0]]);
         }
-        //this.tempResults = [];
-        this.tempResults[--this.tempResultsIndex].push(filteredResult);
-        Log.info("END handleNOT");
     }
 
     private handleLT (obj: {}) {

@@ -34,7 +34,27 @@ describe("QueryReturns", function () {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
 
-            expect(result).to.deep.equal([{}]);
+            expect(result).to.deep.equal([{
+                "courses_instructor": ""
+            },
+                {
+                    "courses_instructor": ""
+                },
+                {
+                    "courses_instructor": ""
+                },
+                {
+                    "courses_instructor": "cubbon, paul;jackes, robert;williamson, elaine"
+                },
+                {
+                    "courses_instructor": "jackes, robert;kroeker, jeff;milne, tamar"
+                },
+                {
+                    "courses_instructor": "kiczales, gregor"
+                },
+                {
+                    "courses_instructor": "mcgrenere, joanna"
+                }]);
         });
     });
 
@@ -80,6 +100,104 @@ describe("QueryReturns", function () {
         });
     });
 
+    it("One NOT", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"IS": {"courses_dept": "comm"}}},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "cpsc"
+            },
+                {
+                    "courses_dept": "cpsc"
+                },
+                {
+                    "courses_dept": "cpsc"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    it("Double NOT", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"NOT": {"IS": {"courses_dept": "comm"}}}},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "comm"
+            },
+                {
+                    "courses_dept": "comm"
+                },
+                {
+                    "courses_dept": "comm"
+                },
+                {
+                    "courses_dept": "comm"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    it("Triple NOT", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"NOT": {"NOT": {"IS": {"courses_dept": "comm"}}}}},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "cpsc"
+            },
+                {
+                    "courses_dept": "cpsc"
+                },
+                {
+                    "courses_dept": "cpsc"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
+    it("Four NOT", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_dept"],
+            "WHERE": {"NOT": {"NOT": {"NOT": {"NOT": {"IS": {"courses_dept": "comm"}}}}}},
+            "AS": "TABLE"
+        };
+        return facade.performQuery(query).then(function (response: InsightResponse) {
+            let table: QueryResponse = <QueryResponse>response.body;
+            let result: {}[] = table.result;
+            let expectedResult: {}[] = [{
+                "courses_dept": "comm"
+            },
+                {
+                    "courses_dept": "comm"
+                },
+                {
+                    "courses_dept": "comm"
+                },
+                {
+                    "courses_dept": "comm"
+                }];
+
+            expect(result).to.deep.equal(expectedResult);
+        });
+    });
+
     it("Check LT", function () {
         let query: QueryRequest = {
             "GET": ["courses_dept", "courses_id"],
@@ -112,7 +230,7 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_dept: "comm", courses_id: "101", courses_title: "busn fundamental", courses_instructor: [""]}];
+            let expectedResult: {}[] = [{courses_dept: "comm", courses_id: "101", courses_title: "busn fundamental", courses_instructor: ""}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -130,10 +248,10 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0},
-                                        {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
+            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar", courses_fail: 0},
+                                        {courses_title: "busn fundamental", courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine", courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 7},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 15}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -151,10 +269,10 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0},
-                                        {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
+            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar", courses_fail: 0},
+                                        {courses_title: "busn fundamental", courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine", courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 7},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 15}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -172,10 +290,10 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0},
-                                        {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
+            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar", courses_fail: 0},
+                                        {courses_title: "busn fundamental", courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine", courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 7},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 15}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -193,10 +311,10 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0},
-                                        {courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 7},
-                                        {courses_title: "busn fundamental", courses_instructor: [""], courses_fail: 15}];
+            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar", courses_fail: 0},
+                                        {courses_title: "busn fundamental", courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine", courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 7},
+                                        {courses_title: "busn fundamental", courses_instructor: "", courses_fail: 15}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -214,8 +332,8 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_dept: "cpsc", courses_id: "110", courses_instructor: ["kiczales, gregor"]},
-                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: ["mcgrenere, joanna"]}];
+            let expectedResult: {}[] = [{courses_dept: "cpsc", courses_id: "110", courses_instructor: "kiczales, gregor"},
+                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: "mcgrenere, joanna"}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -233,8 +351,8 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"], courses_fail: 1},
-                                        {courses_title: "busn fundamental", courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"], courses_fail: 0}];
+            let expectedResult: {}[] = [{courses_title: "busn fundamental", courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine", courses_fail: 1},
+                                        {courses_title: "busn fundamental", courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar", courses_fail: 0}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -276,13 +394,13 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_instructor: [""]},
-                                        {courses_instructor: [""]},
-                                        {courses_instructor: [""]},
-                                        {courses_instructor: ["cubbon, paul", "jackes, robert", "williamson, elaine"]},
-                                        {courses_instructor: ["jackes, robert", "kroeker, jeff", "milne, tamar"]},
-                                        {courses_instructor: ["kiczales, gregor"]},
-                                        {courses_instructor: ["mcgrenere, joanna"]}];
+            let expectedResult: {}[] = [{courses_instructor: ""},
+                                        {courses_instructor: ""},
+                                        {courses_instructor: ""},
+                                        {courses_instructor: "cubbon, paul;jackes, robert;williamson, elaine"},
+                                        {courses_instructor: "jackes, robert;kroeker, jeff;milne, tamar"},
+                                        {courses_instructor: "kiczales, gregor"},
+                                        {courses_instructor: "mcgrenere, joanna"}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.equal(expectedResult);
@@ -308,9 +426,9 @@ describe("QueryReturns", function () {
         return facade.performQuery(query).then(function (response: InsightResponse) {
             let table: QueryResponse = <QueryResponse>response.body;
             let result: {}[] = table.result;
-            let expectedResult: {}[] = [{courses_dept: "cpsc", courses_id: "110", courses_instructor: [""]},
-                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: ["kiczales, gregor"]},
-                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: ["mcgrenere, joanna"]}];
+            let expectedResult: {}[] = [{courses_dept: "cpsc", courses_id: "110", courses_instructor: ""},
+                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: "kiczales, gregor"},
+                                        {courses_dept: "cpsc", courses_id: "110", courses_instructor: "mcgrenere, joanna"}];
 
             Log.test("LT:\n" + JSON.stringify(result));
             expect(result).to.deep.include.members(expectedResult);
