@@ -1072,10 +1072,23 @@ describe("QueryController", function () {
             "WHERE" : {"AND": [{"EQ": {"courses_instructor" : "gregor*"}},{"IS": {"courses_dept": "c*"}}]},
             "GROUP" : [ "courses_dept"],
             "APPLY" : [ {"instructors": {"COUNT": "courses_instructor"}}],
-            "ORDER" : { "dir": "UP", "keys": ["courses_instructor", "instructors"]},
+            "ORDER" : { "dir": "UP", "keys": ["instructors"]},
             "AS":"TABLE"
         };
         let dataset: Datasets = {courses: []};
+        let controller = new QueryController(dataset);
+        let isValid = controller.isValid(query);
+
+        expect(isValid).to.equal(200);
+    });
+
+    it("Valid Instructor key", function () {
+        let query: QueryRequest = {
+            "GET": ["courses_instructor"],
+            "WHERE": {"IS": {"courses_instructor": "gregor*"}},
+            "AS": "TABLE"
+        };
+        let dataset: Datasets = {"courses": []};
         let controller = new QueryController(dataset);
         let isValid = controller.isValid(query);
 

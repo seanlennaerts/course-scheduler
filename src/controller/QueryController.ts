@@ -209,9 +209,10 @@ export default class QueryController {
                     Log.info("Deliverable is: " + whichDeliverable);
                     for(var o of orderKeysArray){
                         Log.info("isValidOrderObject:: this is the key being tried: " + o);
+                        var k :string = o.split("_")[1];
                         if (whichDeliverable === "d2"){
                             if (GROUPandAPPLYkeys.indexOf(o) === -1){
-                                 Log.info("isValidOrderObject :: ORDER key: " + o + " is not in GROUPorAPPLY keys");
+                                 Log.info("isValidOrderObject :: ORDER key: " + k + " is not in GROUPorAPPLY keys");
                                 return 400;
                             }
                         }
@@ -391,7 +392,7 @@ export default class QueryController {
                 var splitIt: string[] = idAndField.split("_");
                 if (!(splitIt[0] in this.datasets)) {
                     this.wrongDatasetIDs.push(splitIt[0]);
-                    // Log.info("About to return 424, group element id not in dataset");
+                    Log.info("About to return 424, group element id not in dataset");
                     return (424);
                 }
                 this.IDconsistency.push(splitIt[0]);
