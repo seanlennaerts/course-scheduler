@@ -1111,7 +1111,7 @@ export default class QueryController {
                     if (i === 0) {
                         stringInstructor = instructors[i];
                     } else {
-                        stringInstructor = stringInstructor + "; " + instructors[i];
+                        stringInstructor = stringInstructor + ";" + instructors[i];
                     }
                 }
                 (<any>r)["courses_instructor"] = stringInstructor;
