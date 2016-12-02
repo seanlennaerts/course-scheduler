@@ -2,8 +2,6 @@
  * Created by AnaCris on noviembre/29/16.
  */
 import Log from "../Util";
-import DatasetController from "./DatasetController";
-import {Datasets} from "./DatasetController";
 import Room from "../model/Room";
 
 export interface buildingLocation{
