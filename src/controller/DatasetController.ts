@@ -153,9 +153,9 @@ export default class DatasetController {
                     reject(new   Error("Invalid archive"));
                 }
                 for (var i = 0; i < root.result.length; i++) {
-                    if (root.result[i].Section === "overall") {
-                        break;
-                    }
+                    // if (root.result[i].Section === "overall") {
+                    //     break;
+                    // }
                     var dept: string = root.result[i].Subject;
                     var id: string = root.result[i].Course;
                     var avg: number = root.result[i].Avg;
