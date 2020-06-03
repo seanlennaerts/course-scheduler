@@ -1,8 +1,8 @@
-# CPSC 310 Project Repository
+# CPSC 310 Project
 
-This is the base project for CPSC310. You will extend this codebase for all of the deliverables in the project. Please keep your repository private.
+![gif of scheduler in action](https://thumbs.gfycat.com/FocusedTallDiscus-size_restricted.gif)
 
-The [course webpage](https://github.com/ubccpsc/310/tree/2016sept) is your best resource for additional details about the project, AutoTest, and the specific requirements of each project deliverable. These resources will be frequently updated as the term progresses.
+Visit the [course webpage](https://github.com/ubccpsc/310/tree/2016sept) for additional details about the project, AutoTest, and the specific requirements of each project deliverable.
 
 ## Configuring your environment
 
@@ -70,5 +70,3 @@ If you are developing in Typescript you will have to re-compile the Typescript c
 While these instructions are for WebStorm, other IDEs (e.g., VSCode, Atom, etc.) and editors (e.g., Sublime) should be similar, or will at least be compatible with the command line options described above.
 
 To run or test the system in WebStorm you will need to configure run targets. To run the system go to the ```Run->Edit Configurations``` and tap on the ```+``` and then ```Node.js```. Point the 'JavaScript file' argument to ```src/App.js```. To run the system tests, go to the ```Run->Edit Configurations``` and tap on the ```+``` and then ```Mocha```. Point the 'Test Directory' file argument to ```test/```.
-
-
