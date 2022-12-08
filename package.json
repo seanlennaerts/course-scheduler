@@ -11,7 +11,7 @@
   "version": "0.0.1",
   "devDependencies": {
     "chai": "^3.5.0",
-    "icedfrisby": "^0.2.4",
+    "icedfrisby": "^4.0.0",
     "istanbul": "^0.4.4",
     "joi": "^8.4.2",
     "mocha": "^2.5.3",
